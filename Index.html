@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تطبيق معاك - M3AK</title>
+    <style>
+        :root {
+            --purple-bg-top: #2b0c3d;
+            --purple-bg-bottom: #12041a;
+            --accent-purple: #7b1fa2;
+            --accent-pink: #e91e63;
+            --card-bg: rgba(255, 255, 255, 0.08);
+            --card-border: rgba(255, 255, 255, 0.15);
+            --text-white: #ffffff;
+            --text-muted: #d1c4e9;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        body {
+            background: linear-gradient(135deg, var(--purple-bg-top), var(--purple-bg-bottom));
+            color: var(--text-white);
+            min-height: 100vh;
+            padding-bottom: 70px;
+        }
+
+        .app-container {
+            max-width: 480px;
+            margin: auto;
+            min-height: 100vh;
+            position: relative;
+            background: rgba(25, 8, 38, 0.95);
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        .screen { display: none; padding: 20px; animation: fadeIn 0.3s ease-in-out; }
+        .screen.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        #screen-splash {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            text-align: center;
+            background: radial-gradient(circle, #4a148c 0%, #12041a 100%);
+        }
+
+        .logo-box {
+            width: 130px;
+            height: 130px;
+            background: linear-gradient(135deg, #e91e63, #9c27b0);
+            border-radius: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 58px;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 0 25px rgba(233, 30, 99, 0.6);
+            margin-bottom: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #9c27b0, #e91e63);
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            width: 100%;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(156, 39, 176, 0.4);
+            margin-top: 15px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 14px;
+            margin: 8px 0 16px 0;
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            color: white;
+            font-size: 15px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 18px;
+            margin-bottom: 15px;
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            max-width: 480px;
+            margin: auto;
+            background: rgba(18, 4, 26, 0.96);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            z-index: 1000;
+        }
+        .nav-item {
+            text-align: center;
+            font-size: 11px;
+            color: var(--text-muted);
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+        .nav-item.active { color: var(--accent-pink); font-weight: bold; }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        .grid-btn {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid var(--card-border);
+            padding: 12px;
+            border-radius: 10px;
+            color: white;
+            text-align: center;
+            font-size: 13px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+
+    <!-- 1. شاشة البداية واللوجو (Splash Screen) -->
+    <div id="screen-splash" class="screen active">
+        <div class="logo-box">M</div>
+        <div style="font-size: 34px; font-weight: bold; margin-bottom: 6px;">M3AK</div>
+        <div style="font-size: 15px; color: var(--text-muted); margin-bottom: 35px;">كل اللي تحتاجه.. معاك</div>
+        <button class="btn-primary" onclick="goToScreen('screen-terms')">ابدأ الاستخدام</button>
+    </div>
+
+    <!-- 2. شاشة الشروط والأحكام -->
+    <div id="screen-terms" class="screen">
+        <div style="padding:15px 0; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom:15px;">
+            <h2>الشروط والأحكام</h2>
+        </div>
+        <div class="card">
+            <h3>أهلاً بك في تطبيق معاك</h3>
+            <p style="color:var(--text-muted); font-size:13px; line-height:1.6;">يرجى قراءة الشروط والأحكام قبل الاستمرار لاستخدام خدمات الدعم المباشرة والتطوع.</p>
+        </div>
+        <button class="btn-primary" onclick="goToScreen('screen-auth')">موافقة والمتابعة</button>
+    </div>
+
+    <!-- 3. شاشة تسجيل الدخول الأصلية -->
+    <div id="screen-auth" class="screen">
+        <div style="text-align: center; margin: 25px 0;">
+            <div style="font-size: 28px; font-weight: bold; margin-bottom: 5px;">أهلاً بعودتك!</div>
+            <p style="color: var(--text-muted); font-size: 13px;">سجل دخولك للوصول إلى حسابك والاستمتاع بخدمات معاك.</p>
+        </div>
+        <div class="card">
+            <form onsubmit="handleLogin(event)">
+                <label style="font-size:13px; color:var(--text-muted);">البريد الإلكتروني</label>
+                <input type="email" class="form-control" value="user@m3ak.app" required>
+                
+                <label style="font-size:13px; color:var(--text-muted);">كلمة المرور</label>
+                <input type="password" class="form-control" value="123456" required>
+                
+                <button type="submit" class="btn-primary">تسجيل الدخول</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 4. الشاشة الرئيسية -->
+    <div id="screen-home" class="screen">
+        <div style="padding:15px 0; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom:15px;">
+            <h2>الرئيسية – تطبيق معاك</h2>
+        </div>
+
+        <div class="card">
+            <h3>الخدمات التفاعلية الحية</h3>
+            <div class="grid-2">
+                <div class="grid-btn" onclick="alert('شاشة تتبع الخدمة تعمل بنجاح')">📍 تتبع الطلب</div>
+                <div class="grid-btn" onclick="alert('شاشة حجز موعد تعمل بنجاح')">📅 حجز موعد</div>
+                <div class="grid-btn" onclick="alert('شاشة الدعم الفني تعمل بنجاح')">💬 الدعم الفني</div>
+                <div class="grid-btn" onclick="alert('شاشة الملف الشخصي تعمل بنجاح')">👤 الملف الشخصي</div>
+            </div>
+        </div>
+
+        <div class="card" style="border-right: 4px solid var(--accent-pink);">
+            <h3>الأقسام الرئيسية</h3>
+            <div class="grid-2">
+                <div class="grid-btn" onclick="alert('قسم المتطوعين نشط')">🤝 المتطوعين</div>
+                <div class="grid-btn" onclick="alert('قسم البلاغات نشط')">🚨 البلاغات</div>
+                <div class="grid-btn" onclick="alert('قسم التبرعات نشط')">❤️ التبرعات</div>
+                <div class="grid-btn" onclick="alert('قسم مزودي الخدمات نشط')">🏢 مزودي الخدمات</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- القائمة السفلية -->
+    <div class="bottom-nav">
+        <button class="nav-item active" onclick="goToScreen('screen-home')">🏠 الرئيسية</button>
+        <button class="nav-item" onclick="goToScreen('screen-auth')">🔑 الحساب</button>
+    </div>
+
+</div>
+
+<script>
+    function goToScreen(screenId) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        const target = document.getElementById(screenId);
+        if (target) {
+            target.classList.add('active');
+            window.scrollTo(0, 0);
+        }
+    }
+
+    function handleLogin(e) {
+        e.preventDefault();
+        goToScreen('screen-home');
+    }
+</script>
+</body>
+</html>
