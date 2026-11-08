@@ -88,11 +88,10 @@ async function claimRecoveryJob(pool, workerId) {
                     AND j.locked_at < CURRENT_TIMESTAMP - INTERVAL '5 minutes'
                 )
             ORDER BY
-                j.next_attempt_at ASC,
-                j.id ASC
-            FOR UPDATE OF j SKIP LOCKED
-            LIMIT 1
-            `
+    j.next_attempt_at ASC,
+    j.id ASC
+LIMIT 1
+FOR UPDATE OF j SKIP LOCKED
         );
 
         if (result.rowCount === 0) {
