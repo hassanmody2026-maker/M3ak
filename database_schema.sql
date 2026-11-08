@@ -162,5 +162,191 @@ CREATE INDEX IF NOT EXISTS idx_payments_status ON subscriptions_payments(status)
 CREATE INDEX IF NOT EXISTS idx_orders_user_created ON orders(user_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_notifications_user_created ON notifications(user_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_support_user_created ON support_tickets(user_id, created_at DESC);
+-- =========================================================
+-- M3AK AI QUOTA SYSTEM
+-- Monthly quota, reservations, usage ledger and recovery jobs
+-- Safe additive schema
+-- =========================================================
 
+-- 1. User quota anchors
+ALTER TABLE users
+    ADD COLUMN IF NOT EXISTS ai_quota_anchor_at TIMESTAMPTZ,
+    ADD COLUMN IF NOT EXISTS ai_quota_anchor_day SMALLINT;
+
+-- 2. Monthly quota periods
+CREATE TABLE IF NOT EXISTS ai_quota_periods (
+    id BIGSERIAL PRIMARY KEY,
+
+    user_id INTEGER NOT NULL
+        REFERENCES users(id) ON DELETE CASCADE,
+
+    period_start TIMESTAMPTZ NOT NULL,
+    period_end TIMESTAMPTZ NOT NULL,
+
+    anchor_day SMALLINT NOT NULL
+        CHECK (anchor_day BETWEEN 1 AND 31),
+
+    words_limit INTEGER NOT NULL
+        CHECK (words_limit >= 0),
+
+    images_limit INTEGER NOT NULL
+        CHECK (images_limit >= 0),
+
+    words_consumed INTEGER NOT NULL DEFAULT 0
+        CHECK (words_consumed >= 0),
+
+    images_consumed INTEGER NOT NULL DEFAULT 0
+        CHECK (images_consumed >= 0),
+
+    words_reserved INTEGER NOT NULL DEFAULT 0
+        CHECK (words_reserved >= 0),
+
+    images_reserved INTEGER NOT NULL DEFAULT 0
+        CHECK (images_reserved >= 0),
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT ai_quota_period_dates_check
+        CHECK (period_end > period_start),
+
+    CONSTRAINT ai_quota_period_user_start_unique
+        UNIQUE (user_id, period_start)
+);
+
+-- 3. AI request reservations
+CREATE TABLE IF NOT EXISTS ai_request_reservations (
+    reservation_id UUID PRIMARY KEY,
+
+    user_id INTEGER NOT NULL
+        REFERENCES users(id) ON DELETE CASCADE,
+
+    period_id BIGINT NOT NULL
+        REFERENCES ai_quota_periods(id),
+
+    idempotency_key VARCHAR(200) NOT NULL,
+
+    reserved_words INTEGER NOT NULL
+        CHECK (reserved_words >= 0),
+
+    reserved_images INTEGER NOT NULL
+        CHECK (reserved_images >= 0),
+
+    actual_words INTEGER NOT NULL DEFAULT 0
+        CHECK (actual_words >= 0),
+
+    actual_images INTEGER NOT NULL DEFAULT 0
+        CHECK (actual_images >= 0),
+
+    status VARCHAR(30) NOT NULL
+        CHECK (
+            status IN (
+                'reserved',
+                'provider_succeeded',
+                'settled',
+                'failed',
+                'refunded',
+                'unknown'
+            )
+        ),
+
+    lease_expires_at TIMESTAMPTZ NOT NULL,
+
+    provider_request_id TEXT,
+    provider_succeeded_at TIMESTAMPTZ,
+
+    last_error TEXT,
+
+    metadata JSONB NOT NULL DEFAULT '{}'::JSONB,
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT ai_request_idempotency_unique
+        UNIQUE (user_id, idempotency_key)
+);
+
+-- 4. AI usage ledger
+CREATE TABLE IF NOT EXISTS ai_usage_ledger (
+    id BIGSERIAL PRIMARY KEY,
+
+    event_key VARCHAR(250) NOT NULL UNIQUE,
+
+    reservation_id UUID NOT NULL
+        REFERENCES ai_request_reservations(reservation_id),
+
+    user_id INTEGER NOT NULL
+        REFERENCES users(id) ON DELETE CASCADE,
+
+    period_id BIGINT NOT NULL
+        REFERENCES ai_quota_periods(id),
+
+    event_type VARCHAR(30) NOT NULL
+        CHECK (
+            event_type IN (
+                'reserve',
+                'settle',
+                'refund'
+            )
+        ),
+
+    words_delta INTEGER NOT NULL DEFAULT 0,
+    images_delta INTEGER NOT NULL DEFAULT 0,
+
+    metadata JSONB NOT NULL DEFAULT '{}'::JSONB,
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 5. AI recovery jobs
+CREATE TABLE IF NOT EXISTS ai_recovery_jobs (
+    id BIGSERIAL PRIMARY KEY,
+
+    reservation_id UUID NOT NULL UNIQUE
+        REFERENCES ai_request_reservations(reservation_id)
+        ON DELETE CASCADE,
+
+    status VARCHAR(30) NOT NULL DEFAULT 'pending'
+        CHECK (
+            status IN (
+                'pending',
+                'processing',
+                'completed',
+                'failed'
+            )
+        ),
+
+    next_attempt_at TIMESTAMPTZ NOT NULL,
+
+    locked_at TIMESTAMPTZ,
+    locked_by VARCHAR(200),
+
+    last_error TEXT,
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 6. Supporting indexes
+CREATE INDEX IF NOT EXISTS idx_ai_quota_periods_user
+    ON ai_quota_periods(user_id, period_start DESC);
+
+CREATE INDEX IF NOT EXISTS idx_ai_reservations_user_status
+    ON ai_request_reservations(user_id, status);
+
+CREATE INDEX IF NOT EXISTS idx_ai_reservations_lease
+    ON ai_request_reservations(status, lease_expires_at);
+
+CREATE INDEX IF NOT EXISTS idx_ai_ledger_user_created
+    ON ai_usage_ledger(user_id, created_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_ai_ledger_period
+    ON ai_usage_ledger(period_id, created_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_ai_recovery_pending
+    ON ai_recovery_jobs(status, next_attempt_at);
+
+-- =========================================================
+-- END AI QUOTA SYSTEM
+-- =========================================================
 COMMIT;
