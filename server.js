@@ -1109,12 +1109,25 @@ app.post(
         }
       });
 
-      if (!reservationResult.created) {
+            if (!reservationResult.created) {
+        const existingReservation = reservationResult.reservation;
+
+        if (
+          existingReservation.status === 'settled' &&
+          typeof existingReservation.response_text === 'string'
+        ) {
+          return res.json({
+            success: true,
+            reply: existingReservation.response_text
+          });
+        }
+
         return res.status(409).json({
-          error: 'هذا الطلب سبق تسجيله أو ما زال قيد المعالجة.',
-          code: 'DUPLICATE_AI_REQUEST'
+          error: 'هذا الطلب سبق تسجيله، لكن نتيجته غير جاهزة للاسترجاع.',
+          code: 'DUPLICATE_AI_REQUEST',
+          status: existingReservation.status
         });
-      }
+            }
 
       reservation = reservationResult.reservation;
 
