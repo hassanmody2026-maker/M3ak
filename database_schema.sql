@@ -12,7 +12,10 @@ CREATE TABLE IF NOT EXISTS packages (
     price NUMERIC(10, 2) NOT NULL CHECK (price >= 0),
     duration_days INTEGER NOT NULL CHECK (duration_days > 0)
 );
-
+-- Compatibility migration for AI recovery worker
+ALTER TABLE ai_recovery_jobs
+    ADD COLUMN IF NOT EXISTS attempts INTEGER NOT NULL DEFAULT 0
+    CHECK (attempts >= 0);
 INSERT INTO packages (name, max_words, max_images, price, duration_days)
 VALUES
     ('trial', 5000, 3, 0.00, 4),
