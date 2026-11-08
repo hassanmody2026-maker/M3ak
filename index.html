@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>معاك - M3AK</title>
-    <!-- استيراد خط كاييرو العربي -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-    <!-- مكتبة الأيقونات -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
@@ -25,47 +23,49 @@
             min-height: 100vh;
         }
 
-        /* حاوية الموبايل */
         .mobile-container {
             width: 100%;
             max-width: 430px;
-            background: linear-gradient(180deg, #b048d6 0%, #390a59 40%, #2b0b42 100%);
+            background: #230638;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            padding: 15px;
+            padding: 10px;
             position: relative;
             overflow-x: hidden;
             color: #fff;
             box-shadow: 0 0 30px rgba(0,0,0,0.8);
         }
 
-        /* جزء الهيدر الذي يحتوي على الصورة الأصلية كاملة */
-        .header-bg-section {
+        /* حاوية الصورة الأصلية المدمجة بالكامل */
+        .header-image-container {
             width: 100%;
-            height: 440px; /* ارتفاع متوافق مع جزء الصورة العلوية */
-            background-image: url('1000051297.png');
-            background-size: 430px auto; /* ضبط عرض الصورة لتغطي الحاوية */
-            background-position: top center;
-            background-repeat: no-repeat;
-            position: relative;
-            border-radius: 20px;
+            line-height: 0;
         }
 
-        /* شبكة الأيقونات (الخدمات) */
+        .header-image-container img {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+        }
+
+        /* شبكة الأيقونات والخدمات */
         .services-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
-            gap: 8px;
-            margin: 10px 0;
+            gap: 6px;
+            padding: 0 5px;
+            margin: 5px 0;
         }
 
         .service-card {
-            background: linear-gradient(135deg, rgba(82, 20, 131, 0.85) 0%, rgba(50, 8, 85, 0.9) 100%);
-            border: 1px solid rgba(255, 120, 220, 0.3);
-            border-radius: 14px;
-            padding: 10px 2px;
+            background: linear-gradient(135deg, rgba(92, 24, 148, 0.9) 0%, rgba(53, 9, 89, 0.95) 100%);
+            border: 1px solid rgba(255, 120, 220, 0.25);
+            border-radius: 12px;
+            padding: 8px 2px;
             text-align: center;
             text-decoration: none;
             color: #fff;
@@ -73,42 +73,37 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        }
-
-        .service-card:hover {
-            transform: translateY(-3px);
-            border-color: rgba(255, 42, 133, 0.8);
+            box-shadow: 0 3px 8px rgba(0,0,0,0.4);
         }
 
         .service-card i {
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             color: #4df3ff;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
         }
 
-        /* تلوين بعض الأيقونات لتشبه التصميم */
-        .service-card:nth-child(2) i { color: #5cdb95; }
-        .service-card:nth-child(3) i { color: #ffca3a; }
-        .service-card:nth-child(4) i { color: #ff5964; }
-        .service-card:nth-child(5) i { color: #c77dff; }
-        .service-card:nth-child(6) i { color: #4df3ff; }
-        .service-card:nth-child(7) i { color: #ffca3a; }
-        .service-card:nth-child(8) i { color: #5cdb95; }
-        .service-card:nth-child(9) i { color: #ff5964; }
-        .service-card:nth-child(10) i { color: #70c1b3; }
+        /* ألوان الأيقونات حسب التصميم الأصلي من اليمين لليسار */
+        .service-card:nth-child(1) i { color: #4df3ff; } /* حماية المستهلك */
+        .service-card:nth-child(2) i { color: #5cdb95; } /* قارن الأسعار */
+        .service-card:nth-child(3) i { color: #ffca3a; } /* مشتريات الأطفال */
+        .service-card:nth-child(4) i { color: #ff5964; } /* فنادق ومطاعم */
+        .service-card:nth-child(5) i { color: #c77dff; } /* صالونات تجميل */
+        .service-card:nth-child(6) i { color: #4df3ff; } /* موبايلات */
+        .service-card:nth-child(7) i { color: #ffca3a; } /* ميزانية البيت */
+        .service-card:nth-child(8) i { color: #c77dff; } /* الإلكترونيات */
+        .service-card:nth-child(9) i { color: #ff5964; } /* أثاث وديكور */
+        .service-card:nth-child(10) i { color: #5cdb95; } /* لاندسكيب */
 
         .service-card span {
-            font-size: 0.65rem;
+            font-size: 0.6rem;
             font-weight: 700;
-            line-height: 1.2;
+            line-height: 1.1;
         }
 
-        /* قسم الأزرار والروابط في الأسفل */
+        /* قسم الأزرار والأسفل */
         .action-section {
             text-align: center;
-            margin-top: 5px;
+            padding: 0 5px 10px 5px;
         }
 
         .start-btn {
@@ -120,25 +115,25 @@
             text-decoration: none;
             padding: 12px 20px;
             border-radius: 50px;
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             font-weight: 800;
-            box-shadow: 0 6px 20px rgba(255, 42, 133, 0.5);
+            box-shadow: 0 5px 15px rgba(255, 42, 133, 0.4);
             border: 1px solid rgba(255,255,255,0.2);
         }
 
         .start-btn i {
             background: rgba(255, 255, 255, 0.25);
-            width: 32px;
-            height: 32px;
+            width: 30px;
+            height: 30px;
             display: flex;
             align-items: center;
             justify-content: center;
             border-radius: 50%;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
         }
 
         .divider {
-            margin: 10px 0;
+            margin: 8px 0;
             position: relative;
             text-align: center;
         }
@@ -150,38 +145,37 @@
             left: 0;
             right: 0;
             height: 1px;
-            background: rgba(255, 255, 255, 0.25);
+            background: rgba(255, 255, 255, 0.2);
         }
 
         .divider span {
-            background: #2b0b42;
-            padding: 0 15px;
+            background: #230638;
+            padding: 0 10px;
             position: relative;
-            color: #d1d1d1;
-            font-size: 0.85rem;
+            color: #bbb;
+            font-size: 0.8rem;
             font-weight: 600;
         }
 
         .footer-links {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             justify-content: center;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
         .sub-link {
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
             color: #fff;
             text-decoration: none;
-            padding: 8px 14px;
+            padding: 7px 12px;
             border-radius: 30px;
-            font-size: 0.75rem;
+            font-size: 0.72rem;
             font-weight: 700;
             display: flex;
             align-items: center;
-            gap: 6px;
-            backdrop-filter: blur(5px);
+            gap: 5px;
         }
 
         .sub-link i {
@@ -189,10 +183,9 @@
         }
 
         .footer-brand-text {
-            font-size: 0.75rem;
-            color: #ddd;
+            font-size: 0.72rem;
+            color: #ccc;
             font-weight: 600;
-            padding-bottom: 5px;
         }
     </style>
 </head>
@@ -200,11 +193,13 @@
 
     <div class="mobile-container">
         
-        <!-- الجزء العلوي المعتمِد على الصورة الأصلية بالكامل -->
-        <div class="header-bg-section"></div>
+        <!-- الهيدر باستخدام الصورة الأصلية مباشرة -->
+        <div class="header-image-container">
+            <img src="1000051297.png" alt="تصميم معاك">
+        </div>
 
-        <!-- شبكة الأيقونات والخدمات (10 خدمات مطابقة) -->
-        <div class="services-grid">
+        <!-- شبكة الخدمات والأيقونات (مرتبة بدقة من اليمين لليسار كالنسخة الأصلية) -->
+        <div class="services-grid" dir="rtl">
             <a href="#" class="service-card">
                 <i class="fa-solid fa-shield-halved"></i>
                 <span>حماية المستهلك</span>
@@ -248,7 +243,7 @@
             </a>
         </div>
 
-        <!-- قسم الأزرار والأسفل -->
+        <!-- الأزرار والسفلية -->
         <div class="action-section">
             <a href="#" class="start-btn">
                 <span>البدء الآن</span>
@@ -277,4 +272,4 @@
     </div>
 
 </body>
-  </html>
+    </html>
