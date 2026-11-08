@@ -320,8 +320,7 @@ async function getPackageById(packageId) {
   );
 
   return result.rows[0] || null;
-}
-
+                          }
 // Health check
 app.get('/health', asyncRoute(async (req, res) => {
   await pool.query('SELECT 1');
@@ -500,7 +499,18 @@ app.post(
       token: createToken(user),
       isTrialExpired: trialExpired,
       user: {
-        // Forgot password
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        role: user.role,
+        isSubscribed: activeSubscription
+      }
+    });
+  })
+);
+
+// Forgot password
 app.post(
   '/api/auth/forgot-password',
   atomicRateLimiter(15 * 60 * 1000, 3, 'forgot-password'),
@@ -526,6 +536,7 @@ app.post(
     }
 
     const rawToken = crypto.randomBytes(32).toString('hex');
+
     const tokenHash = crypto
       .createHash('sha256')
       .update(rawToken)
@@ -571,6 +582,7 @@ app.post(
           `لتغيير كلمة المرور، افتح الرابط التالي. ` +
           `الرابط صالح لمدة 15 دقيقة ولمرة واحدة: ${resetLink}`
       });
+
     } catch (err) {
       await pool.query(
         'DELETE FROM password_resets WHERE token_hash = $1',
@@ -698,7 +710,6 @@ app.post(
     }
   })
 );
-
 // Profile
 app.get(
   '/api/user/profile',
@@ -1086,118 +1097,120 @@ app.post(
 
     } finally {
       client.release();
-                    }
-      // تنفيذ طلب المساعد الذكي
-  try {
-    const content = [{ type: 'text', text: message }];
-
-    if (imageUrl) {
-      content.push({
-        type: 'image_url',
-        image_url: { url: imageUrl }
-      });
     }
 
-    const aiResponse = await axios.post(
-      'https://api.openai.com/v1/chat/completions',
-      {
-        model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
-        messages: [{ role: 'user', content }],
-        max_tokens: 1200
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`
-        },
-        timeout: 45000
-      }
-    );
-
-    const replyText =
-      aiResponse.data?.choices?.[0]?.message?.content;
-
-    if (typeof replyText !== 'string') {
-      throw new Error('Invalid AI provider response.');
-    }
-
-    const outputWords = replyText
-      .split(/\s+/)
-      .filter(Boolean).length;
-
-    const actualWords = inputWords + outputWords;
-    const refundWords = Math.max(
-      0,
-      estimatedReservation - actualWords
-    );
-
-    const saveClient = await pool.connect();
-
+    // تنفيذ طلب المساعد الذكي
     try {
-      await saveClient.query('BEGIN');
+      const content = [{ type: 'text', text: message }];
 
-      await saveClient.query(
-        `UPDATE users
-         SET words_used_count =
-             GREATEST(0, words_used_count - $1)
-         WHERE id = $2`,
-        [refundWords, req.user.id]
+      if (imageUrl) {
+        content.push({
+          type: 'image_url',
+          image_url: { url: imageUrl }
+        });
+      }
+
+      const aiResponse = await axios.post(
+        'https://api.openai.com/v1/chat/completions',
+        {
+          model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+          messages: [{ role: 'user', content }],
+          max_tokens: 1200
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${process.env.OPENAI_API_KEY}`
+          },
+          timeout: 45000
+        }
       );
 
-      await saveClient.query(
-        `INSERT INTO chat_history
-         (user_id, prompt, response, image_url)
-         VALUES ($1, $2, $3, $4)`,
-        [req.user.id, message, replyText, imageUrl]
+      const replyText =
+        aiResponse.data?.choices?.[0]?.message?.content;
+
+      if (typeof replyText !== 'string') {
+        throw new Error('Invalid AI provider response.');
+      }
+
+      const outputWords = replyText
+        .split(/\s+/)
+        .filter(Boolean).length;
+
+      const actualWords = inputWords + outputWords;
+
+      const refundWords = Math.max(
+        0,
+        estimatedReservation - actualWords
       );
 
-      await saveClient.query('COMMIT');
+      const saveClient = await pool.connect();
+
+      try {
+        await saveClient.query('BEGIN');
+
+        await saveClient.query(
+          `UPDATE users
+           SET words_used_count =
+               GREATEST(0, words_used_count - $1)
+           WHERE id = $2`,
+          [refundWords, req.user.id]
+        );
+
+        await saveClient.query(
+          `INSERT INTO chat_history
+           (user_id, prompt, response, image_url)
+           VALUES ($1, $2, $3, $4)`,
+          [req.user.id, message, replyText, imageUrl]
+        );
+
+        await saveClient.query('COMMIT');
+
+      } catch (err) {
+        await saveClient.query('ROLLBACK');
+        throw err;
+
+      } finally {
+        saveClient.release();
+      }
+
+      return res.json({
+        success: true,
+        reply: replyText
+      });
 
     } catch (err) {
-      await saveClient.query('ROLLBACK');
-      throw err;
+      const refundClient = await pool.connect();
 
-    } finally {
-      saveClient.release();
-    }
+      try {
+        await refundClient.query(
+          `UPDATE users
+           SET words_used_count =
+               GREATEST(0, words_used_count - $1),
+               images_used_count =
+               GREATEST(0, images_used_count - $2)
+           WHERE id = $3`,
+          [
+            estimatedReservation,
+            reservedImages,
+            req.user.id
+          ]
+        );
 
-    return res.json({
-      success: true,
-      reply: replyText
-    });
+      } finally {
+        refundClient.release();
+      }
 
-  } catch (err) {
-    const refundClient = await pool.connect();
-
-    try {
-      await refundClient.query(
-        `UPDATE users
-         SET words_used_count =
-             GREATEST(0, words_used_count - $1),
-             images_used_count =
-             GREATEST(0, images_used_count - $2)
-         WHERE id = $3`,
-        [
-          estimatedReservation,
-          reservedImages,
-          req.user.id
-        ]
+      console.error(
+        'AI request failed:',
+        err.response?.data || err.message
       );
 
-    } finally {
-      refundClient.release();
+      return res.status(502).json({
+        error: 'تعذر معالجة الطلب عبر خدمة الذكاء الاصطناعي.'
+      });
     }
-
-    console.error(
-      'AI request failed:',
-      err.response?.data || err.message
-    );
-
-    return res.status(502).json({
-      error: 'تعذر معالجة الطلب عبر خدمة الذكاء الاصطناعي.'
-    });
-  }
-}));
-
+  })
+);
 // إنشاء جلسة دفع Paymob
 app.post(
   '/api/payments/paymob-checkout',
@@ -1210,12 +1223,19 @@ app.post(
   asyncRoute(async (req, res) => {
     const packageId = Number(req.body.packageId);
 
+    if (!Number.isInteger(packageId) || packageId <= 0) {
+      return res.status(400).json({
+        error: 'معرف الباقة غير صالح.'
+      });
+    }
+
     const selectedPackage =
       await getPackageById(packageId);
 
     if (
       !selectedPackage ||
       selectedPackage.name === 'trial' ||
+      !Number.isFinite(Number(selectedPackage.price)) ||
       Number(selectedPackage.price) <= 0
     ) {
       return res.status(400).json({
@@ -1236,32 +1256,56 @@ app.post(
       });
     }
 
+    let phoneNumber;
+
+    try {
+      phoneNumber = normalizePaymobPhone(req.user.phone);
+    } catch {
+      return res.status(400).json({
+        error: 'رقم الهاتف المسجل غير صالح لإتمام الدفع. حدّث رقمك من الملف الشخصي.'
+      });
+    }
+
+    const integrationId =
+      Number(process.env.PAYMOB_INTEGRATION_ID);
+
+    if (
+      !Number.isSafeInteger(integrationId) ||
+      integrationId <= 0
+    ) {
+      return res.status(503).json({
+        error: 'معرف تكامل Paymob غير صالح.'
+      });
+    }
+
     const merchantOrderId =
       `M3AK-${req.user.id}-${selectedPackage.id}-${crypto.randomBytes(8).toString('hex')}`;
 
     const amountCents =
       Math.round(Number(selectedPackage.price) * 100);
 
-    const client = await pool.connect();
-
-    try {
-      await client.query(
-        `INSERT INTO subscriptions_payments
-         (user_id, transaction_id, merchant_order_id,
-          package_id, amount, currency, status, gateway)
-         VALUES ($1, $2, $3, $4, $5, 'EGP', 'pending', 'paymob')`,
-        [
-          req.user.id,
-          `pending:${merchantOrderId}`,
-          merchantOrderId,
-          selectedPackage.id,
-          selectedPackage.price
-        ]
-      );
-
-    } finally {
-      client.release();
+    if (
+      !Number.isSafeInteger(amountCents) ||
+      amountCents <= 0
+    ) {
+      return res.status(400).json({
+        error: 'قيمة الباقة غير صالحة للدفع.'
+      });
     }
+
+    await pool.query(
+      `INSERT INTO subscriptions_payments
+       (user_id, transaction_id, merchant_order_id,
+        package_id, amount, currency, status, gateway)
+       VALUES ($1, $2, $3, $4, $5, 'EGP', 'pending', 'paymob')`,
+      [
+        req.user.id,
+        `pending:${merchantOrderId}`,
+        merchantOrderId,
+        selectedPackage.id,
+        selectedPackage.price
+      ]
+    );
 
     try {
       const auth = await axios.post(
@@ -1272,7 +1316,11 @@ app.post(
         { timeout: 20000 }
       );
 
-      const paymobToken = auth.data.token;
+      const paymobToken = auth.data?.token;
+
+      if (!paymobToken) {
+        throw new Error('Paymob authentication token missing.');
+      }
 
       const order = await axios.post(
         'https://accept.paymob.com/api/ecommerce/orders',
@@ -1287,15 +1335,27 @@ app.post(
         { timeout: 20000 }
       );
 
-      await pool.query(
+      const paymobOrderId = order.data?.id;
+
+      if (!paymobOrderId) {
+        throw new Error('Paymob order ID missing.');
+      }
+
+      const orderUpdate = await pool.query(
         `UPDATE subscriptions_payments
          SET paymob_order_id = $1
-         WHERE merchant_order_id = $2`,
+         WHERE merchant_order_id = $2
+           AND status = 'pending'
+         RETURNING id`,
         [
-          String(order.data.id),
+          String(paymobOrderId),
           merchantOrderId
         ]
       );
+
+      if (!orderUpdate.rows.length) {
+        throw new Error('Local payment record could not be updated.');
+      }
 
       const billingName =
         String(req.user.email)
@@ -1308,7 +1368,7 @@ app.post(
           auth_token: paymobToken,
           amount_cents: amountCents,
           expiration: 3600,
-          order_id: order.data.id,
+          order_id: paymobOrderId,
 
           billing_data: {
             apartment: 'NA',
@@ -1317,7 +1377,7 @@ app.post(
             first_name: billingName.slice(0, 50),
             street: 'NA',
             building: 'NA',
-            phone_number: '+201000000000',
+            phone_number: phoneNumber,
             shipping_method: 'NA',
             postal_code: '00000',
             city: 'Cairo',
@@ -1327,14 +1387,19 @@ app.post(
           },
 
           currency: 'EGP',
-          integration_id:
-            Number(process.env.PAYMOB_INTEGRATION_ID)
+          integration_id: integrationId
         },
         { timeout: 20000 }
       );
 
+      const paymentToken = keyResponse.data?.token;
+
+      if (!paymentToken) {
+        throw new Error('Paymob payment token missing.');
+      }
+
       const checkoutUrl =
-        `https://accept.paymob.com/api/acceptance/iframes/${encodeURIComponent(process.env.PAYMOB_IFRAME_ID)}?payment_token=${encodeURIComponent(keyResponse.data.token)}`;
+        `https://accept.paymob.com/api/acceptance/iframes/${encodeURIComponent(process.env.PAYMOB_IFRAME_ID)}?payment_token=${encodeURIComponent(paymentToken)}`;
 
       return res.json({
         success: true,
@@ -1347,7 +1412,7 @@ app.post(
         `UPDATE subscriptions_payments
          SET status = 'failed'
          WHERE merchant_order_id = $1
-         AND status = 'pending'`,
+           AND status = 'pending'`,
         [merchantOrderId]
       );
 
@@ -1362,6 +1427,7 @@ app.post(
     }
   })
 );
+
 
 // استقبال إشعار الدفع والتحقق من HMAC
 app.post(
@@ -1423,10 +1489,15 @@ app.post(
       });
     }
 
+    // رفض العمليات غير الناجحة أو الملغاة أو المستردة
     if (
       obj.success !== true ||
       obj.pending === true ||
-      obj.is_capture !== true
+      obj.is_capture !== true ||
+      obj.is_voided === true ||
+      obj.is_refunded === true ||
+      obj.error_occured === true ||
+      obj.error_occured === 'true'
     ) {
       return res.status(200).json({
         received: true,
@@ -1447,7 +1518,7 @@ app.post(
       Number(process.env.PAYMOB_INTEGRATION_ID)
     ) {
       return res.status(403).json({
-        error: 'معرّف تكامل الدفع غير صحيح.'
+        error: 'معرف تكامل الدفع غير صحيح.'
       });
     }
 
@@ -1456,9 +1527,24 @@ app.post(
 
     const transactionId = String(obj.id || '');
 
-    if (!merchantOrderId || !transactionId) {
+    const paymobOrderId = String(obj.order?.id || '');
+
+    if (
+      !merchantOrderId ||
+      !transactionId ||
+      !paymobOrderId
+    ) {
       return res.status(400).json({
         error: 'بيانات ربط المعاملة غير مكتملة.'
+      });
+    }
+
+    if (
+      !/^\d+$/.test(transactionId) ||
+      !/^\d+$/.test(paymobOrderId)
+    ) {
+      return res.status(400).json({
+        error: 'معرف معاملة الدفع غير صالح.'
       });
     }
 
@@ -1468,7 +1554,13 @@ app.post(
       await client.query('BEGIN');
 
       const paymentResult = await client.query(
-        `SELECT id, user_id, package_id, amount, status
+        `SELECT
+           id,
+           user_id,
+           package_id,
+           amount,
+           status,
+           paymob_order_id
          FROM subscriptions_payments
          WHERE merchant_order_id = $1
          FOR UPDATE`,
@@ -1485,6 +1577,7 @@ app.post(
 
       const payment = paymentResult.rows[0];
 
+      // منع إعادة تفعيل الاشتراك
       if (payment.status === 'success') {
         await client.query('COMMIT');
 
@@ -1494,17 +1587,40 @@ app.post(
         });
       }
 
+      // لا نسمح بتفعيل أي سجل ليس قيد الانتظار
+      if (payment.status !== 'pending') {
+        await client.query('ROLLBACK');
+
+        return res.status(409).json({
+          error: 'حالة طلب الدفع لا تسمح بتفعيله.'
+        });
+      }
+
+      // مطابقة رقم طلب Paymob مع الرقم المحفوظ محلياً
+      if (
+        !payment.paymob_order_id ||
+        String(payment.paymob_order_id) !== paymobOrderId
+      ) {
+        await client.query('ROLLBACK');
+
+        return res.status(400).json({
+          error: 'رقم طلب Paymob لا يطابق سجل الدفع.'
+        });
+      }
+
       const paidAmount =
         Number(obj.amount_cents) / 100;
 
       if (
+        !Number.isFinite(paidAmount) ||
         Math.round(paidAmount * 100) !==
         Math.round(Number(payment.amount) * 100)
       ) {
         await client.query(
           `UPDATE subscriptions_payments
            SET status = 'amount_mismatch'
-           WHERE id = $1`,
+           WHERE id = $1
+             AND status = 'pending'`,
           [payment.id]
         );
 
@@ -1515,8 +1631,31 @@ app.post(
         });
       }
 
+      // منع ربط معاملة واحدة بأكثر من طلب دفع
+      const duplicateTransaction = await client.query(
+        `SELECT id
+         FROM subscriptions_payments
+         WHERE transaction_id = $1
+           AND id <> $2
+         LIMIT 1`,
+        [
+          transactionId,
+          payment.id
+        ]
+      );
+
+      if (duplicateTransaction.rows.length) {
+        await client.query('ROLLBACK');
+
+        return res.status(409).json({
+          error: 'رقم معاملة الدفع مستخدم بالفعل.'
+        });
+      }
+
       const packageResult = await client.query(
-        'SELECT duration_days FROM packages WHERE id = $1',
+        `SELECT duration_days
+         FROM packages
+         WHERE id = $1`,
         [payment.package_id]
       );
 
@@ -1531,7 +1670,19 @@ app.post(
       const durationDays =
         Number(packageResult.rows[0].duration_days);
 
-      await client.query(
+      if (
+        !Number.isInteger(durationDays) ||
+        durationDays <= 0
+      ) {
+        await client.query('ROLLBACK');
+
+        return res.status(500).json({
+          error: 'مدة الباقة غير صالحة.'
+        });
+      }
+
+      // تفعيل الاشتراك
+      const userUpdate = await client.query(
         `UPDATE users
          SET is_subscribed = TRUE,
              package_id = $1,
@@ -1542,7 +1693,8 @@ app.post(
                ) + ($2::text || ' days')::interval,
              words_used_count = 0,
              images_used_count = 0
-         WHERE id = $3`,
+         WHERE id = $3
+         RETURNING id`,
         [
           payment.package_id,
           durationDays,
@@ -1550,18 +1702,40 @@ app.post(
         ]
       );
 
-      await client.query(
+      if (!userUpdate.rows.length) {
+        await client.query('ROLLBACK');
+
+        return res.status(500).json({
+          error: 'تعذر العثور على المستخدم لتفعيل الاشتراك.'
+        });
+      }
+
+      const paymentUpdate = await client.query(
         `UPDATE subscriptions_payments
          SET transaction_id = $1,
              status = 'success'
-         WHERE id = $2`,
-        [transactionId, payment.id]
+         WHERE id = $2
+           AND status = 'pending'
+         RETURNING id`,
+        [
+          transactionId,
+          payment.id
+        ]
       );
+
+      if (!paymentUpdate.rows.length) {
+        await client.query('ROLLBACK');
+
+        return res.status(409).json({
+          error: 'تعذر تحديث سجل الدفع.'
+        });
+      }
 
       await client.query('COMMIT');
 
       return res.status(200).json({
-        received: true
+        received: true,
+        success: true
       });
 
     } catch (err) {
@@ -1573,7 +1747,6 @@ app.post(
     }
   })
 );
-
 // طلبات المستخدم
 app.get(
   '/api/orders',
@@ -1719,15 +1892,22 @@ app.get(
   '/api/admin/users',
   verifyAdmin,
   asyncRoute(async (req, res) => {
+    const requestedLimit = Number(req.query.limit);
+    const requestedOffset = Number(req.query.offset);
+
     const limit = Math.min(
-      Math.max(Number(req.query.limit) || 25, 1),
+      Math.max(
+        Number.isInteger(requestedLimit) ? requestedLimit : 25,
+        1
+      ),
       100
     );
 
-    const offset = Math.max(
-      Number(req.query.offset) || 0,
-      0
-    );
+    const offset =
+      Number.isSafeInteger(requestedOffset) &&
+      requestedOffset >= 0
+        ? requestedOffset
+        : 0;
 
     const result = await pool.query(
       `SELECT
@@ -1792,13 +1972,3 @@ async function shutdown(signal) {
 
 process.on('SIGTERM', () => shutdown('SIGTERM'));
 process.on('SIGINT', () => shutdown('SIGINT'));
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        phone: user.phone,
-        role: user.role,
-        isSubscribed: activeSubscription
-      }
-    });
-  })
-);
