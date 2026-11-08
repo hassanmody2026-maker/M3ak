@@ -329,7 +329,10 @@ CREATE TABLE IF NOT EXISTS ai_recovery_jobs (
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
-
+-- Compatibility migration for AI recovery worker
+ALTER TABLE ai_recovery_jobs
+    ADD COLUMN IF NOT EXISTS attempts INTEGER NOT NULL DEFAULT 0
+    CHECK (attempts >= 0);
 -- 6. Supporting indexes
 CREATE INDEX IF NOT EXISTS idx_ai_quota_periods_user
     ON ai_quota_periods(user_id, period_start DESC);
