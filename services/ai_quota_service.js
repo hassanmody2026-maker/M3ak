@@ -525,8 +525,9 @@ async function settleAiReservation(
     {
         reservationId,
         actualWords,
-        actualImages = 0,
-        metadata = {}
+                actualImages = 0,
+        metadata = {},
+        responseText = null
     }
 ) {
     if (!reservationId) {
