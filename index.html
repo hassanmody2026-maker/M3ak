@@ -2,352 +2,321 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#241653">
-<meta name="description" content="معاك M3AK - كل اللي تحتاجه معاك من أول اليوم لآخره">
-<title>M3AK | معاك</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#260b3d">
+<title>معاك | كل اللي تحتاجه.. معاك</title>
 
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap');
+
 :root {
-  --deep: #241653;
-  --purple: #5d3aa8;
-  --pink: #ed4b9b;
-  --cyan: #39c6c9;
-  --white: #ffffff;
-  --background: #f8f6fc;
-  --text: #30234e;
+  --purple:#32104e;
+  --purple2:#60208c;
+  --pink:#ed3c91;
+  --turquoise:#23c7c0;
+  --white:#ffffff;
+  --text:#28133b;
 }
 
 * {
-  box-sizing: border-box;
-}
-
-html {
-  scroll-behavior: smooth;
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
 }
 
 body {
-  margin: 0;
-  min-height: 100vh;
-  font-family: Tahoma, Arial, sans-serif;
-  color: var(--text);
-  background:
-    radial-gradient(circle at 5% 5%, #ed4b9b20, transparent 30%),
-    radial-gradient(circle at 95% 70%, #39c6c920, transparent 30%),
-    var(--background);
+  font-family:'Cairo',sans-serif;
+  background:#f5eff9;
+  color:var(--text);
+  min-height:100vh;
 }
 
 .page {
-  width: 100%;
-  max-width: 520px;
-  min-height: 100vh;
-  margin: auto;
-  padding: 18px 17px 25px;
-  display: flex;
-  flex-direction: column;
+  width:100%;
+  max-width:480px;
+  min-height:100vh;
+  margin:auto;
+  background:linear-gradient(180deg,#fff 0%,#faf5ff 75%,#f4eaff 100%);
+  position:relative;
+  overflow:hidden;
+  padding-bottom:35px;
 }
 
-/* LOGO */
+/* Header */
 
 .header {
-  text-align: center;
-  padding: 5px 0 14px;
+  padding:23px 15px 8px;
+  text-align:center;
 }
 
 .logo {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 9px;
-  direction: ltr;
-  font-size: 31px;
-  font-weight: 900;
-  color: var(--deep);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:10px;
 }
 
-.logo-mark {
-  width: 53px;
-  height: 53px;
-  border-radius: 17px;
-  display: grid;
-  place-items: center;
-  background: linear-gradient(145deg, #754cc5, #39216f);
-  box-shadow: 0 7px 20px #4b2b8b35;
+.logo-symbol {
+  width:65px;
+  height:65px;
+  filter:drop-shadow(0 5px 8px #6c278b35);
 }
 
-.logo-mark svg {
-  width: 39px;
-  height: 39px;
+.logo-text {
+  font-size:39px;
+  font-weight:900;
+  color:#592080;
+  letter-spacing:-2px;
 }
 
-.logo-three {
-  color: var(--pink);
+.logo-text span {
+  color:var(--pink);
 }
 
-.brand-ar {
-  margin-top: 2px;
-  font-size: 16px;
-  font-weight: bold;
-  color: var(--purple);
+.tagline {
+  margin:13px auto 0;
+  width:92%;
+  padding:10px 8px;
+  border-radius:15px;
+  background:linear-gradient(100deg,#542078,#912b9c,#e63e91);
+  color:white;
+  font-size:20px;
+  font-weight:900;
+  box-shadow:0 7px 17px #782b9230;
 }
 
-.brand-slogan {
-  margin-top: 7px;
-  font-size: 13px;
-  font-weight: bold;
-  color: var(--pink);
+.subtitle {
+  font-size:15px;
+  color:#76518a;
+  font-weight:700;
+  margin-top:7px;
 }
 
-/* HERO */
+/* Family illustration */
 
 .hero {
-  position: relative;
-  overflow: hidden;
-  border-radius: 28px;
-  padding: 23px 16px 21px;
-  text-align: center;
-  color: white;
-  background: linear-gradient(
-    145deg,
-    #241653 0%,
-    #58328e 60%,
-    #302064 100%
-  );
-  box-shadow: 0 15px 35px #35206430;
+  margin:13px 12px 14px;
+  height:190px;
+  border-radius:22px;
+  overflow:hidden;
+  position:relative;
+  background:linear-gradient(180deg,#e9dcff 0%,#f8dff0 58%,#f7c9dd 100%);
+  box-shadow:0 6px 18px #4b1c6520;
 }
 
-.hero::before {
-  content: "";
-  position: absolute;
-  width: 180px;
-  height: 180px;
-  top: -110px;
-  right: -70px;
-  border-radius: 50%;
-  background: #ed4b9b30;
+.hero svg {
+  display:block;
+  width:100%;
+  height:100%;
 }
 
-.hero::after {
-  content: "";
-  position: absolute;
-  width: 180px;
-  height: 180px;
-  bottom: -125px;
-  left: -70px;
-  border-radius: 50%;
-  background: #39c6c930;
+/* Services */
+
+.services-wrap {
+  margin:0 12px;
+  padding:13px 9px 15px;
+  border-radius:23px;
+  background:linear-gradient(145deg,#391252,#60217f 55%,#7c288d);
+  box-shadow:0 9px 23px #44165d35;
 }
 
-.hero-title {
-  position: relative;
-  z-index: 1;
-  margin: 0 0 8px;
-  font-size: 25px;
-  font-weight: 900;
-  line-height: 1.6;
+.services-title {
+  text-align:center;
+  color:#fff;
+  font-size:16px;
+  font-weight:800;
+  margin-bottom:11px;
 }
-
-.hero-description {
-  position: relative;
-  z-index: 1;
-  margin: 0;
-  font-size: 14px;
-  line-height: 1.9;
-  color: #eee8fb;
-}
-
-/* FAMILY ILLUSTRATION */
-
-.family-art {
-  position: relative;
-  z-index: 1;
-  width: 190px;
-  height: 145px;
-  margin: 0 auto 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.family-art svg {
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-}
-
-/* CATEGORY SECTION */
-
-.section-heading {
-  text-align: center;
-  margin: 20px 0 13px;
-}
-
-.section-heading h2 {
-  margin: 0 0 5px;
-  font-size: 19px;
-  font-weight: 900;
-  color: var(--deep);
-}
-
-.section-heading p {
-  margin: 0;
-  font-size: 12px;
-  color: #81798f;
-}
-
-/* SERVICES GRID */
 
 .services {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px 7px;
 }
 
-.service-card {
-  min-height: 83px;
-  padding: 11px 8px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  border-radius: 17px;
-  background: linear-gradient(145deg, #38206e, #6541a5);
-  color: white;
-  box-shadow: 0 5px 13px #35206418;
+.service {
+  min-height:91px;
+  padding:9px 3px 7px;
+  border-radius:15px;
+  background:linear-gradient(145deg,#ffffff25,#ffffff10);
+  border:1px solid #ffffff35;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  color:white;
+  transition:.2s;
+}
+
+.service:active {
+  transform:scale(.96);
 }
 
 .service-icon {
-  flex: 0 0 43px;
-  width: 43px;
-  height: 43px;
-  border-radius: 13px;
-  display: grid;
-  place-items: center;
-  background: #ffffff19;
-  border: 1px solid #ffffff30;
-}
-
-.service-icon svg {
-  width: 25px;
-  height: 25px;
-  stroke: white;
-  fill: none;
-  stroke-width: 1.8;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+  font-size:27px;
+  line-height:1.3;
+  margin-bottom:5px;
 }
 
 .service-name {
-  font-size: 12px;
-  font-weight: bold;
-  line-height: 1.7;
-  color: white;
+  color:#fff;
+  font-size:10.5px;
+  font-weight:800;
+  line-height:1.6;
 }
 
-/* MAIN BUTTON */
+/* Main action */
 
-.start-area {
-  margin-top: 22px;
+.actions {
+  padding:17px 18px 0;
 }
 
-.start-button {
-  min-height: 59px;
-  width: 100%;
-  border: 0;
-  border-radius: 19px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  text-decoration: none;
-  color: white;
-  font-family: inherit;
-  font-size: 18px;
-  font-weight: 900;
-  background: linear-gradient(100deg, #ed4b9b, #7549c1);
-  box-shadow: 0 10px 23px #8b4ebc45;
-  transition: transform .15s ease, filter .15s ease;
+.start-btn {
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:10px;
+  width:100%;
+  min-height:57px;
+  border:0;
+  border-radius:19px;
+  color:white;
+  font-family:inherit;
+  font-size:20px;
+  font-weight:900;
+  text-decoration:none;
+  background:linear-gradient(100deg,#ed3994,#a12ac0,#64218c);
+  box-shadow:0 8px 18px #bd328b45,inset 0 2px 2px #ffffff50;
+  transition:.2s;
 }
 
-.start-button:active {
-  transform: scale(.98);
-  filter: brightness(.95);
+.start-btn:active {
+  transform:scale(.98);
 }
 
-.arrow {
-  width: 31px;
-  height: 31px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  background: #ffffff28;
-  border: 1px solid #ffffff70;
-  font-size: 19px;
+.start-btn .arrow {
+  font-size:24px;
 }
 
-/* FOOTER */
+.or {
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin:13px 0;
+  color:#a18aa9;
+  font-size:13px;
+  font-weight:700;
+}
+
+.or:before,.or:after {
+  content:"";
+  height:1px;
+  flex:1;
+  background:#e6d8ed;
+}
+
+.google-btn {
+  width:100%;
+  min-height:48px;
+  border:1px solid #e5d9eb;
+  border-radius:15px;
+  background:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  color:#473452;
+  font-family:inherit;
+  font-size:14px;
+  font-weight:800;
+  text-decoration:none;
+  box-shadow:0 3px 9px #4a1c5b0d;
+}
+
+.google-icon {
+  font-family:Arial,sans-serif;
+  font-weight:900;
+  font-size:22px;
+  background:conic-gradient(from -45deg,#4285f4 0 25%,#34a853 25% 50%,#fbbc05 50% 75%,#ea4335 75%);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+}
+
+/* Legal */
+
+.legal {
+  text-align:center;
+  margin-top:15px;
+  font-size:11px;
+  color:#92799d;
+}
+
+.legal a {
+  color:#67258a;
+  text-decoration:none;
+  font-weight:800;
+  padding:0 5px;
+}
 
 .footer {
-  margin-top: 20px;
-  text-align: center;
-  font-size: 11px;
-  line-height: 2;
-  color: #81798f;
+  text-align:center;
+  margin-top:13px;
+  font-size:13px;
+  font-weight:800;
+  color:#6d3986;
 }
 
-.footer a {
-  color: var(--purple);
-  font-weight: bold;
-  text-decoration: none;
+.footer span {
+  color:var(--pink);
 }
 
-.footer-slogan {
-  margin-top: 7px;
-  color: var(--pink);
-  font-weight: bold;
+/* Decorative waves */
+
+.waves {
+  position:relative;
+  height:24px;
+  margin-top:12px;
+  overflow:hidden;
 }
 
-@media (max-width: 360px) {
-  .page {
-    padding-left: 12px;
-    padding-right: 12px;
-  }
-
-  .service-card {
-    gap: 7px;
-    padding: 9px 6px;
-  }
-
-  .service-icon {
-    flex-basis: 38px;
-    width: 38px;
-    height: 38px;
-  }
-
-  .service-name {
-    font-size: 11px;
-  }
-
-  .hero-title {
-    font-size: 22px;
-  }
+.wave {
+  position:absolute;
+  width:130%;
+  height:55px;
+  left:-15%;
+  border-radius:50% 50% 0 0;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .hero {
-    animation: appear .6s ease-out both;
-  }
-
-  @keyframes appear {
-    from {
-      opacity: 0;
-      transform: translateY(12px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
+.wave.one {
+  top:9px;
+  background:#67228b;
 }
+
+.wave.two {
+  top:17px;
+  background:#e73b91;
+  transform:rotate(-3deg);
+}
+
+.wave.three {
+  top:24px;
+  background:#22c7bd;
+  transform:rotate(2deg);
+}
+
+/* Small screens */
+
+@media(max-width:360px) {
+  .logo-text {font-size:34px;}
+  .tagline {font-size:17px;}
+  .hero {height:165px;}
+  .service {min-height:84px;}
+  .service-name {font-size:9.5px;}
+  .service-icon {font-size:24px;}
+}
+
 </style>
 </head>
 
@@ -355,260 +324,202 @@ body {
 
 <main class="page">
 
-  <!-- LOGO -->
   <header class="header">
 
     <div class="logo">
 
-      <span class="logo-mark">
-        <svg viewBox="0 0 64 64" fill="none">
-          <path d="M7 27 L32 7 L57 27"
-            stroke="#ff8fc4"
-            stroke-width="5"
-            stroke-linecap="round"
-            stroke-linejoin="round"/>
+      <svg class="logo-symbol" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="logoGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#e83b94"/>
+            <stop offset="1" stop-color="#64218b"/>
+          </linearGradient>
+        </defs>
 
-          <path d="M32 24 C25 15 15 21 18 30
-                   C20 37 32 46 32 46
-                   C32 46 44 37 46 30
-                   C49 21 39 15 32 24Z"
-            fill="#ed4b9b"/>
+        <path d="M12 45 L50 12 L88 45" fill="none"
+              stroke="url(#logoGrad)" stroke-width="8"
+              stroke-linecap="round" stroke-linejoin="round"/>
 
-          <path d="M9 49 C17 41 25 42 32 48
-                   C39 42 47 41 55 49
-                   L48 58 H16Z"
-            fill="#39c6c9"
-            stroke="white"
-            stroke-width="2"/>
-        </svg>
-      </span>
+        <path d="M24 42 V76 Q24 83 32 83 H68 Q76 83 76 76 V42"
+              fill="none" stroke="#63228a" stroke-width="7"
+              stroke-linecap="round"/>
 
-      <span>
-        M<span class="logo-three">3</span>AK
-      </span>
+        <path d="M50 69 C36 59 34 48 42 44
+                 C47 41 50 46 50 46
+                 C50 46 56 40 62 45
+                 C70 53 59 63 50 69Z"
+              fill="#ed3c91"/>
+
+        <path d="M13 72 Q27 56 42 67 M87 72 Q73 56 58 67"
+              fill="none" stroke="#23bfb7" stroke-width="5"
+              stroke-linecap="round"/>
+      </svg>
+
+      <div class="logo-text">معا<span>ك</span></div>
 
     </div>
 
-    <div class="brand-ar">— معاك —</div>
-
-    <div class="brand-slogan">
-      كل اللي تحتاجه.. معاك
-    </div>
+    <div class="tagline">كل اللي تحتاجه.. معاك</div>
+    <div class="subtitle">من أول اليوم لآخره</div>
 
   </header>
 
 
-  <!-- WELCOME HERO -->
-  <section class="hero">
+  <!-- Cairo and family illustration -->
 
-    <div class="family-art">
+  <section class="hero" aria-label="معاك مع الأسرة المصرية">
 
-      <svg viewBox="0 0 220 160" fill="none">
+    <svg viewBox="0 0 420 210" preserveAspectRatio="xMidYMid slice"
+         xmlns="http://www.w3.org/2000/svg">
 
-        <!-- الخلفية -->
-        <circle cx="110" cy="79" r="67"
-          fill="#ffffff12"/>
+      <defs>
+        <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#d9c9ff"/>
+          <stop offset="1" stop-color="#ffd7e9"/>
+        </linearGradient>
+        <linearGradient id="clothes" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#8736a5"/>
+          <stop offset="1" stop-color="#d33c91"/>
+        </linearGradient>
+      </defs>
 
-        <circle cx="110" cy="79" r="58"
-          stroke="#ffffff35"
-          stroke-width="2"/>
+      <rect width="420" height="210" fill="url(#sky)"/>
 
-        <!-- الأب -->
-        <circle cx="70" cy="46" r="19"
-          fill="#ffd2b0"/>
+      <circle cx="350" cy="40" r="23" fill="#fff4c9" opacity=".75"/>
 
-        <path d="M52 43 Q55 21 75 25 Q90 30 88 48
-                 Q78 37 70 39 Q61 40 52 43Z"
-          fill="#30234e"/>
+      <!-- Clouds -->
+      <g fill="#fff" opacity=".55">
+        <ellipse cx="75" cy="37" rx="35" ry="10"/>
+        <ellipse cx="95" cy="30" rx="24" ry="13"/>
+        <ellipse cx="265" cy="28" rx="30" ry="9"/>
+      </g>
 
-        <path d="M40 123 Q39 72 70 69
-                 Q101 72 101 123Z"
-          fill="#7549c1"/>
+      <!-- Cairo buildings -->
+      <g fill="#a995c6" opacity=".75">
+        <rect x="0" y="100" width="40" height="70"/>
+        <rect x="38" y="88" width="31" height="82"/>
+        <rect x="70" y="110" width="37" height="60"/>
+        <rect x="314" y="98" width="35" height="72"/>
+        <rect x="350" y="82" width="32" height="88"/>
+        <rect x="383" y="107" width="37" height="63"/>
+      </g>
 
-        <!-- الأم -->
-        <circle cx="151" cy="46" r="19"
-          fill="#ffd2b0"/>
+      <!-- Pyramids -->
+      <path d="M8 166 L61 96 L111 166Z" fill="#c49b75"/>
+      <path d="M61 96 L61 166 L111 166Z" fill="#a98266"/>
+      <path d="M72 166 L109 118 L144 166Z" fill="#d1a982"/>
 
-        <path d="M132 45 Q130 20 153 21
-                 Q177 22 171 52
-                 L164 35 Q149 28 132 45Z"
-          fill="#ed4b9b"/>
+      <!-- Cairo Tower -->
+      <g stroke="#9275b3" fill="none" stroke-width="4">
+        <path d="M355 167 L367 70 L379 167"/>
+        <path d="M359 112 H375"/>
+        <path d="M362 92 H372"/>
+        <path d="M356 72 Q367 59 378 72"/>
+      </g>
 
-        <path d="M123 123 Q122 72 151 69
-                 Q181 72 183 123Z"
-          fill="#ed4b9b"/>
+      <!-- Ground -->
+      <path d="M0 171 Q120 160 210 172 Q310 157 420 169 V210 H0Z"
+            fill="#d8a9c8"/>
 
-        <!-- الطفل -->
-        <circle cx="109" cy="87" r="15"
-          fill="#ffd2b0"/>
+      <!-- Family: father -->
+      <g>
+        <circle cx="163" cy="102" r="19" fill="#b8795e"/>
+        <path d="M145 100 Q144 77 164 79 Q183 81 181 100 Q171 89 145 100"
+              fill="#332039"/>
+        <path d="M133 126 Q163 111 190 128 L203 210 H119Z"
+              fill="#543078"/>
+        <path d="M149 120 Q164 133 178 120" fill="none"
+              stroke="#f1c9b4" stroke-width="4"/>
+      </g>
 
-        <path d="M94 86 Q94 65 109 68
-                 Q125 68 124 88
-                 Q115 77 109 78
-                 Q100 78 94 86Z"
-          fill="#30234e"/>
+      <!-- Mother -->
+      <g>
+        <path d="M202 103 Q202 68 229 67 Q256 69 258 104
+                 L250 128 H210Z" fill="#e94d9a"/>
+        <circle cx="230" cy="105" r="17" fill="#c98770"/>
+        <path d="M212 101 Q210 82 230 83 Q250 84 249 103
+                 L245 92 Q230 86 214 98Z" fill="#9b398e"/>
+        <path d="M198 128 Q229 112 259 130 L270 210 H190Z"
+              fill="url(#clothes)"/>
+        <path d="M216 120 Q230 130 244 120"
+              fill="none" stroke="#f4d1c5" stroke-width="3"/>
+      </g>
 
-        <path d="M87 139 Q87 105 109 104
-                 Q132 105 132 139Z"
-          fill="#39c6c9"/>
+      <!-- Son -->
+      <g>
+        <circle cx="112" cy="139" r="13" fill="#c98770"/>
+        <path d="M99 136 Q100 120 113 123 Q126 124 125 138
+                 Q113 130 99 136" fill="#39263d"/>
+        <path d="M96 154 Q112 146 127 155 L136 210 H88Z"
+              fill="#25aeb2"/>
+      </g>
 
-        <!-- القلب -->
-        <path d="M105 120
-                 C99 113 90 119 95 126
-                 L105 136
-                 L115 126
-                 C120 119 111 113 105 120Z"
-          fill="#ffffff"/>
+      <!-- Daughter -->
+      <g>
+        <circle cx="287" cy="139" r="13" fill="#c98770"/>
+        <path d="M274 139 Q271 122 287 123 Q304 122 301 142
+                 Q290 129 274 139" fill="#5b315f"/>
+        <path d="M270 154 Q287 146 304 155 L315 210 H259Z"
+              fill="#f1a4c9"/>
+      </g>
 
-      </svg>
+      <!-- Decorative sparkle -->
+      <g fill="#fff">
+        <path d="M128 49 L131 58 L140 61 L131 64 L128 73 L125 64 L116 61 L125 58Z"/>
+        <path d="M302 52 L304 59 L311 61 L304 64 L302 71 L300 64 L293 61 L300 59Z"/>
+      </g>
 
-    </div>
-
-    <h1 class="hero-title">
-      أهلاً بيك في معاك 💜
-    </h1>
-
-    <p class="hero-description">
-      كل اللي تحتاجه في مكان واحد.<br>
-      مساعدك الذكي لاحتياجاتك اليومية واحتياجات أسرتك.
-    </p>
+    </svg>
 
   </section>
 
 
-  <!-- SERVICES -->
-  <section>
+  <!-- Services -->
 
-    <div class="section-heading">
-      <h2>خدمات معاك</h2>
-      <p>مجموعة متكاملة من الخدمات ليك ولأسرتك</p>
-    </div>
+  <section class="services-wrap">
 
+    <div class="services-title">كل خدماتك في مكان واحد</div>
 
     <div class="services">
 
-      <div class="service-card">
-        <div class="service-icon">
-          <svg viewBox="0 0 24 24">
-            <path d="M3 7h18l-2 12H5L3 7Z"/>
-            <path d="M8 7l4-4 4 4"/>
-            <path d="M9 12h6"/>
-          </svg>
-        </div>
-        <div class="service-name">التسوق<br>وقارن الأسعار</div>
+      <div class="service">
+        <div class="service-icon">✈️</div>
+        <div class="service-name">السفر والفنادق</div>
       </div>
 
-
-      <div class="service-card">
-        <div class="service-icon">
-          <svg viewBox="0 0 24 24">
-            <path d="M12 3 21 7v6c0 5-4 8-9 9-5-1-9-4-9-9V7l9-4Z"/>
-            <path d="m8 12 3 3 5-6"/>
-          </svg>
-        </div>
-        <div class="service-name">حماية<br>المستهلك</div>
+      <div class="service">
+        <div class="service-icon">🛍️</div>
+        <div class="service-name">التسوق وقارن الأسعار</div>
       </div>
 
-
-      <div class="service-card">
-        <div class="service-icon">
-          <svg viewBox="0 0 24 24">
-            <circle cx="8" cy="8" r="3"/>
-            <circle cx="17" cy="9" r="2.5"/>
-            <path d="M2 20c0-4 2-6 6-6s6 2 6 6"/>
-            <path d="M14 15c4-1 7 1 8 5"/>
-          </svg>
-        </div>
-        <div class="service-name">مشتريات<br>الأطفال</div>
+      <div class="service">
+        <div class="service-icon">👨‍👩‍👧‍👦</div>
+        <div class="service-name">الأطفال والأسرة</div>
       </div>
 
-
-      <div class="service-card">
-        <div class="service-icon">
-          <svg viewBox="0 0 24 24">
-            <path d="M3 21h18"/>
-            <path d="M5 21V8l7-5 7 5v13"/>
-            <path d="M9 21v-7h6v7"/>
-            <path d="M9 9h.01M15 9h.01"/>
-          </svg>
-        </div>
-        <div class="service-name">فنادق<br>ومطاعم</div>
+      <div class="service">
+        <div class="service-icon">💇‍♀️</div>
+        <div class="service-name">صالونات التجميل</div>
       </div>
 
-
-      <div class="service-card">
-        <div class="service-icon">
-          <svg viewBox="0 0 24 24">
-            <circle cx="12" cy="7" r="4"/>
-            <path d="M4 21c0-5 3-8 8-8s8 3 8 8"/>
-            <path d="M8 4 6 2M16 4l2-2"/>
-          </svg>
-        </div>
-        <div class="service-name">صالونات<br>تجميل رجالي وحريمي</div>
+      <div class="service">
+        <div class="service-icon">🏡</div>
+        <div class="service-name">المنزل والديكور</div>
       </div>
 
-
-      <div class="service-card">
-        <div class="service-icon">
-          <svg viewBox="0 0 24 24">
-            <rect x="7" y="2" width="10" height="20" rx="2"/>
-            <path d="M10 5h4M11 18h2"/>
-            <path d="M19 7h3v10h-3"/>
-          </svg>
-        </div>
-        <div class="service-name">الموبايلات<br>والإلكترونيات</div>
+      <div class="service">
+        <div class="service-icon">📱</div>
+        <div class="service-name">الموبايلات والإلكترونيات</div>
       </div>
 
-
-      <div class="service-card">
-        <div class="service-icon">
-          <svg viewBox="0 0 24 24">
-            <path d="M3 11 12 3l9 8"/>
-            <path d="M5 10v11h14V10"/>
-            <path d="M9 21v-6h6v6"/>
-            <path d="M8 8h.01M16 8h.01"/>
-          </svg>
-        </div>
-        <div class="service-name">ميزانية البيت<br>والأسرة</div>
+      <div class="service">
+        <div class="service-icon">🛡️</div>
+        <div class="service-name">حماية المستهلك</div>
       </div>
 
-
-      <div class="service-card">
-        <div class="service-icon">
-          <svg viewBox="0 0 24 24">
-            <path d="M3 11h18v8H3z"/>
-            <path d="M5 11V8h14v3"/>
-            <path d="M6 19v2M18 19v2"/>
-            <path d="M8 8V5h8v3"/>
-          </svg>
-        </div>
-        <div class="service-name">أثاث<br>وديكور</div>
-      </div>
-
-
-      <div class="service-card">
-        <div class="service-icon">
-          <svg viewBox="0 0 24 24">
-            <path d="M4 21c0-7 3-12 8-18"/>
-            <path d="M12 21c0-6 3-10 8-14"/>
-            <path d="M4 15h5M8 10h5M12 16h5"/>
-          </svg>
-        </div>
-        <div class="service-name">لاندسكيب<br>ونجيل صناعي</div>
-      </div>
-
-
-      <div class="service-card">
-        <div class="service-icon">
-          <svg viewBox="0 0 24 24">
-            <path d="M3 12h18"/>
-            <path d="M5 12V8h14v4"/>
-            <path d="M7 8V5h10v3"/>
-            <path d="M7 12v7M17 12v7"/>
-            <path d="M4 19h16"/>
-          </svg>
-        </div>
-        <div class="service-name">السفر<br>والرحلات</div>
+      <div class="service">
+        <div class="service-icon">🤖</div>
+        <div class="service-name">المساعد الذكي في كل مكان</div>
       </div>
 
     </div>
@@ -616,33 +527,42 @@ body {
   </section>
 
 
-  <!-- START BUTTON -->
-  <section class="start-area">
+  <!-- Registration actions -->
 
-    <a class="start-button" href="signup.html">
-      <span>البدء الآن</span>
+  <section class="actions">
+
+    <a class="start-btn" href="signup.html">
       <span class="arrow">←</span>
+      <span>البدء الآن</span>
     </a>
 
+    <div class="or">أو</div>
+
+    <a class="google-btn" href="signup.html">
+      <span class="google-icon">G</span>
+      <span>المتابعة باستخدام Google</span>
+    </a>
+
+    <div class="legal">
+      <a href="privacy.html">سياسة الخصوصية</a>
+      |
+      <a href="terms.html">الشروط والأحكام</a>
+    </div>
+
+    <div class="footer">
+      معاك .. دائمًا وأبدًا <span>♥ ♥</span>
+    </div>
+
   </section>
 
 
-  <!-- FOOTER -->
-  <footer class="footer">
+  <!-- Bottom color waves -->
 
-    بالمتابعة يمكنك الاطلاع على
-
-    <a href="terms.html">الأحكام والشروط</a>
-
-    و
-
-    <a href="privacy.html">سياسة الخصوصية</a>
-
-    <div class="footer-slogan">
-      M3AK – معاك .. دائماً وأبداً 💜
-    </div>
-
-  </footer>
+  <div class="waves">
+    <div class="wave one"></div>
+    <div class="wave two"></div>
+    <div class="wave three"></div>
+  </div>
 
 </main>
 
