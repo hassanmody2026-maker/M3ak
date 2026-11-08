@@ -1261,12 +1261,11 @@ app.post(
     // because provider success has already been recorded.
     try {
       await settleAiReservation(pool, {
-        reservationId: reservation.reservation_id,
-        actualWords,
-                actualWords,
-        actualImages: reservedImages,
-        responseText: replyText,
-        metadata: {
+    reservationId: reservation.reservation_id,
+    actualWords,
+    actualImages: reservedImages,
+    responseText: replyText,
+    metadata: {
           model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
           providerRequestId:
             aiResponse.headers?.['x-request-id'] || null
