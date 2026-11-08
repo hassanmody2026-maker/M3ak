@@ -11,6 +11,14 @@ const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const crypto = require('crypto');
 const axios = require('axios');
+const {
+  QuotaError,
+  reserveAiQuota,
+  markProviderSucceeded,
+  settleAiReservation,
+  refundAiReservation,
+  markAiReservationUnknown
+} = require('./services/ai_quota_service');
 const nodemailer = require('nodemailer');
 const admin = require('firebase-admin');
 const { Pool } = require('pg');
@@ -968,8 +976,7 @@ app.post(
   })
 );
 
-// AI assistant
-// Usage is reserved atomically before calling the provider.
+// AI assistant - Durable quota reservation and safe settlement
 app.post(
   '/api/ai/chat',
   verifyToken,
@@ -978,7 +985,7 @@ app.post(
     const message = String(req.body.message || '').trim();
 
     const imageUrl = req.body.imageUrl
-      ? String(req.body.imageUrl)
+      ? String(req.body.imageUrl).trim()
       : null;
 
     if (!message) {
@@ -1017,88 +1024,290 @@ app.post(
       });
     }
 
-    const inputWords = message.split(/\s+/).filter(Boolean).length;
-    const reservedOutputWords = 1000;
-    const estimatedReservation =
-      inputWords + reservedOutputWords;
+    // Use a client-provided idempotency key when available.
+    // A generated key protects this execution, but not a client retry.
+    const idempotencyKey = String(
+      req.get('Idempotency-Key') ||
+      req.body.requestId ||
+      crypto.randomUUID()
+    ).trim();
 
-    const client = await pool.connect();
-    let reservedImages = 0;
+    if (
+      idempotencyKey.length < 8 ||
+      idempotencyKey.length > 200
+    ) {
+      return res.status(400).json({
+        error: 'معرف الطلب غير صالح.'
+      });
+    }
+
+    const inputWords = message
+      .split(/\s+/)
+      .filter(Boolean).length;
+
+    // Reserve enough words for the maximum provider output.
+    const reservedWords = inputWords + 1200;
+    const reservedImages = imageUrl ? 1 : 0;
+
+    let packageResult;
 
     try {
-      await client.query('BEGIN');
-
-      const userResult = await client.query(
+      packageResult = await pool.query(
         `SELECT
-           u.words_used_count,
-           u.images_used_count,
            p.max_words,
            p.max_images
          FROM users u
          JOIN packages p ON p.id = u.package_id
-         WHERE u.id = $1
-         FOR UPDATE OF u`,
+         WHERE u.id = $1`,
         [req.user.id]
       );
+    } catch (error) {
+      console.error('AI package lookup failed:', error.message);
 
-      if (!userResult.rows.length) {
-        await client.query('ROLLBACK');
-
-        return res.status(404).json({
-          error: 'المستخدم أو الباقة غير موجودين.'
-        });
-      }
-
-      const usage = userResult.rows[0];
-
-      if (
-        Number(usage.words_used_count) +
-        estimatedReservation >
-        Number(usage.max_words)
-      ) {
-        await client.query('ROLLBACK');
-
-        return res.status(403).json({
-          error: 'الرصيد المتبقي من الكلمات لا يكفي لهذه المحادثة.'
-        });
-      }
-
-      if (
-        imageUrl &&
-        Number(usage.images_used_count) + 1 >
-        Number(usage.max_images)
-      ) {
-        await client.query('ROLLBACK');
-
-        return res.status(403).json({
-          error: 'لقد استنفدت الحد الأقصى للصور في باقتك.'
-        });
-      }
-
-      await client.query(
-        `UPDATE users
-         SET words_used_count = words_used_count + $1,
-             images_used_count = images_used_count + $2
-         WHERE id = $3`,
-        [
-          estimatedReservation,
-          imageUrl ? 1 : 0,
-          req.user.id
-        ]
-      );
-
-      reservedImages = imageUrl ? 1 : 0;
-
-      await client.query('COMMIT');
-
-    } catch (err) {
-      await client.query('ROLLBACK');
-      throw err;
-
-    } finally {
-      client.release();
+      return res.status(500).json({
+        error: 'تعذر التحقق من حدود الباقة.'
+      });
     }
 
+    if (packageResult.rowCount === 0) {
+      return res.status(404).json({
+        error: 'المستخدم أو الباقة غير موجودين.'
+      });
+    }
+
+    const wordsLimit = Number(packageResult.rows[0].max_words);
+    const imagesLimit = Number(packageResult.rows[0].max_images);
+
+    if (
+      !Number.isSafeInteger(wordsLimit) ||
+      wordsLimit < 0 ||
+      !Number.isSafeInteger(imagesLimit) ||
+      imagesLimit < 0
+    ) {
+      console.error('Invalid AI package quota configuration.');
+
+      return res.status(500).json({
+        error: 'إعدادات رصيد الباقة غير صالحة.'
+      });
+    }
+
+    // Reserve quota atomically before calling OpenAI.
+    let reservation;
+
+    try {
+      const reservationResult = await reserveAiQuota(pool, {
+        userId: Number(req.user.id),
+        idempotencyKey,
+        wordsLimit,
+        imagesLimit,
+        reservedWords,
+        reservedImages,
+        leaseSeconds: 180,
+        metadata: {
+          source: 'api/ai/chat',
+          model: process.env.OPENAI_MODEL || 'gpt-4o-mini'
+        }
+      });
+
+      if (!reservationResult.created) {
+        return res.status(409).json({
+          error: 'هذا الطلب سبق تسجيله أو ما زال قيد المعالجة.',
+          code: 'DUPLICATE_AI_REQUEST'
+        });
+      }
+
+      reservation = reservationResult.reservation;
+
+    } catch (error) {
+      if (error instanceof QuotaError) {
+        return res.status(error.statusCode || 400).json({
+          error:
+            error.code === 'QUOTA_EXCEEDED'
+              ? 'رصيد الباقة لا يكفي لهذه المحادثة.'
+              : error.message,
+          code: error.code
+        });
+      }
+
+      console.error('AI quota reservation failed:', error.message);
+
+      return res.status(500).json({
+        error: 'تعذر حجز رصيد المساعد الذكي.'
+      });
+    }
+
+    // Call the provider only after successful reservation.
+    let aiResponse;
+
+    try {
+      const content = [
+        {
+          type: 'text',
+          text: message
+        }
+      ];
+
+      if (imageUrl) {
+        content.push({
+          type: 'image_url',
+          image_url: {
+            url: imageUrl
+          }
+        });
+      }
+
+      aiResponse = await axios.post(
+        'https://api.openai.com/v1/chat/completions',
+        {
+          model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+          messages: [
+            {
+              role: 'user',
+              content
+            }
+          ],
+          max_tokens: 1200
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${process.env.OPENAI_API_KEY}`
+          },
+          timeout: 45000
+        }
+      );
+
+    } catch (error) {
+      const providerStatus = Number(error.response?.status);
+
+      // A definite client rejection is safe to refund.
+      // Timeouts, network failures and server errors are uncertain.
+      const definiteRejection =
+        Number.isInteger(providerStatus) &&
+        providerStatus >= 400 &&
+        providerStatus < 500 &&
+        providerStatus !== 408;
+
+      try {
+        if (definiteRejection) {
+          await refundAiReservation(pool, {
+            reservationId: reservation.reservation_id,
+            reason: `Provider rejected request with HTTP ${providerStatus}`
+          });
+        } else {
+          await markAiReservationUnknown(pool, {
+            reservationId: reservation.reservation_id,
+            reason:
+              'Provider outcome uncertain: ' +
+              String(error.message || 'Unknown provider error')
+          });
+        }
+      } catch (quotaError) {
+        console.error(
+          'AI reservation recovery update failed:',
+          quotaError.message
+        );
+      }
+
+      console.error(
+        'AI provider request failed:',
+        error.response?.data || error.message
+      );
+
+      return res.status(502).json({
+        error: 'تعذر إكمال الطلب عبر خدمة الذكاء الاصطناعي.'
+      });
+    }
+
+    // The provider returned a successful HTTP response.
+    // Record provider success BEFORE settlement or chat-history saving.
+    try {
+      await markProviderSucceeded(pool, {
+        reservationId: reservation.reservation_id,
+        providerRequestId:
+          aiResponse.headers?.['x-request-id'] || null
+      });
+    } catch (error) {
+      // Never refund after a successful provider response.
+      console.error(
+        'Could not record AI provider success:',
+        error.message
+      );
+
+      return res.status(502).json({
+        error: 'تم تنفيذ الطلب، لكن تعذر تأكيد تسجيله محاسبياً.'
+      });
+    }
+
+    const replyText =
+      aiResponse.data?.choices?.[0]?.message?.content;
+
+    if (typeof replyText !== 'string') {
+      // Keep the reservation in provider_succeeded state.
+      // It must not be refunded automatically.
+      console.error('OpenAI returned an invalid successful response.');
+
+      return res.status(502).json({
+        error: 'وصل رد غير مكتمل من خدمة الذكاء الاصطناعي.'
+      });
+    }
+
+    const outputWords = replyText
+      .split(/\s+/)
+      .filter(Boolean).length;
+
+    const actualWords = inputWords + outputWords;
+
+    // Settle quota. A settlement failure must never trigger a refund
+    // because provider success has already been recorded.
+    try {
+      await settleAiReservation(pool, {
+        reservationId: reservation.reservation_id,
+        actualWords,
+        actualImages: reservedImages,
+        metadata: {
+          model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+          providerRequestId:
+            aiResponse.headers?.['x-request-id'] || null
+        }
+      });
+    } catch (error) {
+      console.error(
+        'AI quota settlement failed after provider success:',
+        error.message
+      );
+
+      return res.status(502).json({
+        error: 'تم تنفيذ الطلب، لكن تعذر إتمام تسوية الرصيد.'
+      });
+    }
+
+    // Chat history is saved AFTER successful quota settlement.
+    // A history failure must not refund already consumed AI usage.
+    try {
+      await pool.query(
+        `INSERT INTO chat_history
+         (user_id, prompt, response, image_url)
+         VALUES ($1, $2, $3, $4)`,
+        [
+          req.user.id,
+          message,
+          replyText,
+          imageUrl
+        ]
+      );
+    } catch (error) {
+      console.error(
+        'AI chat history save failed:',
+        error.message
+      );
+    }
+
+    return res.json({
+      success: true,
+      reply: replyText
+    });
+  })
+);
     // تنفيذ طلب المساعد الذكي
     try {
       const content = [{ type: 'text', text: message }];
