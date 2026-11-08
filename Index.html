@@ -1561,6 +1561,36 @@ async function handleAiChat() {
     const responseText =
         document.getElementById("aiResponseText");
 
+    const storageKey = "m3ak_pending_ai_request";
+
+    let pendingRequest;
+
+    try {
+        pendingRequest = JSON.parse(
+            localStorage.getItem(storageKey) || "null"
+        );
+    } catch {
+        pendingRequest = null;
+    }
+
+    // Reuse the same key when retrying the exact same request.
+    if (
+        !pendingRequest ||
+        pendingRequest.message !== message ||
+        pendingRequest.imageUrl !== imageUrl
+    ) {
+        pendingRequest = {
+            message,
+            imageUrl,
+            requestId: crypto.randomUUID()
+        };
+
+        localStorage.setItem(
+            storageKey,
+            JSON.stringify(pendingRequest)
+        );
+    }
+
     responseText.textContent = "جارٍ تجهيز الإجابة...";
     responseContainer.style.display = "block";
 
@@ -1568,20 +1598,26 @@ async function handleAiChat() {
 
         const data = await apiRequest("/ai/chat", {
             method: "POST",
+            headers: {
+                "Idempotency-Key": pendingRequest.requestId
+            },
             body: JSON.stringify({
                 message,
-                imageUrl: imageUrl || null
+                imageUrl: imageUrl || null,
+                requestId: pendingRequest.requestId
             })
         });
 
         responseText.textContent =
             data.reply || "لم تصل إجابة من المساعد.";
 
+        localStorage.removeItem(storageKey);
+
     } catch (error) {
 
         responseText.textContent = error.message;
     }
-}
+                }
 
 
 /* =====================================
