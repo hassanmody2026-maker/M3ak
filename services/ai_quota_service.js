@@ -525,7 +525,7 @@ async function settleAiReservation(
     {
         reservationId,
         actualWords,
-                actualImages = 0,
+        actualImages = 0,
         metadata = {},
         responseText = null
     }
@@ -643,11 +643,16 @@ async function settleAiReservation(
             );
         }
 
-        const updated = await client.query(
+                const updated = await client.query(
             `UPDATE ai_request_reservations
              SET
                 actual_words = $2,
                 actual_images = $3,
+                response_text = $4,
+                response_saved_at = CASE
+                    WHEN $4 IS NOT NULL THEN CURRENT_TIMESTAMP
+                    ELSE response_saved_at
+                END,
                 status = 'settled',
                 updated_at = CURRENT_TIMESTAMP
              WHERE reservation_id = $1
@@ -655,9 +660,10 @@ async function settleAiReservation(
             [
                 reservationId,
                 actualWords,
-                actualImages
+                actualImages,
+                responseText
             ]
-        );
+        ); 
 
         await client.query(
             `UPDATE ai_recovery_jobs
