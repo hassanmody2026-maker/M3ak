@@ -264,7 +264,10 @@ CREATE TABLE IF NOT EXISTS ai_request_reservations (
     CONSTRAINT ai_request_idempotency_unique
         UNIQUE (user_id, idempotency_key)
 );
-
+-- Store the completed AI response for safe idempotent retries.
+ALTER TABLE ai_request_reservations
+    ADD COLUMN IF NOT EXISTS response_text TEXT,
+    ADD COLUMN IF NOT EXISTS response_saved_at TIMESTAMPTZ;
 -- 4. AI usage ledger
 CREATE TABLE IF NOT EXISTS ai_usage_ledger (
     id BIGSERIAL PRIMARY KEY,
