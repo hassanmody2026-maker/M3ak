@@ -1263,7 +1263,9 @@ app.post(
       await settleAiReservation(pool, {
         reservationId: reservation.reservation_id,
         actualWords,
+                actualWords,
         actualImages: reservedImages,
+        responseText: replyText,
         metadata: {
           model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
           providerRequestId:
