@@ -1,570 +1,280 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#260b3d">
-<title>معاك | كل اللي تحتاجه.. معاك</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>معاك - M3AK</title>
+    <!-- استيراد خط كاييرو العربي -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- مكتبة الأيقونات -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Cairo', sans-serif;
+        }
 
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap');
+        body {
+            background-color: #1a0529;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
 
-:root {
-  --purple:#32104e;
-  --purple2:#60208c;
-  --pink:#ed3c91;
-  --turquoise:#23c7c0;
-  --white:#ffffff;
-  --text:#28133b;
-}
+        /* حاوية الموبايل */
+        .mobile-container {
+            width: 100%;
+            max-width: 430px;
+            background: linear-gradient(180deg, #b048d6 0%, #390a59 40%, #2b0b42 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 15px;
+            position: relative;
+            overflow-x: hidden;
+            color: #fff;
+            box-shadow: 0 0 30px rgba(0,0,0,0.8);
+        }
 
-* {
-  box-sizing:border-box;
-  margin:0;
-  padding:0;
-}
+        /* جزء الهيدر الذي يحتوي على الصورة الأصلية كاملة */
+        .header-bg-section {
+            width: 100%;
+            height: 440px; /* ارتفاع متوافق مع جزء الصورة العلوية */
+            background-image: url('1000051297.png');
+            background-size: 430px auto; /* ضبط عرض الصورة لتغطي الحاوية */
+            background-position: top center;
+            background-repeat: no-repeat;
+            position: relative;
+            border-radius: 20px;
+        }
 
-body {
-  font-family:'Cairo',sans-serif;
-  background:#f5eff9;
-  color:var(--text);
-  min-height:100vh;
-}
+        /* شبكة الأيقونات (الخدمات) */
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            margin: 10px 0;
+        }
 
-.page {
-  width:100%;
-  max-width:480px;
-  min-height:100vh;
-  margin:auto;
-  background:linear-gradient(180deg,#fff 0%,#faf5ff 75%,#f4eaff 100%);
-  position:relative;
-  overflow:hidden;
-  padding-bottom:35px;
-}
+        .service-card {
+            background: linear-gradient(135deg, rgba(82, 20, 131, 0.85) 0%, rgba(50, 8, 85, 0.9) 100%);
+            border: 1px solid rgba(255, 120, 220, 0.3);
+            border-radius: 14px;
+            padding: 10px 2px;
+            text-align: center;
+            text-decoration: none;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
 
-/* Header */
+        .service-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(255, 42, 133, 0.8);
+        }
 
-.header {
-  padding:23px 15px 8px;
-  text-align:center;
-}
+        .service-card i {
+            font-size: 1.3rem;
+            color: #4df3ff;
+            margin-bottom: 6px;
+        }
 
-.logo {
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  gap:10px;
-}
+        /* تلوين بعض الأيقونات لتشبه التصميم */
+        .service-card:nth-child(2) i { color: #5cdb95; }
+        .service-card:nth-child(3) i { color: #ffca3a; }
+        .service-card:nth-child(4) i { color: #ff5964; }
+        .service-card:nth-child(5) i { color: #c77dff; }
+        .service-card:nth-child(6) i { color: #4df3ff; }
+        .service-card:nth-child(7) i { color: #ffca3a; }
+        .service-card:nth-child(8) i { color: #5cdb95; }
+        .service-card:nth-child(9) i { color: #ff5964; }
+        .service-card:nth-child(10) i { color: #70c1b3; }
 
-.logo-symbol {
-  width:65px;
-  height:65px;
-  filter:drop-shadow(0 5px 8px #6c278b35);
-}
+        .service-card span {
+            font-size: 0.65rem;
+            font-weight: 700;
+            line-height: 1.2;
+        }
 
-.logo-text {
-  font-size:39px;
-  font-weight:900;
-  color:#592080;
-  letter-spacing:-2px;
-}
+        /* قسم الأزرار والروابط في الأسفل */
+        .action-section {
+            text-align: center;
+            margin-top: 5px;
+        }
 
-.logo-text span {
-  color:var(--pink);
-}
+        .start-btn {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(90deg, #ff2a85 0%, #7b2cbf 100%);
+            color: #fff;
+            text-decoration: none;
+            padding: 12px 20px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 800;
+            box-shadow: 0 6px 20px rgba(255, 42, 133, 0.5);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
 
-.tagline {
-  margin:13px auto 0;
-  width:92%;
-  padding:10px 8px;
-  border-radius:15px;
-  background:linear-gradient(100deg,#542078,#912b9c,#e63e91);
-  color:white;
-  font-size:20px;
-  font-weight:900;
-  box-shadow:0 7px 17px #782b9230;
-}
+        .start-btn i {
+            background: rgba(255, 255, 255, 0.25);
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 0.85rem;
+        }
 
-.subtitle {
-  font-size:15px;
-  color:#76518a;
-  font-weight:700;
-  margin-top:7px;
-}
+        .divider {
+            margin: 10px 0;
+            position: relative;
+            text-align: center;
+        }
 
-/* Family illustration */
+        .divider::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.25);
+        }
 
-.hero {
-  margin:13px 12px 14px;
-  height:190px;
-  border-radius:22px;
-  overflow:hidden;
-  position:relative;
-  background:linear-gradient(180deg,#e9dcff 0%,#f8dff0 58%,#f7c9dd 100%);
-  box-shadow:0 6px 18px #4b1c6520;
-}
+        .divider span {
+            background: #2b0b42;
+            padding: 0 15px;
+            position: relative;
+            color: #d1d1d1;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
 
-.hero svg {
-  display:block;
-  width:100%;
-  height:100%;
-}
+        .footer-links {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
 
-/* Services */
+        .sub-link {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #fff;
+            text-decoration: none;
+            padding: 8px 14px;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            backdrop-filter: blur(5px);
+        }
 
-.services-wrap {
-  margin:0 12px;
-  padding:13px 9px 15px;
-  border-radius:23px;
-  background:linear-gradient(145deg,#391252,#60217f 55%,#7c288d);
-  box-shadow:0 9px 23px #44165d35;
-}
+        .sub-link i {
+            color: #ff2a85;
+        }
 
-.services-title {
-  text-align:center;
-  color:#fff;
-  font-size:16px;
-  font-weight:800;
-  margin-bottom:11px;
-}
-
-.services {
-  display:grid;
-  grid-template-columns:repeat(4,minmax(0,1fr));
-  gap:10px 7px;
-}
-
-.service {
-  min-height:91px;
-  padding:9px 3px 7px;
-  border-radius:15px;
-  background:linear-gradient(145deg,#ffffff25,#ffffff10);
-  border:1px solid #ffffff35;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  align-items:center;
-  text-align:center;
-  color:white;
-  transition:.2s;
-}
-
-.service:active {
-  transform:scale(.96);
-}
-
-.service-icon {
-  font-size:27px;
-  line-height:1.3;
-  margin-bottom:5px;
-}
-
-.service-name {
-  color:#fff;
-  font-size:10.5px;
-  font-weight:800;
-  line-height:1.6;
-}
-
-/* Main action */
-
-.actions {
-  padding:17px 18px 0;
-}
-
-.start-btn {
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  gap:10px;
-  width:100%;
-  min-height:57px;
-  border:0;
-  border-radius:19px;
-  color:white;
-  font-family:inherit;
-  font-size:20px;
-  font-weight:900;
-  text-decoration:none;
-  background:linear-gradient(100deg,#ed3994,#a12ac0,#64218c);
-  box-shadow:0 8px 18px #bd328b45,inset 0 2px 2px #ffffff50;
-  transition:.2s;
-}
-
-.start-btn:active {
-  transform:scale(.98);
-}
-
-.start-btn .arrow {
-  font-size:24px;
-}
-
-.or {
-  display:flex;
-  align-items:center;
-  gap:12px;
-  margin:13px 0;
-  color:#a18aa9;
-  font-size:13px;
-  font-weight:700;
-}
-
-.or:before,.or:after {
-  content:"";
-  height:1px;
-  flex:1;
-  background:#e6d8ed;
-}
-
-.google-btn {
-  width:100%;
-  min-height:48px;
-  border:1px solid #e5d9eb;
-  border-radius:15px;
-  background:#fff;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:10px;
-  color:#473452;
-  font-family:inherit;
-  font-size:14px;
-  font-weight:800;
-  text-decoration:none;
-  box-shadow:0 3px 9px #4a1c5b0d;
-}
-
-.google-icon {
-  font-family:Arial,sans-serif;
-  font-weight:900;
-  font-size:22px;
-  background:conic-gradient(from -45deg,#4285f4 0 25%,#34a853 25% 50%,#fbbc05 50% 75%,#ea4335 75%);
-  -webkit-background-clip:text;
-  background-clip:text;
-  color:transparent;
-}
-
-/* Legal */
-
-.legal {
-  text-align:center;
-  margin-top:15px;
-  font-size:11px;
-  color:#92799d;
-}
-
-.legal a {
-  color:#67258a;
-  text-decoration:none;
-  font-weight:800;
-  padding:0 5px;
-}
-
-.footer {
-  text-align:center;
-  margin-top:13px;
-  font-size:13px;
-  font-weight:800;
-  color:#6d3986;
-}
-
-.footer span {
-  color:var(--pink);
-}
-
-/* Decorative waves */
-
-.waves {
-  position:relative;
-  height:24px;
-  margin-top:12px;
-  overflow:hidden;
-}
-
-.wave {
-  position:absolute;
-  width:130%;
-  height:55px;
-  left:-15%;
-  border-radius:50% 50% 0 0;
-}
-
-.wave.one {
-  top:9px;
-  background:#67228b;
-}
-
-.wave.two {
-  top:17px;
-  background:#e73b91;
-  transform:rotate(-3deg);
-}
-
-.wave.three {
-  top:24px;
-  background:#22c7bd;
-  transform:rotate(2deg);
-}
-
-/* Small screens */
-
-@media(max-width:360px) {
-  .logo-text {font-size:34px;}
-  .tagline {font-size:17px;}
-  .hero {height:165px;}
-  .service {min-height:84px;}
-  .service-name {font-size:9.5px;}
-  .service-icon {font-size:24px;}
-}
-
-</style>
+        .footer-brand-text {
+            font-size: 0.75rem;
+            color: #ddd;
+            font-weight: 600;
+            padding-bottom: 5px;
+        }
+    </style>
 </head>
-
 <body>
 
-<main class="page">
+    <div class="mobile-container">
+        
+        <!-- الجزء العلوي المعتمِد على الصورة الأصلية بالكامل -->
+        <div class="header-bg-section"></div>
 
-  <header class="header">
+        <!-- شبكة الأيقونات والخدمات (10 خدمات مطابقة) -->
+        <div class="services-grid">
+            <a href="#" class="service-card">
+                <i class="fa-solid fa-shield-halved"></i>
+                <span>حماية المستهلك</span>
+            </a>
+            <a href="#" class="service-card">
+                <i class="fa-solid fa-cart-shopping"></i>
+                <span>قارن الأسعار</span>
+            </a>
+            <a href="#" class="service-card">
+                <i class="fa-solid fa-children"></i>
+                <span>مشتريات الأطفال</span>
+            </a>
+            <a href="#" class="service-card">
+                <i class="fa-solid fa-building"></i>
+                <span>فنادق ومطاعم</span>
+            </a>
+            <a href="#" class="service-card">
+                <i class="fa-solid fa-scissors"></i>
+                <span>صالونات تجميل</span>
+            </a>
 
-    <div class="logo">
+            <a href="#" class="service-card">
+                <i class="fa-solid fa-mobile-screen-button"></i>
+                <span>موبايلات واكسسوارات</span>
+            </a>
+            <a href="#" class="service-card">
+                <i class="fa-solid fa-house-user"></i>
+                <span>ميزانية البيت والأسرة</span>
+            </a>
+            <a href="#" class="service-card">
+                <i class="fa-solid fa-laptop"></i>
+                <span>الإلكترونيات</span>
+            </a>
+            <a href="#" class="service-card">
+                <i class="fa-solid fa-couch"></i>
+                <span>أثاث وديكور</span>
+            </a>
+            <a href="#" class="service-card">
+                <i class="fa-solid fa-seedling"></i>
+                <span>لاندسكيب ونجيل صناعي</span>
+            </a>
+        </div>
 
-      <svg class="logo-symbol" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <linearGradient id="logoGrad" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stop-color="#e83b94"/>
-            <stop offset="1" stop-color="#64218b"/>
-          </linearGradient>
-        </defs>
+        <!-- قسم الأزرار والأسفل -->
+        <div class="action-section">
+            <a href="#" class="start-btn">
+                <span>البدء الآن</span>
+                <i class="fa-solid fa-arrow-left"></i>
+            </a>
+            
+            <div class="divider">
+                <span>أو</span>
+            </div>
 
-        <path d="M12 45 L50 12 L88 45" fill="none"
-              stroke="url(#logoGrad)" stroke-width="8"
-              stroke-linecap="round" stroke-linejoin="round"/>
+            <div class="footer-links">
+                <a href="#" class="sub-link">
+                    <i class="fa-solid fa-shield-check"></i>
+                    الأحكام والشروط
+                </a>
+                <a href="#" class="sub-link">
+                    <i class="fa-solid fa-lock"></i>
+                    سياسة الخصوصية
+                </a>
+            </div>
 
-        <path d="M24 42 V76 Q24 83 32 83 H68 Q76 83 76 76 V42"
-              fill="none" stroke="#63228a" stroke-width="7"
-              stroke-linecap="round"/>
-
-        <path d="M50 69 C36 59 34 48 42 44
-                 C47 41 50 46 50 46
-                 C50 46 56 40 62 45
-                 C70 53 59 63 50 69Z"
-              fill="#ed3c91"/>
-
-        <path d="M13 72 Q27 56 42 67 M87 72 Q73 56 58 67"
-              fill="none" stroke="#23bfb7" stroke-width="5"
-              stroke-linecap="round"/>
-      </svg>
-
-      <div class="logo-text">معا<span>ك</span></div>
-
+            <div class="footer-brand-text">
+                معاك ... دائمًا وأبدًا <i class="fa-solid fa-heart" style="color: #ff2a85;"></i>
+            </div>
+        </div>
     </div>
-
-    <div class="tagline">كل اللي تحتاجه.. معاك</div>
-    <div class="subtitle">من أول اليوم لآخره</div>
-
-  </header>
-
-
-  <!-- Cairo and family illustration -->
-
-  <section class="hero" aria-label="معاك مع الأسرة المصرية">
-
-    <svg viewBox="0 0 420 210" preserveAspectRatio="xMidYMid slice"
-         xmlns="http://www.w3.org/2000/svg">
-
-      <defs>
-        <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stop-color="#d9c9ff"/>
-          <stop offset="1" stop-color="#ffd7e9"/>
-        </linearGradient>
-        <linearGradient id="clothes" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stop-color="#8736a5"/>
-          <stop offset="1" stop-color="#d33c91"/>
-        </linearGradient>
-      </defs>
-
-      <rect width="420" height="210" fill="url(#sky)"/>
-
-      <circle cx="350" cy="40" r="23" fill="#fff4c9" opacity=".75"/>
-
-      <!-- Clouds -->
-      <g fill="#fff" opacity=".55">
-        <ellipse cx="75" cy="37" rx="35" ry="10"/>
-        <ellipse cx="95" cy="30" rx="24" ry="13"/>
-        <ellipse cx="265" cy="28" rx="30" ry="9"/>
-      </g>
-
-      <!-- Cairo buildings -->
-      <g fill="#a995c6" opacity=".75">
-        <rect x="0" y="100" width="40" height="70"/>
-        <rect x="38" y="88" width="31" height="82"/>
-        <rect x="70" y="110" width="37" height="60"/>
-        <rect x="314" y="98" width="35" height="72"/>
-        <rect x="350" y="82" width="32" height="88"/>
-        <rect x="383" y="107" width="37" height="63"/>
-      </g>
-
-      <!-- Pyramids -->
-      <path d="M8 166 L61 96 L111 166Z" fill="#c49b75"/>
-      <path d="M61 96 L61 166 L111 166Z" fill="#a98266"/>
-      <path d="M72 166 L109 118 L144 166Z" fill="#d1a982"/>
-
-      <!-- Cairo Tower -->
-      <g stroke="#9275b3" fill="none" stroke-width="4">
-        <path d="M355 167 L367 70 L379 167"/>
-        <path d="M359 112 H375"/>
-        <path d="M362 92 H372"/>
-        <path d="M356 72 Q367 59 378 72"/>
-      </g>
-
-      <!-- Ground -->
-      <path d="M0 171 Q120 160 210 172 Q310 157 420 169 V210 H0Z"
-            fill="#d8a9c8"/>
-
-      <!-- Family: father -->
-      <g>
-        <circle cx="163" cy="102" r="19" fill="#b8795e"/>
-        <path d="M145 100 Q144 77 164 79 Q183 81 181 100 Q171 89 145 100"
-              fill="#332039"/>
-        <path d="M133 126 Q163 111 190 128 L203 210 H119Z"
-              fill="#543078"/>
-        <path d="M149 120 Q164 133 178 120" fill="none"
-              stroke="#f1c9b4" stroke-width="4"/>
-      </g>
-
-      <!-- Mother -->
-      <g>
-        <path d="M202 103 Q202 68 229 67 Q256 69 258 104
-                 L250 128 H210Z" fill="#e94d9a"/>
-        <circle cx="230" cy="105" r="17" fill="#c98770"/>
-        <path d="M212 101 Q210 82 230 83 Q250 84 249 103
-                 L245 92 Q230 86 214 98Z" fill="#9b398e"/>
-        <path d="M198 128 Q229 112 259 130 L270 210 H190Z"
-              fill="url(#clothes)"/>
-        <path d="M216 120 Q230 130 244 120"
-              fill="none" stroke="#f4d1c5" stroke-width="3"/>
-      </g>
-
-      <!-- Son -->
-      <g>
-        <circle cx="112" cy="139" r="13" fill="#c98770"/>
-        <path d="M99 136 Q100 120 113 123 Q126 124 125 138
-                 Q113 130 99 136" fill="#39263d"/>
-        <path d="M96 154 Q112 146 127 155 L136 210 H88Z"
-              fill="#25aeb2"/>
-      </g>
-
-      <!-- Daughter -->
-      <g>
-        <circle cx="287" cy="139" r="13" fill="#c98770"/>
-        <path d="M274 139 Q271 122 287 123 Q304 122 301 142
-                 Q290 129 274 139" fill="#5b315f"/>
-        <path d="M270 154 Q287 146 304 155 L315 210 H259Z"
-              fill="#f1a4c9"/>
-      </g>
-
-      <!-- Decorative sparkle -->
-      <g fill="#fff">
-        <path d="M128 49 L131 58 L140 61 L131 64 L128 73 L125 64 L116 61 L125 58Z"/>
-        <path d="M302 52 L304 59 L311 61 L304 64 L302 71 L300 64 L293 61 L300 59Z"/>
-      </g>
-
-    </svg>
-
-  </section>
-
-
-  <!-- Services -->
-
-  <section class="services-wrap">
-
-    <div class="services-title">كل خدماتك في مكان واحد</div>
-
-    <div class="services">
-
-      <div class="service">
-        <div class="service-icon">✈️</div>
-        <div class="service-name">السفر والفنادق</div>
-      </div>
-
-      <div class="service">
-        <div class="service-icon">🛍️</div>
-        <div class="service-name">التسوق وقارن الأسعار</div>
-      </div>
-
-      <div class="service">
-        <div class="service-icon">👨‍👩‍👧‍👦</div>
-        <div class="service-name">الأطفال والأسرة</div>
-      </div>
-
-      <div class="service">
-        <div class="service-icon">💇‍♀️</div>
-        <div class="service-name">صالونات التجميل</div>
-      </div>
-
-      <div class="service">
-        <div class="service-icon">🏡</div>
-        <div class="service-name">المنزل والديكور</div>
-      </div>
-
-      <div class="service">
-        <div class="service-icon">📱</div>
-        <div class="service-name">الموبايلات والإلكترونيات</div>
-      </div>
-
-      <div class="service">
-        <div class="service-icon">🛡️</div>
-        <div class="service-name">حماية المستهلك</div>
-      </div>
-
-      <div class="service">
-        <div class="service-icon">🤖</div>
-        <div class="service-name">المساعد الذكي في كل مكان</div>
-      </div>
-
-    </div>
-
-  </section>
-
-
-  <!-- Registration actions -->
-
-  <section class="actions">
-
-    <a class="start-btn" href="signup.html">
-      <span class="arrow">←</span>
-      <span>البدء الآن</span>
-    </a>
-
-    <div class="or">أو</div>
-
-    <a class="google-btn" href="signup.html">
-      <span class="google-icon">G</span>
-      <span>المتابعة باستخدام Google</span>
-    </a>
-
-    <div class="legal">
-      <a href="privacy.html">سياسة الخصوصية</a>
-      |
-      <a href="terms.html">الشروط والأحكام</a>
-    </div>
-
-    <div class="footer">
-      معاك .. دائمًا وأبدًا <span>♥ ♥</span>
-    </div>
-
-  </section>
-
-
-  <!-- Bottom color waves -->
-
-  <div class="waves">
-    <div class="wave one"></div>
-    <div class="wave two"></div>
-    <div class="wave three"></div>
-  </div>
-
-</main>
 
 </body>
   </html>
