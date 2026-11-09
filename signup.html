@@ -15,9 +15,9 @@
             --secondary-pink: #e91e63;
             --accent-teal: #00bcd4;
             --bg-color: #ffffff;
-            --card-bg: #f8f9fa;
-            --card-border: #e0e0e0;
-            --text-color: #212121;
+            --card-bg: #fdfdfd;
+            --card-border: #eaeaea;
+            --text-color: #1a1a1a;
             --text-muted: #666666;
             --error-color: #d32f2f;
         }
@@ -46,38 +46,30 @@
             border: 1px solid var(--card-border);
             border-radius: 24px;
             padding: 30px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.06);
         }
 
-        /* تنسيق الشعار والكلمة تحته */
+        /* تنسيق الشعار الحقيقي والكلمة تحته */
         .logo-section {
             text-align: center;
             margin-bottom: 20px;
         }
 
-        .logo-box {
-            display: inline-flex;
-            flex-direction: column;
-            align-items: center;
-            background: linear-gradient(135deg, #7b1fa2, #4a148c);
-            padding: 12px 25px;
-            border-radius: 16px;
-            box-shadow: 0 4px 15px rgba(123, 31, 162, 0.3);
+        .logo-section img {
+            width: 85px;
+            height: 85px;
+            border-radius: 20px;
+            object-fit: cover;
+            box-shadow: 0 4px 12px rgba(123, 31, 162, 0.2);
+            border: 2px solid var(--primary-purple);
+            margin-bottom: 8px;
         }
 
-        .logo-brand {
-            color: #ffffff;
-            font-size: 22px;
-            font-weight: 900;
-            letter-spacing: 1px;
-        }
-
-        .logo-subtitle {
-            color: #e1bee7;
-            font-size: 11px;
-            font-weight: 600;
-            margin-top: 2px;
-            white-space: nowrap;
+        .logo-subtitle-text {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--primary-purple);
+            letter-spacing: 0.5px;
         }
 
         /* عنوان الشاشة */
@@ -87,20 +79,20 @@
         }
 
         .header-section h1 {
-            font-size: 22px;
+            font-size: 21px;
             font-weight: 700;
             margin-bottom: 6px;
             color: var(--primary-purple);
         }
 
         .header-section p {
-            font-size: 13px;
+            font-size: 12.5px;
             color: var(--text-muted);
             line-height: 1.5;
         }
 
         .form-group {
-            margin-bottom: 18px;
+            margin-bottom: 16px;
             position: relative;
         }
 
@@ -127,8 +119,8 @@
 
         .form-control {
             width: 100%;
-            background: #ffffff;
-            border: 1px solid #ccc;
+            background: #f9f9f9;
+            border: 1px solid #dcdcdc;
             border-radius: 12px;
             padding: 12px 40px 12px 15px;
             color: var(--text-color);
@@ -143,7 +135,8 @@
         .form-control:focus {
             outline: none;
             border-color: var(--primary-purple);
-            box-shadow: 0 0 8px rgba(123, 31, 162, 0.2);
+            background: #ffffff;
+            box-shadow: 0 0 8px rgba(123, 31, 162, 0.15);
         }
 
         .phone-group {
@@ -152,8 +145,8 @@
         }
 
         .country-select {
-            background: #ffffff;
-            border: 1px solid #ccc;
+            background: #f9f9f9;
+            border: 1px solid #dcdcdc;
             border-radius: 12px;
             color: var(--text-color);
             padding: 0 12px;
@@ -165,6 +158,7 @@
 
         .country-select:focus {
             border-color: var(--primary-purple);
+            background: #ffffff;
         }
 
         .toggle-password {
@@ -189,6 +183,7 @@
 
         .form-group.error .form-control {
             border-color: var(--error-color);
+            background: #fff8f8;
         }
 
         .form-group.error .error-msg {
@@ -196,14 +191,14 @@
         }
 
         .trial-notice {
-            background: rgba(123, 31, 162, 0.08);
+            background: rgba(123, 31, 162, 0.05);
             border: 1px dashed var(--primary-purple);
             border-radius: 10px;
             padding: 10px 12px;
             font-size: 12px;
             text-align: center;
             color: var(--primary-purple);
-            margin-bottom: 18px;
+            margin-bottom: 16px;
             font-weight: 600;
         }
 
@@ -211,7 +206,7 @@
             display: flex;
             align-items: flex-start;
             gap: 10px;
-            margin-bottom: 20px;
+            margin-bottom: 18px;
             font-size: 12px;
         }
 
@@ -249,7 +244,7 @@
             font-weight: 700;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(233, 30, 99, 0.3);
+            box-shadow: 0 4px 15px rgba(233, 30, 99, 0.25);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -259,7 +254,7 @@
         .btn-submit:hover {
             opacity: 0.95;
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(233, 30, 99, 0.5);
+            box-shadow: 0 6px 20px rgba(233, 30, 99, 0.4);
         }
 
         .btn-submit:disabled {
@@ -270,7 +265,7 @@
 
         .footer-text {
             text-align: center;
-            margin-top: 20px;
+            margin-top: 18px;
             font-size: 13px;
             color: var(--text-muted);
         }
@@ -303,12 +298,10 @@
 <body>
 
     <div class="signup-container">
-        <!-- شعار التطبيق مع الكلمة تحته -->
+        <!-- شعار التطبيق الحقيقي والكلمة تحته -->
         <div class="logo-section">
-            <div class="logo-box">
-                <span class="logo-brand">M3AK</span>
-                <span class="logo-subtitle">معاك من أول اليوم لآخره</span>
-            </div>
+            <img src="1000050393.png" alt="شعار تطبيق M3AK">
+            <div class="logo-subtitle-text">معاك من أول اليوم لآخره</div>
         </div>
 
         <!-- عنوان الشاشة -->
@@ -394,7 +387,7 @@
                         أوافق على <a href="terms.html" target="_blank">الشروط والأحكام</a> و<a href="privacy.html" target="_blank">سياسة الخصوصية</a> الخاصة بتطبيق معاك.
                     </label>
                 </div>
-                <div class="error-msg" id="termsError" style="margin-top: -15px; margin-bottom: 10px;">يجب الموافقة على الشروط والأحكام للمتابعة.</div>
+                <div class="error-msg" id="termsError" style="margin-top: -12px; margin-bottom: 8px;">يجب الموافقة على الشروط والأحكام للمتابعة.</div>
             </div>
 
             <!-- الزر الرئيسي -->
@@ -485,4 +478,4 @@
         });
     </script>
 </body>
-</html>
+        </html>
