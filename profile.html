@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#190824">
+<title>الملف الشخصي | معاك</title>
+
+<style>
+:root {
+  --bg:#12051b;
+  --bg2:#1d0a2a;
+  --card:#281235;
+  --purple:#8e35b5;
+  --pink:#e83d91;
+  --cyan:#28d6cb;
+  --white:#fff;
+  --muted:#bcaec6;
+  --border:rgba(255,255,255,.09);
+}
+
+* {
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+
+body {
+  font-family:Tahoma,Arial,sans-serif;
+  background:
+    radial-gradient(circle at 85% 0%,#45205c 0,transparent 35%),
+    linear-gradient(160deg,#190824,#100416 75%);
+  color:var(--white);
+  min-height:100vh;
+  padding-bottom:100px;
+}
+
+button {
+  font-family:inherit;
+  cursor:pointer;
+}
+
+.container {
+  width:100%;
+  max-width:520px;
+  margin:auto;
+  padding:18px 16px 30px;
+}
+
+/* HEADER */
+
+.header {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:25px;
+}
+
+.brand {
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.logo {
+  width:48px;
+  height:48px;
+  border-radius:16px;
+  background:linear-gradient(135deg,#a33bd0,#e83d91);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:25px;
+  font-weight:bold;
+  box-shadow:0 5px 20px #9d35b555;
+}
+
+.brand-name {
+  font-size:23px;
+  font-weight:900;
+  letter-spacing:1px;
+}
+
+.brand-caption {
+  color:var(--muted);
+  font-size:11px;
+  margin-top:3px;
+}
+
+.header-icon {
+  width:43px;
+  height:43px;
+  border:1px solid var(--border);
+  background:#ffffff0b;
+  border-radius:14px;
+  color:white;
+  font-size:19px;
+}
+
+/* PAGE TITLE */
+
+.page-title {
+  margin-bottom:20px;
+}
+
+.page-title h1 {
+  font-size:25px;
+  margin-bottom:7px;
+}
+
+.page-title p {
+  font-size:13px;
+  color:var(--muted);
+  line-height:1.7;
+}
+
+/* PROFILE CARD */
+
+.profile-card {
+  position:relative;
+  overflow:hidden;
+  padding:22px 18px;
+  border-radius:23px;
+  background:linear-gradient(135deg,#56236e,#29133d 65%,#34152f);
+  border:1px solid #ffffff16;
+  margin-bottom:18px;
+}
+
+.profile-card:after {
+  content:"";
+  position:absolute;
+  width:170px;
+  height:170px;
+  border-radius:50%;
+  background:#e83d911c;
+  left:-55px;
+  top:-75px;
+}
+
+.profile-main {
+  position:relative;
+  z-index:1;
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+
+.avatar {
+  width:68px;
+  height:68px;
+  flex-shrink:0;
+  border-radius:22px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:30px;
+  background:linear-gradient(135deg,#e83d91,#8236b8);
+  border:2px solid #ffffff50;
+}
+
+.profile-info h2 {
+  font-size:18px;
+  margin-bottom:7px;
+}
+
+.profile-info p {
+  font-size:12px;
+  color:#e2d3ec;
+  direction:ltr;
+  text-align:right;
+}
+
+.account-status {
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  background:#28d6cb20;
+  color:#7ff5e8;
+  border:1px solid #28d6cb45;
+  border-radius:30px;
+  padding:6px 10px;
+  font-size:11px;
+  margin-top:10px;
+}
+
+/* SUBSCRIPTION */
+
+.subscription {
+  padding:18px;
+  border-radius:21px;
+  background:linear-gradient(135deg,#291238,#20102d);
+  border:1px solid #a53acb44;
+  margin-bottom:23px;
+}
+
+.section-heading {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:16px;
+}
+
+.section-heading h3 {
+  font-size:16px;
+}
+
+.plan-label {
+  color:#ffd5f0;
+  background:#e83d9124;
+  border:1px solid #e83d9155;
+  padding:6px 10px;
+  border-radius:20px;
+  font-size:11px;
+}
+
+.plan-details {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
+.plan-box {
+  background:#ffffff09;
+  padding:12px;
+  border-radius:14px;
+}
+
+.plan-box small {
+  display:block;
+  color:var(--muted);
+  font-size:11px;
+  margin-bottom:8px;
+}
+
+.plan-box strong {
+  font-size:14px;
+  color:white;
+}
+
+.plan-progress {
+  margin-top:16px;
+}
+
+.progress-caption {
+  display:flex;
+  justify-content:space-between;
+  color:var(--muted);
+  font-size:11px;
+  margin-bottom:8px;
+}
+
+.progress-track {
+  height:7px;
+  background:#ffffff16;
+  border-radius:20px;
+  overflow:hidden;
+}
+
+.progress-fill {
+  width:0%;
+  height:100%;
+  background:linear-gradient(90deg,var(--purple),var(--pink));
+  border-radius:20px;
+}
+
+.upgrade-btn {
+  width:100%;
+  margin-top:17px;
+  border:0;
+  padding:13px;
+  color:white;
+  font-size:13px;
+  font-weight:bold;
+  border-radius:13px;
+  background:linear-gradient(90deg,#8736b7,#e83d91);
+}
+
+/* SECTIONS */
+
+.group {
+  margin-bottom:23px;
+}
+
+.group-title {
+  color:#cbb8d5;
+  font-size:13px;
+  margin:0 4px 11px;
+}
+
+.menu-card {
+  background:linear-gradient(145deg,#281334,#21102d);
+  border:1px solid var(--border);
+  border-radius:19px;
+  overflow:hidden;
+}
+
+.menu-item {
+  display:flex;
+  align-items:center;
+  gap:13px;
+  padding:15px 14px;
+  min-height:70px;
+  border-bottom:1px solid #ffffff0b;
+  text-decoration:none;
+  color:white;
+  background:transparent;
+  width:100%;
+  text-align:right;
+}
+
+.menu-item:last-child {
+  border-bottom:0;
+}
+
+.menu-item:active {
+  background:#ffffff0a;
+}
+
+.menu-icon {
+  width:42px;
+  height:42px;
+  border-radius:14px;
+  flex-shrink:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:19px;
+  background:#963cbb25;
+  border:1px solid #a64acb30;
+}
+
+.menu-icon.cyan {
+  background:#28d6cb16;
+  border-color:#28d6cb35;
+}
+
+.menu-icon.pink {
+  background:#e83d9118;
+  border-color:#e83d9135;
+}
+
+.menu-text {
+  flex:1;
+}
+
+.menu-text strong {
+  display:block;
+  font-size:13px;
+  margin-bottom:6px;
+}
+
+.menu-text small {
+  display:block;
+  font-size:11px;
+  color:var(--muted);
+}
+
+.arrow {
+  color:#9e8aa9;
+  font-size:20px;
+}
+
+/* LOGOUT */
+
+.logout-btn {
+  width:100%;
+  padding:15px;
+  border:1px solid #e83d9140;
+  border-radius:15px;
+  background:#e83d9110;
+  color:#ff80b8;
+  font-size:14px;
+  font-weight:bold;
+  margin:5px 0 20px;
+}
+
+.version {
+  text-align:center;
+  font-size:10px;
+  color:#887695;
+  padding:8px;
+}
+
+/* BOTTOM NAV */
+
+.bottom-nav {
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  max-width:520px;
+  margin:auto;
+  z-index:100;
+  display:flex;
+  justify-content:space-around;
+  align-items:center;
+  padding:11px 5px calc(11px + env(safe-area-inset-bottom));
+  background:rgba(27,10,39,.96);
+  border-top:1px solid #ffffff15;
+  backdrop-filter:blur(18px);
+}
+
+.nav-item {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:5px;
+  color:#a999b4;
+  text-decoration:none;
+  font-size:10px;
+  min-width:55px;
+}
+
+.nav-item span:first-child {
+  font-size:21px;
+}
+
+.nav-item.active {
+  color:#f16ab0;
+}
+
+.nav-item.active span:first-child {
+  filter:drop-shadow(0 0 7px #e83d91);
+}
+
+/* NOTICE */
+
+.notice {
+  display:none;
+  position:fixed;
+  bottom:90px;
+  left:16px;
+  right:16px;
+  max-width:480px;
+  margin:auto;
+  z-index:200;
+  background:#34203e;
+  border:1px solid #a84acb70;
+  color:white;
+  border-radius:14px;
+  padding:14px;
+  text-align:center;
+  font-size:13px;
+  box-shadow:0 10px 35px #0008;
+}
+
+@media(min-width:600px) {
+  body {
+    padding-top:15px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <header class="header">
+    <div class="brand">
+      <div class="logo">M</div>
+      <div>
+        <div class="brand-name">M3AK</div>
+        <div class="brand-caption">كل اللي تحتاجه.. معاك</div>
+      </div>
+    </div>
+
+    <button class="header-icon"
+      onclick="showNotice('إعدادات الحساب سيتم تفعيلها بعد الربط')">
+      ⚙
+    </button>
+  </header>
+
+  <section class="page-title">
+    <h1>الملف الشخصي</h1>
+    <p>حسابك وخدماتك واشتراكك.. كل حاجة في مكان واحد.</p>
+  </section>
+
+  <!-- USER PROFILE -->
+
+  <section class="profile-card">
+    <div class="profile-main">
+      <div class="avatar">👤</div>
+
+      <div class="profile-info">
+        <h2 id="userName">بيانات المستخدم</h2>
+        <p id="userEmail">لم تُحمّل بيانات الحساب بعد</p>
+
+        <div class="account-status">
+          <span>●</span>
+          <span>حالة الحساب ستظهر هنا</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SUBSCRIPTION -->
+
+  <section class="subscription">
+
+    <div class="section-heading">
+      <h3>اشتراك معاك</h3>
+      <span class="plan-label">الباقة الحالية</span>
+    </div>
+
+    <div class="plan-details">
+
+      <div class="plan-box">
+        <small>اسم الباقة</small>
+        <strong id="planName">لم يتم تحميلها</strong>
+      </div>
+
+      <div class="plan-box">
+        <small>حالة الاشتراك</small>
+        <strong id="planStatus">غير محددة</strong>
+      </div>
+
+      <div class="plan-box">
+        <small>تاريخ البداية</small>
+        <strong>غير متاح</strong>
+      </div>
+
+      <div class="plan-box">
+        <small>تاريخ التجديد</small>
+        <strong>غير متاح</strong>
+      </div>
+
+    </div>
+
+    <div class="plan-progress">
+      <div class="progress-caption">
+        <span>استهلاك حدود الباقة</span>
+        <span>بانتظار بيانات الاستخدام</span>
+      </div>
+
+      <div class="progress-track">
+        <div class="progress-fill"></div>
+      </div>
+    </div>
+
+    <button class="upgrade-btn"
+      onclick="showNotice('صفحة الباقات والدفع سيتم ربطها بنظام الاشتراكات')">
+      استكشف الباقات والاشتراكات
+    </button>
+
+  </section>
+
+  <!-- ACCOUNT -->
+
+  <section class="group">
+
+    <div class="group-title">إدارة الحساب</div>
+
+    <div class="menu-card">
+
+      <button class="menu-item" onclick="showNotice('سيتم ربط تعديل البيانات بالحساب')">
+        <div class="menu-icon">👤</div>
+        <div class="menu-text">
+          <strong>البيانات الشخصية</strong>
+          <small>الاسم وبيانات التواصل</small>
+        </div>
+        <span class="arrow">‹</span>
+      </button>
+
+      <button class="menu-item" onclick="showNotice('سيتم ربط تغيير كلمة المرور بنظام الأمان')">
+        <div class="menu-icon pink">🔐</div>
+        <div class="menu-text">
+          <strong>كلمة المرور والأمان</strong>
+          <small>حماية حسابك وتحديث كلمة المرور</small>
+        </div>
+        <span class="arrow">‹</span>
+      </button>
+
+      <button class="menu-item" onclick="showNotice('إدارة الأجهزة ستظهر بعد ربط الجلسات')">
+        <div class="menu-icon cyan">📱</div>
+        <div class="menu-text">
+          <strong>الأجهزة المرتبطة</strong>
+          <small>إدارة الأجهزة والجلسات النشطة</small>
+        </div>
+        <span class="arrow">‹</span>
+      </button>
+
+    </div>
+  </section>
+
+  <!-- SERVICES -->
+
+  <section class="group">
+
+    <div class="group-title">خدماتك وطلباتك</div>
+
+    <div class="menu-card">
+
+      <a href="orders.html" class="menu-item">
+        <div class="menu-icon">📦</div>
+        <div class="menu-text">
+          <strong>طلباتي</strong>
+          <small>متابعة الطلبات والخدمات السابقة</small>
+        </div>
+        <span class="arrow">‹</span>
+      </a>
+
+      <button class="menu-item" onclick="showNotice('سجل المشتريات سيتم ربطه بالنظام')">
+        <div class="menu-icon cyan">🛡️</div>
+        <div class="menu-text">
+          <strong>حماية مشترياتي</strong>
+          <small>متابعة عمليات الشراء والحماية</small>
+        </div>
+        <span class="arrow">‹</span>
+      </button>
+
+      <button class="menu-item" onclick="showNotice('المحفظة ستُفعّل وفق نظام المدفوعات')">
+        <div class="menu-icon pink">💳</div>
+        <div class="menu-text">
+          <strong>المدفوعات والفواتير</strong>
+          <small>سجل المدفوعات والفواتير</small>
+        </div>
+        <span class="arrow">‹</span>
+      </button>
+
+    </div>
+  </section>
+
+  <!-- SUPPORT -->
+
+  <section class="group">
+
+    <div class="group-title">المساعدة والدعم</div>
+
+    <div class="menu-card">
+
+      <button class="menu-item" onclick="showNotice('مركز المساعدة سيتم تفعيله')">
+        <div class="menu-icon cyan">🎧</div>
+        <div class="menu-text">
+          <strong>مركز المساعدة</strong>
+          <small>نحن هنا لمساعدتك</small>
+        </div>
+        <span class="arrow">‹</span>
+      </button>
+
+      <button class="menu-item" onclick="showNotice('سيتم ربط الدعم الفني')">
+        <div class="menu-icon">💬</div>
+        <div class="menu-text">
+          <strong>تواصل معنا</strong>
+          <small>الاستفسارات والمقترحات والشكاوى</small>
+        </div>
+        <span class="arrow">‹</span>
+      </button>
+
+    </div>
+  </section>
+
+  <!-- PRIVACY -->
+
+  <section class="group">
+
+    <div class="group-title">القانونية والخصوصية</div>
+
+    <div class="menu-card">
+
+      <a href="terms.html" class="menu-item">
+        <div class="menu-icon">📄</div>
+        <div class="menu-text">
+          <strong>الشروط والأحكام</strong>
+          <small>شروط استخدام تطبيق معاك</small>
+        </div>
+        <span class="arrow">‹</span>
+      </a>
+
+      <a href="privacy.html" class="menu-item">
+        <div class="menu-icon cyan">🔒</div>
+        <div class="menu-text">
+          <strong>سياسة الخصوصية</strong>
+          <small>كيف نحافظ على بياناتك</small>
+        </div>
+        <span class="arrow">‹</span>
+      </a>
+
+    </div>
+  </section>
+
+  <button class="logout-btn" onclick="logout()">
+    تسجيل الخروج
+  </button>
+
+  <div class="version">
+    M3AK · معاك في كل خطوة
+    <br>
+    الإصدار الأولي
+  </div>
+
+</div>
+
+<!-- BOTTOM NAV -->
+
+<nav class="bottom-nav">
+
+  <a href="home.html" class="nav-item">
+    <span>⌂</span>
+    <span>الرئيسية</span>
+  </a>
+
+  <a href="orders.html" class="nav-item">
+    <span>▣</span>
+    <span>طلباتي</span>
+  </a>
+
+  <a href="assistant.html" class="nav-item">
+    <span>✦</span>
+    <span>المساعد</span>
+  </a>
+
+  <a href="notifications.html" class="nav-item">
+    <span>♧</span>
+    <span>الإشعارات</span>
+  </a>
+
+  <a href="profile.html" class="nav-item active">
+    <span>◉</span>
+    <span>حسابي</span>
+  </a>
+
+</nav>
+
+<div class="notice" id="notice"></div>
+
+<script>
+
+function showNotice(message) {
+  const box = document.getElementById("notice");
+
+  box.textContent = message;
+  box.style.display = "block";
+
+  clearTimeout(window.noticeTimer);
+
+  window.noticeTimer = setTimeout(() => {
+    box.style.display = "none";
+  }, 3000);
+}
+
+function logout() {
+
+  const confirmed = confirm("هل تريد تسجيل الخروج من حسابك؟");
+
+  if (!confirmed) return;
+
+  /*
+    لا يتم مسح بيانات الجلسة أو التوكنات هنا،
+    لأن آلية المصادقة النهائية لم تُربط بعد.
+  */
+
+  showNotice("سيتم تفعيل تسجيل الخروج بعد ربط نظام الحسابات.");
+}
+
+</script>
+
+</body>
+</html>
