@@ -712,6 +712,615 @@ EXECUTE FUNCTION set_updated_at();
 
 DROP TRIGGER IF EXISTS payment_transactions_updated_at ON payment_transactions;
 CREATE TRIGGER payment_transactions_updated_at
+    -- =========================================================
+-- M3AK DATABASE SCHEMA - PHASE 2
+-- Merchants, Catalog, Offers, Messages, Budget, Protection
+-- =========================================================
+
+BEGIN;
+
+-- =========================================================
+-- 18. USER ROLES
+-- =========================================================
+
+ALTER TABLE users
+DROP CONSTRAINT IF EXISTS users_role_check;
+
+ALTER TABLE users
+ADD CONSTRAINT users_role_check
+CHECK (role IN ('user', 'admin', 'support', 'merchant'));
+
+
+-- =========================================================
+-- 19. MERCHANTS
+-- الإدارة تنشئ وتدير بيانات المتاجر
+-- =========================================================
+
+CREATE TABLE IF NOT EXISTS merchants (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    user_id UUID NOT NULL UNIQUE
+        REFERENCES users(id) ON DELETE RESTRICT,
+
+    business_name VARCHAR(200) NOT NULL,
+    business_type VARCHAR(100),
+
+    description TEXT,
+    phone VARCHAR(30),
+    email VARCHAR(255),
+
+    address TEXT,
+    city VARCHAR(100),
+    latitude NUMERIC(10,7),
+    longitude NUMERIC(10,7),
+
+    logo_url TEXT,
+    cover_image_url TEXT,
+
+    status VARCHAR(20) NOT NULL DEFAULT 'pending'
+        CHECK (status IN ('pending', 'active', 'suspended', 'closed')),
+
+    created_by_admin UUID REFERENCES users(id),
+    is_visible BOOLEAN NOT NULL DEFAULT FALSE,
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS merchants_status_idx
+ON merchants(status);
+
+CREATE INDEX IF NOT EXISTS merchants_city_idx
+ON merchants(city);
+
+
+-- =========================================================
+-- 20. MERCHANT SUBSCRIPTION PLANS
+-- الأسعار تضاف لاحقًا بواسطة الإدارة بعد اعتمادها
+-- =========================================================
+
+CREATE TABLE IF NOT EXISTS merchant_plans (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    code VARCHAR(30) NOT NULL UNIQUE,
+    name VARCHAR(100) NOT NULL,
+
+    monthly_price NUMERIC(10,2),
+    quarterly_price NUMERIC(10,2),
+    semiannual_price NUMERIC(10,2),
+    annual_price NUMERIC(10,2),
+
+    description TEXT,
+    features JSONB NOT NULL DEFAULT '{}'::JSONB,
+
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT merchant_plan_prices_nonnegative CHECK (
+        (monthly_price IS NULL OR monthly_price >= 0)
+        AND (quarterly_price IS NULL OR quarterly_price >= 0)
+        AND (semiannual_price IS NULL OR semiannual_price >= 0)
+        AND (annual_price IS NULL OR annual_price >= 0)
+    )
+);
+
+
+-- =========================================================
+-- 21. MERCHANT SUBSCRIPTIONS
+-- شهر مجاني عند بداية التعاقد
+-- =========================================================
+
+CREATE TABLE IF NOT EXISTS merchant_subscriptions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    merchant_id UUID NOT NULL
+        REFERENCES merchants(id) ON DELETE RESTRICT,
+
+    plan_id UUID REFERENCES merchant_plans(id),
+
+    billing_cycle VARCHAR(20) NOT NULL DEFAULT 'monthly'
+        CHECK (billing_cycle IN (
+            'monthly', 'quarterly', 'semiannual', 'annual', 'free_trial'
+        )),
+
+    status VARCHAR(20) NOT NULL DEFAULT 'trial'
+        CHECK (status IN (
+            'trial', 'active', 'expired', 'suspended', 'cancelled'
+        )),
+
+    amount NUMERIC(10,2) NOT NULL DEFAULT 0,
+    currency VARCHAR(10) NOT NULL DEFAULT 'EGP',
+
+    started_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    ends_at TIMESTAMPTZ NOT NULL DEFAULT (NOW() + INTERVAL '30 days'),
+
+    reminder_sent_at TIMESTAMPTZ,
+    renewed_at TIMESTAMPTZ,
+
+    payment_method VARCHAR(50),
+    auto_renew BOOLEAN NOT NULL DEFAULT FALSE,
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT merchant_subscription_dates CHECK (ends_at > started_at),
+    CONSTRAINT merchant_subscription_amount CHECK (amount >= 0)
+);
+
+CREATE INDEX IF NOT EXISTS merchant_subscriptions_merchant_idx
+ON merchant_subscriptions(merchant_id);
+
+CREATE INDEX IF NOT EXISTS merchant_subscriptions_expiry_idx
+ON merchant_subscriptions(ends_at, status);
+
+
+-- =========================================================
+-- 22. CATALOG ITEMS
+-- المنتجات والخدمات التي تتحكم بها الإدارة فقط
+-- =========================================================
+
+CREATE TABLE IF NOT EXISTS catalog_items (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    merchant_id UUID NOT NULL
+        REFERENCES merchants(id) ON DELETE RESTRICT,
+
+    section_code VARCHAR(60) NOT NULL,
+    category_name VARCHAR(150),
+
+    item_type VARCHAR(20) NOT NULL
+        CHECK (item_type IN ('product', 'service')),
+
+    name VARCHAR(200) NOT NULL,
+    description TEXT,
+
+    specifications JSONB NOT NULL DEFAULT '{}'::JSONB,
+
+    price NUMERIC(10,2),
+    currency VARCHAR(10) NOT NULL DEFAULT 'EGP',
+
+    stock_quantity INTEGER,
+
+    main_image_url TEXT,
+
+    status VARCHAR(20) NOT NULL DEFAULT 'draft'
+        CHECK (status IN ('draft', 'published', 'hidden', 'archived')),
+
+    created_by_admin UUID REFERENCES users(id),
+    updated_by_admin UUID REFERENCES users(id),
+
+    published_at TIMESTAMPTZ,
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT catalog_price_nonnegative CHECK (
+        price IS NULL OR price >= 0
+    ),
+
+    CONSTRAINT catalog_stock_nonnegative CHECK (
+        stock_quantity IS NULL OR stock_quantity >= 0
+    )
+);
+
+CREATE INDEX IF NOT EXISTS catalog_items_merchant_idx
+ON catalog_items(merchant_id);
+
+CREATE INDEX IF NOT EXISTS catalog_items_section_idx
+ON catalog_items(section_code, status);
+
+CREATE INDEX IF NOT EXISTS catalog_items_published_idx
+ON catalog_items(status, published_at DESC);
+
+
+-- =========================================================
+-- 23. CATALOG ITEM IMAGES
+-- =========================================================
+
+CREATE TABLE IF NOT EXISTS catalog_item_images (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    item_id UUID NOT NULL
+        REFERENCES catalog_items(id) ON DELETE CASCADE,
+
+    image_url TEXT NOT NULL,
+    alt_text VARCHAR(250),
+
+    sort_order INTEGER NOT NULL DEFAULT 0,
+    is_primary BOOLEAN NOT NULL DEFAULT FALSE,
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT catalog_image_sort_nonnegative CHECK (sort_order >= 0)
+);
+
+CREATE INDEX IF NOT EXISTS catalog_item_images_item_idx
+ON catalog_item_images(item_id, sort_order);
+
+
+-- =========================================================
+-- 24. OFFERS AND DISCOUNTS
+-- =========================================================
+
+CREATE TABLE IF NOT EXISTS offers (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    merchant_id UUID NOT NULL
+        REFERENCES merchants(id) ON DELETE RESTRICT,
+
+    item_id UUID
+        REFERENCES catalog_items(id) ON DELETE CASCADE,
+
+    title VARCHAR(200) NOT NULL,
+    description TEXT,
+
+    image_url TEXT,
+
+    original_price NUMERIC(10,2) NOT NULL,
+    discounted_price NUMERIC(10,2) NOT NULL,
+
+    discount_percentage NUMERIC(5,2)
+        GENERATED ALWAYS AS (
+            CASE
+                WHEN original_price > 0
+                THEN ROUND(
+                    ((original_price - discounted_price)
+                    / original_price) * 100,
+                    2
+                )
+                ELSE 0
+            END
+        ) STORED,
+
+    starts_at TIMESTAMPTZ NOT NULL,
+    ends_at TIMESTAMPTZ NOT NULL,
+
+    status VARCHAR(20) NOT NULL DEFAULT 'draft'
+        CHECK (status IN ('draft', 'published', 'hidden', 'expired')),
+
+    created_by_admin UUID REFERENCES users(id),
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT offer_prices_valid CHECK (
+        original_price > 0
+        AND discounted_price >= 0
+        AND discounted_price < original_price
+    ),
+
+    CONSTRAINT offer_dates_valid CHECK (ends_at > starts_at)
+);
+
+CREATE INDEX IF NOT EXISTS offers_merchant_idx
+ON offers(merchant_id);
+
+CREATE INDEX IF NOT EXISTS offers_active_idx
+ON offers(status, starts_at, ends_at);
+
+
+-- =========================================================
+-- 25. ORDERS - MERCHANT ASSIGNMENT
+-- =========================================================
+
+ALTER TABLE orders
+ADD COLUMN IF NOT EXISTS merchant_id UUID
+REFERENCES merchants(id) ON DELETE RESTRICT;
+
+ALTER TABLE orders
+ADD COLUMN IF NOT EXISTS customer_notes TEXT;
+
+ALTER TABLE orders
+ADD COLUMN IF NOT EXISTS merchant_notes TEXT;
+
+CREATE INDEX IF NOT EXISTS orders_merchant_idx
+ON orders(merchant_id, created_at DESC);
+
+
+-- =========================================================
+-- 26. ORDER ITEMS
+-- =========================================================
+
+CREATE TABLE IF NOT EXISTS order_items (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    order_id UUID NOT NULL
+        REFERENCES orders(id) ON DELETE CASCADE,
+
+    item_id UUID REFERENCES catalog_items(id) ON DELETE SET NULL,
+
+    item_name VARCHAR(200) NOT NULL,
+    item_type VARCHAR(20) NOT NULL
+        CHECK (item_type IN ('product', 'service')),
+
+    quantity INTEGER NOT NULL DEFAULT 1,
+    unit_price NUMERIC(10,2) NOT NULL,
+    total_price NUMERIC(10,2) NOT NULL,
+
+    item_snapshot JSONB NOT NULL DEFAULT '{}'::JSONB,
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT order_item_quantity_positive CHECK (quantity > 0),
+    CONSTRAINT order_item_prices_valid CHECK (
+        unit_price >= 0 AND total_price >= 0
+    )
+);
+
+CREATE INDEX IF NOT EXISTS order_items_order_idx
+ON order_items(order_id);
+
+
+-- =========================================================
+-- 27. CUSTOMER-MERCHANT CONVERSATIONS
+-- =========================================================
+
+CREATE TABLE IF NOT EXISTS conversations (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    customer_id UUID NOT NULL
+        REFERENCES users(id) ON DELETE RESTRICT,
+
+    merchant_id UUID NOT NULL
+        REFERENCES merchants(id) ON DELETE RESTRICT,
+
+    order_id UUID REFERENCES orders(id) ON DELETE SET NULL,
+
+    status VARCHAR(20) NOT NULL DEFAULT 'open'
+        CHECK (status IN ('open', 'closed', 'archived')),
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    UNIQUE (customer_id, merchant_id, order_id)
+);
+
+CREATE INDEX IF NOT EXISTS conversations_customer_idx
+ON conversations(customer_id, updated_at DESC);
+
+CREATE INDEX IF NOT EXISTS conversations_merchant_idx
+ON conversations(merchant_id, updated_at DESC);
+
+
+-- =========================================================
+-- 28. CONVERSATION MESSAGES
+-- =========================================================
+
+CREATE TABLE IF NOT EXISTS conversation_messages (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    conversation_id UUID NOT NULL
+        REFERENCES conversations(id) ON DELETE CASCADE,
+
+    sender_user_id UUID NOT NULL
+        REFERENCES users(id) ON DELETE RESTRICT,
+
+    message_text TEXT NOT NULL,
+
+    attachment_url TEXT,
+
+    is_read BOOLEAN NOT NULL DEFAULT FALSE,
+    read_at TIMESTAMPTZ,
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT conversation_message_not_empty
+        CHECK (LENGTH(TRIM(message_text)) > 0 OR attachment_url IS NOT NULL)
+);
+
+CREATE INDEX IF NOT EXISTS conversation_messages_conversation_idx
+ON conversation_messages(conversation_id, created_at);
+
+
+-- =========================================================
+-- 29. PERSONAL BUDGET RECORDS
+-- بيانات مالية خاصة بكل مستخدم
+-- =========================================================
+
+CREATE TABLE IF NOT EXISTS budget_records (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    user_id UUID NOT NULL
+        REFERENCES users(id) ON DELETE CASCADE,
+
+    record_type VARCHAR(20) NOT NULL
+        CHECK (record_type IN ('income', 'expense', 'saving')),
+
+    title VARCHAR(200) NOT NULL,
+    category VARCHAR(100),
+
+    amount NUMERIC(12,2) NOT NULL,
+    currency VARCHAR(10) NOT NULL DEFAULT 'EGP',
+
+    record_date DATE NOT NULL DEFAULT CURRENT_DATE,
+
+    notes TEXT,
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT budget_amount_positive CHECK (amount > 0)
+);
+
+CREATE INDEX IF NOT EXISTS budget_records_user_date_idx
+ON budget_records(user_id, record_date DESC);
+
+
+-- =========================================================
+-- 30. PURCHASE PROTECTION
+-- =========================================================
+
+CREATE TABLE IF NOT EXISTS protected_purchases (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    user_id UUID NOT NULL
+        REFERENCES users(id) ON DELETE RESTRICT,
+
+    order_id UUID REFERENCES orders(id) ON DELETE SET NULL,
+
+    merchant_id UUID REFERENCES merchants(id) ON DELETE SET NULL,
+
+    product_name VARCHAR(200) NOT NULL,
+    purchase_date DATE,
+
+    purchase_price NUMERIC(10,2),
+    currency VARCHAR(10) NOT NULL DEFAULT 'EGP',
+
+    invoice_reference VARCHAR(200),
+    invoice_file_url TEXT,
+
+    notes TEXT,
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT protected_purchase_price_valid CHECK (
+        purchase_price IS NULL OR purchase_price >= 0
+    )
+);
+
+CREATE INDEX IF NOT EXISTS protected_purchases_user_idx
+ON protected_purchases(user_id, created_at DESC);
+
+
+-- =========================================================
+-- 31. WARRANTIES
+-- =========================================================
+
+CREATE TABLE IF NOT EXISTS warranties (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    purchase_id UUID NOT NULL
+        REFERENCES protected_purchases(id) ON DELETE CASCADE,
+
+    provider_name VARCHAR(200),
+
+    warranty_number VARCHAR(150),
+
+    starts_at DATE,
+    ends_at DATE,
+
+    terms TEXT,
+    document_url TEXT,
+
+    status VARCHAR(20) NOT NULL DEFAULT 'active'
+        CHECK (status IN ('active', 'expired', 'claimed', 'cancelled')),
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT warranty_dates_valid CHECK (
+        ends_at IS NULL OR starts_at IS NULL OR ends_at >= starts_at
+    )
+);
+
+CREATE INDEX IF NOT EXISTS warranties_purchase_idx
+ON warranties(purchase_id);
+
+CREATE INDEX IF NOT EXISTS warranties_expiry_idx
+ON warranties(ends_at, status);
+
+
+-- =========================================================
+-- 32. PURCHASE COMPLAINTS
+-- =========================================================
+
+CREATE TABLE IF NOT EXISTS purchase_complaints (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    purchase_id UUID NOT NULL
+        REFERENCES protected_purchases(id) ON DELETE CASCADE,
+
+    user_id UUID NOT NULL
+        REFERENCES users(id) ON DELETE RESTRICT,
+
+    complaint_type VARCHAR(80) NOT NULL,
+
+    subject VARCHAR(200) NOT NULL,
+    description TEXT NOT NULL,
+
+    status VARCHAR(25) NOT NULL DEFAULT 'open'
+        CHECK (status IN (
+            'open', 'under_review', 'waiting_customer',
+            'resolved', 'rejected', 'closed'
+        )),
+
+    admin_response TEXT,
+    resolved_at TIMESTAMPTZ,
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS purchase_complaints_user_idx
+ON purchase_complaints(user_id, created_at DESC);
+
+CREATE INDEX IF NOT EXISTS purchase_complaints_status_idx
+ON purchase_complaints(status);
+
+
+-- =========================================================
+-- 33. UPDATED_AT TRIGGERS FOR NEW TABLES
+-- =========================================================
+
+DROP TRIGGER IF EXISTS merchants_updated_at ON merchants;
+CREATE TRIGGER merchants_updated_at
+BEFORE UPDATE ON merchants
+FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+DROP TRIGGER IF EXISTS merchant_plans_updated_at ON merchant_plans;
+CREATE TRIGGER merchant_plans_updated_at
+BEFORE UPDATE ON merchant_plans
+FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+DROP TRIGGER IF EXISTS merchant_subscriptions_updated_at ON merchant_subscriptions;
+CREATE TRIGGER merchant_subscriptions_updated_at
+BEFORE UPDATE ON merchant_subscriptions
+FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+DROP TRIGGER IF EXISTS catalog_items_updated_at ON catalog_items;
+CREATE TRIGGER catalog_items_updated_at
+BEFORE UPDATE ON catalog_items
+FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+DROP TRIGGER IF EXISTS offers_updated_at ON offers;
+CREATE TRIGGER offers_updated_at
+BEFORE UPDATE ON offers
+FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+DROP TRIGGER IF EXISTS conversations_updated_at ON conversations;
+CREATE TRIGGER conversations_updated_at
+BEFORE UPDATE ON conversations
+FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+DROP TRIGGER IF EXISTS budget_records_updated_at ON budget_records;
+CREATE TRIGGER budget_records_updated_at
+BEFORE UPDATE ON budget_records
+FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+DROP TRIGGER IF EXISTS protected_purchases_updated_at ON protected_purchases;
+CREATE TRIGGER protected_purchases_updated_at
+BEFORE UPDATE ON protected_purchases
+FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+DROP TRIGGER IF EXISTS warranties_updated_at ON warranties;
+CREATE TRIGGER warranties_updated_at
+BEFORE UPDATE ON warranties
+FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+DROP TRIGGER IF EXISTS purchase_complaints_updated_at ON purchase_complaints;
+CREATE TRIGGER purchase_complaints_updated_at
+BEFORE UPDATE ON purchase_complaints
+FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+
+COMMIT;
+
+-- =========================================================
+-- END OF M3AK DATABASE SCHEMA PHASE 2
+-- =========================================================
 BEFORE UPDATE ON payment_transactions
 FOR EACH ROW
 EXECUTE FUNCTION set_updated_at();
