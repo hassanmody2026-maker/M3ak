@@ -1271,7 +1271,275 @@ app.post(
 /* =========================================================
    CURRENT USER
 ========================================================= */
+/* =========================================================
+   MERCHANT ORDERS
+   التاجر يرى طلبات متجره فقط
+========================================================= */
 
+// عرض طلبات المتجر
+app.get(
+  '/api/merchant/orders',
+  authenticate,
+  requireMerchant,
+  asyncRoute(async (req, res) => {
+    const result = await pool.query(
+      `
+      SELECT DISTINCT
+        o.id,
+        o.order_number,
+        o.user_id,
+        o.order_type,
+        o.description,
+        o.status,
+        o.total_amount,
+        o.currency,
+        o.created_at,
+        u.full_name AS customer_name,
+        u.phone AS customer_phone
+      FROM orders o
+      INNER JOIN order_items oi ON oi.order_id = o.id
+      INNER JOIN catalog_items ci ON ci.id = oi.item_id
+      WHERE ci.merchant_id = $1
+      ORDER BY o.created_at DESC
+      LIMIT 100
+      `,
+      [req.merchant.id]
+    );
+
+    res.json({
+      success: true,
+      orders: result.rows
+    });
+  })
+);
+
+
+// تحديث حالة طلب تابع للمتجر فقط
+app.patch(
+  '/api/merchant/orders/:id/status',
+  authenticate,
+  requireMerchant,
+  asyncRoute(async (req, res) => {
+    const allowedStatuses = [
+      'confirmed',
+      'processing',
+      'completed',
+      'rejected'
+    ];
+
+    const { status } = req.body;
+
+    if (!allowedStatuses.includes(status)) {
+      return sendError(
+        res,
+        400,
+        'حالة الطلب غير مسموح بها.',
+        'INVALID_ORDER_STATUS'
+      );
+    }
+
+    const result = await pool.query(
+      `
+      UPDATE orders o
+      SET
+        status = $1,
+        updated_at = NOW()
+      WHERE o.id = $2
+        AND EXISTS (
+          SELECT 1
+          FROM order_items oi
+          INNER JOIN catalog_items ci ON ci.id = oi.item_id
+          WHERE oi.order_id = o.id
+            AND ci.merchant_id = $3
+        )
+      RETURNING o.id, o.order_number, o.status
+      `,
+      [status, req.params.id, req.merchant.id]
+    );
+
+    if (!result.rowCount) {
+      return sendError(
+        res,
+        404,
+        'الطلب غير موجود أو لا يتبع متجرك.',
+        'MERCHANT_ORDER_NOT_FOUND'
+      );
+    }
+
+    res.json({
+      success: true,
+      message: 'تم تحديث حالة الطلب.',
+      order: result.rows[0]
+    });
+  })
+);
+
+
+/* =========================================================
+   MERCHANT CONVERSATIONS
+   التاجر يتابع محادثات متجره فقط
+========================================================= */
+
+// عرض محادثات المتجر
+app.get(
+  '/api/merchant/conversations',
+  authenticate,
+  requireMerchant,
+  asyncRoute(async (req, res) => {
+    const result = await pool.query(
+      `
+      SELECT
+        c.id,
+        c.customer_id,
+        c.order_id,
+        c.status,
+        c.created_at,
+        c.updated_at,
+        u.full_name AS customer_name,
+        (
+          SELECT message_text
+          FROM conversation_messages cm
+          WHERE cm.conversation_id = c.id
+          ORDER BY cm.created_at DESC
+          LIMIT 1
+        ) AS last_message
+      FROM conversations c
+      INNER JOIN users u ON u.id = c.customer_id
+      WHERE c.merchant_id = $1
+      ORDER BY c.updated_at DESC
+      LIMIT 100
+      `,
+      [req.merchant.id]
+    );
+
+    res.json({
+      success: true,
+      conversations: result.rows
+    });
+  })
+);
+
+
+// عرض رسائل محادثة تخص المتجر
+app.get(
+  '/api/merchant/conversations/:id/messages',
+  authenticate,
+  requireMerchant,
+  asyncRoute(async (req, res) => {
+    const conversation = await pool.query(
+      `
+      SELECT id
+      FROM conversations
+      WHERE id = $1
+        AND merchant_id = $2
+      LIMIT 1
+      `,
+      [req.params.id, req.merchant.id]
+    );
+
+    if (!conversation.rowCount) {
+      return sendError(
+        res,
+        404,
+        'المحادثة غير موجودة.',
+        'MERCHANT_CONVERSATION_NOT_FOUND'
+      );
+    }
+
+    const result = await pool.query(
+      `
+      SELECT
+        cm.id,
+        cm.sender_user_id,
+        cm.message_text,
+        cm.attachment_url,
+        cm.is_read,
+        cm.created_at,
+        u.role AS sender_role
+      FROM conversation_messages cm
+      INNER JOIN users u ON u.id = cm.sender_user_id
+      WHERE cm.conversation_id = $1
+      ORDER BY cm.created_at ASC
+      LIMIT 200
+      `,
+      [req.params.id]
+    );
+
+    res.json({
+      success: true,
+      messages: result.rows
+    });
+  })
+);
+
+
+// إرسال رد من التاجر
+app.post(
+  '/api/merchant/conversations/:id/messages',
+  authenticate,
+  requireMerchant,
+  asyncRoute(async (req, res) => {
+    const message = String(req.body.message || '').trim();
+
+    if (!message || message.length > 5000) {
+      return sendError(
+        res,
+        400,
+        'اكتب رسالة صحيحة لا تتجاوز 5000 حرف.',
+        'INVALID_MESSAGE'
+      );
+    }
+
+    const result = await pool.query(
+      `
+      INSERT INTO conversation_messages (
+        conversation_id,
+        sender_user_id,
+        message_text
+      )
+      SELECT
+        c.id,
+        $3,
+        $4
+      FROM conversations c
+      WHERE c.id = $1
+        AND c.merchant_id = $2
+        AND c.status = 'open'
+      RETURNING id, conversation_id, message_text, created_at
+      `,
+      [
+        req.params.id,
+        req.merchant.id,
+        req.user.id,
+        message
+      ]
+    );
+
+    if (!result.rowCount) {
+      return sendError(
+        res,
+        404,
+        'المحادثة غير موجودة أو مغلقة.',
+        'CONVERSATION_NOT_AVAILABLE'
+      );
+    }
+
+    await pool.query(
+      `
+      UPDATE conversations
+      SET updated_at = NOW()
+      WHERE id = $1
+      `,
+      [req.params.id]
+    );
+
+    res.status(201).json({
+      success: true,
+      message: 'تم إرسال الرد.',
+      data: result.rows[0]
+    });
+  })
+);
 app.get(
   '/api/auth/me',
   authenticate,
