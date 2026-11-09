@@ -471,6 +471,80 @@ function requireAdmin(req, res, next) {
 
   next();
 }
+/* =========================================================
+   MERCHANT AUTHORIZATION
+   التاجر يستقبل الطلبات ويتابع الرسائل فقط
+   لا يملك صلاحيات إدارة المنتجات أو العروض
+========================================================= */
+
+const requireMerchant = asyncRoute(async (req, res, next) => {
+  if (!req.user || req.user.role !== 'merchant') {
+    return sendError(
+      res,
+      403,
+      'هذه العملية مخصصة لحسابات التجار فقط.',
+      'MERCHANT_REQUIRED'
+    );
+  }
+
+  const result = await pool.query(
+    `
+    SELECT
+      m.id,
+      m.business_name,
+      m.status,
+      ms.status AS subscription_status,
+      ms.ends_at
+    FROM merchants m
+    LEFT JOIN LATERAL (
+      SELECT status, ends_at
+      FROM merchant_subscriptions
+      WHERE merchant_id = m.id
+      ORDER BY created_at DESC
+      LIMIT 1
+    ) ms ON TRUE
+    WHERE m.user_id = $1
+    LIMIT 1
+    `,
+    [req.user.id]
+  );
+
+  if (!result.rowCount) {
+    return sendError(
+      res,
+      403,
+      'لا يوجد متجر مرتبط بحسابك.',
+      'MERCHANT_PROFILE_NOT_FOUND'
+    );
+  }
+
+  const merchant = result.rows[0];
+
+  if (merchant.status !== 'active') {
+    return sendError(
+      res,
+      403,
+      'المتجر غير نشط حاليًا.',
+      'MERCHANT_NOT_ACTIVE'
+    );
+  }
+
+  if (
+    !['trial', 'active'].includes(merchant.subscription_status) ||
+    !merchant.ends_at ||
+    new Date(merchant.ends_at) <= new Date()
+  ) {
+    return sendError(
+      res,
+      403,
+      'اشتراك المتجر منتهٍ أو غير نشط. يرجى التجديد.',
+      'MERCHANT_SUBSCRIPTION_INACTIVE'
+    );
+  }
+
+  req.merchant = merchant;
+  next();
+});
 
 
 /* =========================================================
