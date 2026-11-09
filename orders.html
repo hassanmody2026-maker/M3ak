@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#180522">
+<title>طلباتي | M3AK</title>
+
+<style>
+:root {
+  --bg:#13051d;
+  --panel:#281039;
+  --purple:#a020dc;
+  --pink:#ed24b5;
+  --cyan:#13d9e8;
+  --gold:#ffc936;
+  --white:#fff;
+  --muted:#cbb3dc;
+}
+
+* {
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+
+body {
+  font-family:Tahoma,Arial,sans-serif;
+  color:var(--white);
+  background:
+    radial-gradient(ellipse at 80% 0%,#480b67 0%,transparent 38%),
+    linear-gradient(150deg,#190526,#100318 75%);
+  min-height:100vh;
+  padding-bottom:110px;
+}
+
+button,input {
+  font-family:inherit;
+}
+
+button {
+  cursor:pointer;
+}
+
+.container {
+  max-width:520px;
+  margin:auto;
+  padding:20px 16px 25px;
+}
+
+/* HEADER */
+
+.header {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:28px;
+}
+
+.brand {
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.logo {
+  width:58px;
+  height:58px;
+  border-radius:17px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:39px;
+  font-weight:bold;
+  background:linear-gradient(140deg,#ed28e5,#6b13d9);
+  box-shadow:0 0 22px #c51aff55;
+}
+
+.brand-name {
+  font-size:27px;
+  font-weight:900;
+  letter-spacing:1px;
+}
+
+.brand-caption {
+  font-size:12px;
+  color:#e0c9ed;
+  margin-top:4px;
+}
+
+.header-btn {
+  width:48px;
+  height:48px;
+  border-radius:15px;
+  border:1px solid #a83ad855;
+  color:white;
+  background:#ffffff0a;
+  font-size:23px;
+}
+
+/* TITLE */
+
+.page-title {
+  margin-bottom:23px;
+}
+
+.page-title h1 {
+  font-size:25px;
+  margin-bottom:8px;
+}
+
+.page-title p {
+  font-size:13px;
+  color:var(--muted);
+  line-height:1.8;
+}
+
+/* SUMMARY */
+
+.summary {
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  margin-bottom:23px;
+}
+
+.summary-card {
+  padding:15px 7px;
+  text-align:center;
+  border-radius:19px;
+  border:1px solid #8c35ac;
+  background:linear-gradient(145deg,#351143,#210b32);
+}
+
+.summary-card .icon {
+  font-size:24px;
+  margin-bottom:9px;
+}
+
+.summary-card strong {
+  display:block;
+  font-size:23px;
+  margin-bottom:5px;
+}
+
+.summary-card small {
+  font-size:10px;
+  color:#d5b9e5;
+}
+
+.summary-card.active {
+  border-color:#ed24b5;
+  box-shadow:0 0 15px #ed24b522;
+}
+
+.summary-card.complete {
+  border-color:#13d9a0;
+}
+
+/* SEARCH */
+
+.search-box {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:14px;
+  border:1px solid #81319c;
+  border-radius:17px;
+  background:#ffffff08;
+  margin-bottom:21px;
+}
+
+.search-box span {
+  font-size:20px;
+}
+
+.search-box input {
+  width:100%;
+  background:transparent;
+  border:0;
+  outline:0;
+  color:white;
+  font-size:13px;
+}
+
+.search-box input::placeholder {
+  color:#b99dc9;
+}
+
+/* FILTERS */
+
+.filters {
+  display:flex;
+  gap:9px;
+  overflow-x:auto;
+  padding-bottom:10px;
+  margin-bottom:17px;
+  scrollbar-width:none;
+}
+
+.filters::-webkit-scrollbar {
+  display:none;
+}
+
+.filter-btn {
+  flex-shrink:0;
+  padding:11px 17px;
+  border-radius:25px;
+  background:#ffffff09;
+  border:1px solid #80349b;
+  color:#d7c1e5;
+  font-size:12px;
+}
+
+.filter-btn.active {
+  background:linear-gradient(100deg,#ed28ae,#8b0cdd);
+  border-color:transparent;
+  color:white;
+  font-weight:bold;
+}
+
+/* ORDER CARD */
+
+.orders-list {
+  display:flex;
+  flex-direction:column;
+  gap:15px;
+}
+
+.order-card {
+  border:1px solid #77308f;
+  background:linear-gradient(135deg,#32103f,#210c30);
+  border-radius:22px;
+  padding:16px;
+  overflow:hidden;
+}
+
+.order-top {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  padding-bottom:13px;
+  border-bottom:1px solid #ffffff14;
+}
+
+.order-number {
+  font-size:12px;
+  color:#d9bce9;
+}
+
+.order-date {
+  font-size:10px;
+  color:#a98ab9;
+  margin-top:6px;
+}
+
+.status {
+  padding:8px 11px;
+  border-radius:20px;
+  font-size:10px;
+  font-weight:bold;
+  white-space:nowrap;
+}
+
+.status.pending {
+  background:#ffb92b20;
+  border:1px solid #ffc93688;
+  color:#ffdb76;
+}
+
+.status.progress {
+  background:#13d9e820;
+  border:1px solid #13d9e888;
+  color:#65f3ff;
+}
+
+.status.done {
+  background:#13d9a020;
+  border:1px solid #13d9a088;
+  color:#69f5b5;
+}
+
+.status.cancelled {
+  background:#ed458020;
+  border:1px solid #ed458088;
+  color:#ff92a7;
+}
+
+.order-main {
+  display:flex;
+  align-items:center;
+  gap:13px;
+  padding:16px 0;
+}
+
+.order-icon {
+  width:54px;
+  height:54px;
+  flex-shrink:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:17px;
+  background:#a020dc30;
+  border:1px solid #b536e7;
+  font-size:26px;
+}
+
+.order-info {
+  flex:1;
+}
+
+.order-info h3 {
+  font-size:14px;
+  margin-bottom:7px;
+}
+
+.order-info p {
+  font-size:11px;
+  color:#c8afd9;
+  line-height:1.7;
+}
+
+.order-bottom {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding-top:12px;
+  border-top:1px solid #ffffff14;
+}
+
+.order-price {
+  font-size:11px;
+  color:#c8afd9;
+}
+
+.order-price strong {
+  display:block;
+  font-size:15px;
+  color:white;
+  margin-top:5px;
+}
+
+.details-btn {
+  border:1px solid #bc37e6;
+  background:#9d20d52b;
+  color:white;
+  padding:10px 13px;
+  border-radius:12px;
+  font-size:11px;
+}
+
+/* EMPTY STATE */
+
+.empty-state {
+  display:none;
+  text-align:center;
+  padding:40px 20px;
+  border:1px dashed #8c35ac;
+  border-radius:22px;
+  background:#ffffff05;
+}
+
+.empty-icon {
+  font-size:48px;
+  margin-bottom:15px;
+}
+
+.empty-state h3 {
+  font-size:16px;
+  margin-bottom:9px;
+}
+
+.empty-state p {
+  color:#c6acd7;
+  font-size:12px;
+  line-height:1.8;
+}
+
+/* ASSISTANT BANNER */
+
+.assistant-banner {
+  display:flex;
+  align-items:center;
+  gap:13px;
+  padding:17px;
+  border-radius:21px;
+  border:1px solid #0ec9d9;
+  background:linear-gradient(120deg,#093f57,#21103b);
+  margin-top:24px;
+}
+
+.assistant-icon {
+  width:49px;
+  height:49px;
+  border-radius:16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#13d9e825;
+  font-size:25px;
+  flex-shrink:0;
+}
+
+.assistant-text {
+  flex:1;
+}
+
+.assistant-text strong {
+  display:block;
+  font-size:13px;
+  margin-bottom:6px;
+}
+
+.assistant-text small {
+  color:#b8dce7;
+  font-size:10px;
+  line-height:1.6;
+}
+
+.assistant-btn {
+  border:0;
+  border-radius:12px;
+  background:#13c8d8;
+  color:#10212a;
+  font-weight:bold;
+  padding:10px;
+  font-size:11px;
+}
+
+/* BOTTOM NAV */
+
+.bottom-nav {
+  position:fixed;
+  z-index:100;
+  bottom:0;
+  left:0;
+  right:0;
+  width:100%;
+  max-width:520px;
+  margin:auto;
+  display:flex;
+  justify-content:space-around;
+  align-items:center;
+  padding:12px 4px calc(12px + env(safe-area-inset-bottom));
+  background:rgba(24,5,38,.97);
+  border:1px solid #6f188d;
+  border-bottom:0;
+  border-radius:27px 27px 0 0;
+  backdrop-filter:blur(20px);
+}
+
+.nav-item {
+  min-width:55px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
+  color:#b18bc9;
+  font-size:10px;
+  text-decoration:none;
+}
+
+.nav-icon {
+  font-size:23px;
+}
+
+.nav-item.active {
+  color:#f02ac2;
+  font-weight:bold;
+}
+
+.nav-item.active .nav-icon {
+  filter:drop-shadow(0 0 8px #ef28c5);
+}
+
+/* NOTICE */
+
+.notice {
+  position:fixed;
+  display:none;
+  z-index:200;
+  bottom:95px;
+  left:15px;
+  right:15px;
+  max-width:480px;
+  margin:auto;
+  background:#351440;
+  border:1px solid #c02ce2;
+  border-radius:15px;
+  padding:14px;
+  text-align:center;
+  font-size:13px;
+  box-shadow:0 8px 25px #0008;
+}
+
+</style>
+</head>
+
+<body>
+
+<main class="container">
+
+  <!-- HEADER -->
+
+  <header class="header">
+
+    <div class="brand">
+      <div class="logo">M</div>
+
+      <div>
+        <div class="brand-name">M3AK</div>
+        <div class="brand-caption">كل اللي تحتاجه.. معاك</div>
+      </div>
+    </div>
+
+    <button class="header-btn"
+      onclick="showNotice('الإشعارات سيتم ربطها لاحقًا')">
+      ♧
+    </button>
+
+  </header>
+
+  <!-- TITLE -->
+
+  <section class="page-title">
+    <h1>طلباتي</h1>
+    <p>كل خدماتك وطلباتك في مكان واحد.. تابع كل خطوة مع معاك.</p>
+  </section>
+
+  <!-- SUMMARY -->
+
+  <section class="summary">
+
+    <div class="summary-card active">
+      <div class="icon">⏳</div>
+      <strong id="activeCount">0</strong>
+      <small>طلبات نشطة</small>
+    </div>
+
+    <div class="summary-card complete">
+      <div class="icon">✓</div>
+      <strong id="completedCount">0</strong>
+      <small>مكتملة</small>
+    </div>
+
+    <div class="summary-card">
+      <div class="icon">▤</div>
+      <strong id="totalCount">0</strong>
+      <small>إجمالي الطلبات</small>
+    </div>
+
+  </section>
+
+  <!-- SEARCH -->
+
+  <div class="search-box">
+    <span>⌕</span>
+    <input
+      type="search"
+      id="searchInput"
+      placeholder="ابحث برقم الطلب أو اسم الخدمة..."
+      oninput="renderOrders()">
+  </div>
+
+  <!-- FILTERS -->
+
+  <div class="filters">
+
+    <button class="filter-btn active"
+      data-filter="all"
+      onclick="setFilter('all',this)">
+      الكل
+    </button>
+
+    <button class="filter-btn"
+      data-filter="pending"
+      onclick="setFilter('pending',this)">
+      قيد المراجعة
+    </button>
+
+    <button class="filter-btn"
+      data-filter="progress"
+      onclick="setFilter('progress',this)">
+      قيد التنفيذ
+    </button>
+
+    <button class="filter-btn"
+      data-filter="done"
+      onclick="setFilter('done',this)">
+      مكتملة
+    </button>
+
+    <button class="filter-btn"
+      data-filter="cancelled"
+      onclick="setFilter('cancelled',this)">
+      ملغاة
+    </button>
+
+  </div>
+
+  <!-- ORDERS -->
+
+  <section class="orders-list" id="ordersList"></section>
+
+  <div class="empty-state" id="emptyState">
+    <div class="empty-icon">📦</div>
+    <h3>لا توجد طلبات هنا حتى الآن</h3>
+    <p>
+      عندما تطلب أي خدمة من معاك، هتظهر تفاصيلها وحالتها في الصفحة دي.
+    </p>
+  </div>
+
+  <!-- ASSISTANT -->
+
+  <section class="assistant-banner">
+
+    <div class="assistant-icon">✦</div>
+
+    <div class="assistant-text">
+      <strong>محتاج مساعدة في طلبك؟</strong>
+      <small>المساعد الذكي معاك لمتابعة استفساراتك.</small>
+    </div>
+
+    <button class="assistant-btn"
+      onclick="location.href='assistant.html'">
+      اسأل الآن
+    </button>
+
+  </section>
+
+</main>
+
+<!-- BOTTOM NAV -->
+
+<nav class="bottom-nav">
+
+  <a href="home.html" class="nav-item">
+    <span class="nav-icon">⌂</span>
+    <span>الرئيسية</span>
+  </a>
+
+  <a href="orders.html" class="nav-item active">
+    <span class="nav-icon">▣</span>
+    <span>طلباتي</span>
+  </a>
+
+  <a href="assistant.html" class="nav-item">
+    <span class="nav-icon">✦</span>
+    <span>المساعد</span>
+  </a>
+
+  <a href="notifications.html" class="nav-item">
+    <span class="nav-icon">♧</span>
+    <span>الإشعارات</span>
+  </a>
+
+  <a href="profile.html" class="nav-item">
+    <span class="nav-icon">●</span>
+    <span>حسابي</span>
+  </a>
+
+</nav>
+
+<div class="notice" id="notice"></div>
+
+<script>
+
+/*
+  بيانات تجريبية للعرض فقط.
+  سيتم استبدالها بطلبات المستخدم الحقيقية من قاعدة البيانات
+  عند تنفيذ الربط الخلفي.
+*/
+
+const orders = [];
+
+let currentFilter = "all";
+
+const statusNames = {
+  pending: "قيد المراجعة",
+  progress: "قيد التنفيذ",
+  done: "مكتمل",
+  cancelled: "ملغي"
+};
+
+function setFilter(filter,button) {
+
+  currentFilter = filter;
+
+  document.querySelectorAll(".filter-btn").forEach(btn => {
+    btn.classList.remove("active");
+  });
+
+  button.classList.add("active");
+
+  renderOrders();
+
+}
+
+function renderOrders() {
+
+  const list = document.getElementById("ordersList");
+  const empty = document.getElementById("emptyState");
+  const search = document.getElementById("searchInput")
+    .value.trim().toLowerCase();
+
+  const filtered = orders.filter(order => {
+
+    const matchesFilter =
+      currentFilter === "all" ||
+      order.status === currentFilter;
+
+    const matchesSearch =
+      order.id.toLowerCase().includes(search) ||
+      order.title.toLowerCase().includes(search);
+
+    return matchesFilter && matchesSearch;
+
+  });
+
+  list.innerHTML = "";
+
+  filtered.forEach(order => {
+
+    const card = document.createElement("article");
+    card.className = "order-card";
+
+    const top = document.createElement("div");
+    top.className = "order-top";
+
+    const number = document.createElement("div");
+
+    const orderNumber = document.createElement("div");
+    orderNumber.className = "order-number";
+    orderNumber.textContent = "رقم الطلب: " + order.id;
+
+    const date = document.createElement("div");
+    date.className = "order-date";
+    date.textContent = order.date;
+
+    number.append(orderNumber,date);
+
+    const status = document.createElement("span");
+    status.className = "status " + order.status;
+    status.textContent = statusNames[order.status];
+
+    top.append(number,status);
+
+    const main = document.createElement("div");
+    main.className = "order-main";
+
+    const icon = document.createElement("div");
+    icon.className = "order-icon";
+    icon.textContent = order.icon;
+
+    const info = document.createElement("div");
+    info.className = "order-info";
+
+    const title = document.createElement("h3");
+    title.textContent = order.title;
+
+    const description = document.createElement("p");
+    description.textContent = order.description;
+
+    info.append(title,description);
+    main.append(icon,info);
+
+    const bottom = document.createElement("div");
+    bottom.className = "order-bottom";
+
+    const price = document.createElement("div");
+    price.className = "order-price";
+    price.textContent = "قيمة الطلب";
+
+    const priceValue = document.createElement("strong");
+    priceValue.textContent = order.price;
+
+    price.append(priceValue);
+
+    const details = document.createElement("button");
+    details.className = "details-btn";
+    details.textContent = "تفاصيل الطلب";
+    details.onclick = () => showOrderDetails(order);
+
+    bottom.append(price,details);
+
+    card.append(top,main,bottom);
+
+    list.appendChild(card);
+
+  });
+
+  empty.style.display = filtered.length ? "none" : "block";
+
+  updateSummary();
+
+}
+
+function updateSummary() {
+
+  const active = orders.filter(order =>
+    order.status === "pending" ||
+    order.status === "progress"
+  ).length;
+
+  const completed = orders.filter(order =>
+    order.status === "done"
+  ).length;
+
+  document.getElementById("activeCount").textContent = active;
+  document.getElementById("completedCount").textContent = completed;
+  document.getElementById("totalCount").textContent = orders.length;
+
+}
+
+function showOrderDetails(order) {
+
+  showNotice(
+    "تفاصيل الطلب " + order.id +
+    " ستظهر كاملة بعد ربط قاعدة البيانات."
+  );
+
+}
+
+function showNotice(message) {
+
+  const box = document.getElementById("notice");
+
+  box.textContent = message;
+  box.style.display = "block";
+
+  clearTimeout(window.noticeTimer);
+
+  window.noticeTimer = setTimeout(() => {
+    box.style.display = "none";
+  },3500);
+
+}
+
+renderOrders();
+
+</script>
+
+</body>
+</html>
