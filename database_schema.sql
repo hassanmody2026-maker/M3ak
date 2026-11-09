@@ -712,6 +712,9 @@ EXECUTE FUNCTION set_updated_at();
 
 DROP TRIGGER IF EXISTS payment_transactions_updated_at ON payment_transactions;
 CREATE TRIGGER payment_transactions_updated_at
+BEFORE UPDATE ON payment_transactions
+FOR EACH ROW
+EXECUTE FUNCTION set_updated_at();
     -- =========================================================
 -- M3AK DATABASE SCHEMA - PHASE 2
 -- Merchants, Catalog, Offers, Messages, Budget, Protection
@@ -1313,17 +1316,8 @@ FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 DROP TRIGGER IF EXISTS purchase_complaints_updated_at ON purchase_complaints;
 CREATE TRIGGER purchase_complaints_updated_at
 BEFORE UPDATE ON purchase_complaints
-FOR EACH ROW EXECUTE FUNCTION set_updated_at();
-
-
+FOR EACH ROW EXECUTE FUNCTION 
 COMMIT;
-
--- =========================================================
--- END OF M3AK DATABASE SCHEMA PHASE 2
--- =========================================================
-BEFORE UPDATE ON payment_transactions
-FOR EACH ROW
-EXECUTE FUNCTION set_updated_at();
 
 
 -- =========================================================
