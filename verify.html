@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#16051f">
+<title>التحقق الآمن | معاك M3AK</title>
+
+<style>
+:root {
+  --bg:#16051f;
+  --purple:#8b35b2;
+  --pink:#ed4c9b;
+  --cyan:#43d7d0;
+  --text:#ffffff;
+  --muted:#c8b8d0;
+  --line:#ffffff20;
+}
+
+* { box-sizing:border-box; }
+
+body {
+  margin:0;
+  min-height:100vh;
+  font-family:Tahoma,Arial,sans-serif;
+  color:var(--text);
+  background:
+    radial-gradient(ellipse at 12% 8%,#722b8c66,transparent 36%),
+    radial-gradient(ellipse at 90% 90%,#b52d7950,transparent 34%),
+    var(--bg);
+  display:grid;
+  place-items:center;
+  padding:22px;
+}
+
+a {
+  color:#f7a5d0;
+  text-decoration:none;
+}
+
+button,input { font:inherit; }
+
+.shell {
+  width:min(100%,1050px);
+  min-height:650px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  border:1px solid var(--line);
+  border-radius:30px;
+  overflow:hidden;
+  background:#ffffff08;
+  box-shadow:0 28px 90px #0007;
+}
+
+.brand-side {
+  padding:48px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  background:linear-gradient(145deg,#401354dd,#1e0b2be8);
+  position:relative;
+  overflow:hidden;
+}
+
+.brand {
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+
+.mark {
+  width:64px;
+  height:64px;
+  border-radius:21px;
+  background:linear-gradient(135deg,var(--purple),var(--pink));
+  display:grid;
+  place-items:center;
+  font-size:32px;
+  box-shadow:0 12px 32px #0005;
+}
+
+.brand strong { font-size:28px; }
+
+.brand small {
+  display:block;
+  color:#e3cde9;
+  font-size:12px;
+  margin-top:4px;
+}
+
+.side-copy h1 {
+  font-size:42px;
+  line-height:1.5;
+}
+
+.side-copy p {
+  color:#dfd0e6;
+  line-height:2;
+  font-size:15px;
+}
+
+.side-foot {
+  color:#c8b4d0;
+  font-size:12px;
+}
+
+.form-side {
+  padding:clamp(25px,5vw,58px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.card { width:min(100%,440px); }
+
+.mobile-brand {
+  display:none;
+  align-items:center;
+  gap:10px;
+  margin-bottom:25px;
+}
+
+.pill {
+  display:inline-flex;
+  padding:8px 13px;
+  border:1px solid #43d7d055;
+  border-radius:30px;
+  color:var(--cyan);
+  font-size:12px;
+  background:#43d7d012;
+}
+
+.icon {
+  width:62px;
+  height:62px;
+  border-radius:20px;
+  display:grid;
+  place-items:center;
+  font-size:29px;
+  margin:22px 0 16px;
+  background:linear-gradient(135deg,#8b35b244,#ed4c9b30);
+  border:1px solid #ffffff20;
+}
+
+h2 {
+  font-size:29px;
+  margin:0 0 10px;
+}
+
+.desc {
+  color:var(--muted);
+  line-height:1.9;
+  font-size:14px;
+  margin:0 0 25px;
+}
+
+.destination {
+  color:#fff;
+  font-weight:bold;
+  direction:ltr;
+  display:inline-block;
+}
+
+.otp {
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  gap:9px;
+  direction:ltr;
+  margin:20px 0;
+}
+
+.otp input {
+  width:100%;
+  height:60px;
+  text-align:center;
+  border-radius:14px;
+  border:1px solid var(--line);
+  background:#ffffff0b;
+  color:#fff;
+  font-size:24px;
+  font-weight:bold;
+  outline:none;
+}
+
+.otp input:focus {
+  border-color:var(--cyan);
+  box-shadow:0 0 0 3px #43d7d022;
+}
+
+.field { margin:17px 0; }
+
+.field label {
+  display:block;
+  font-size:13px;
+  margin-bottom:9px;
+  color:#e9ddec;
+}
+
+.field input {
+  width:100%;
+  height:52px;
+  border:1px solid var(--line);
+  border-radius:13px;
+  padding:0 15px;
+  background:#ffffff0b;
+  color:#fff;
+  outline:none;
+}
+
+.field input:focus { border-color:var(--pink); }
+
+.primary {
+  width:100%;
+  height:54px;
+  border:0;
+  border-radius:14px;
+  color:#fff;
+  font-weight:bold;
+  background:linear-gradient(100deg,#7b2ca1,#d9368b);
+  box-shadow:0 12px 25px #8b35b233;
+  cursor:pointer;
+  margin-top:10px;
+}
+
+.meta {
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  margin-top:18px;
+  color:var(--muted);
+  font-size:12px;
+}
+
+.notice {
+  display:none;
+  margin-top:16px;
+  padding:12px 14px;
+  border-radius:12px;
+  background:#ed4c9b18;
+  border:1px solid #ed4c9b55;
+  color:#ffd4e9;
+  font-size:13px;
+  line-height:1.8;
+}
+
+.notice.show { display:block; }
+
+.back {
+  display:inline-block;
+  margin-top:25px;
+  color:#d9c7e1;
+  font-size:13px;
+}
+
+@media(max-width:760px) {
+  body {
+    padding:0;
+    display:block;
+  }
+
+  .shell {
+    min-height:100vh;
+    display:block;
+    border:0;
+    border-radius:0;
+    background:transparent;
+  }
+
+  .brand-side { display:none; }
+
+  .form-side {
+    min-height:100vh;
+    padding:30px 22px;
+  }
+
+  .mobile-brand { display:flex; }
+
+  .otp { gap:6px; }
+
+  .otp input {
+    height:54px;
+    font-size:21px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<main class="shell">
+
+<section class="brand-side">
+
+  <div class="brand">
+    <div class="mark">♥</div>
+    <div>
+      <strong>M3AK</strong>
+      <small>كل اللي تحتاجه.. معاك</small>
+    </div>
+  </div>
+
+  <div class="side-copy">
+    <span style="color:var(--cyan)">حسابك في أمان</span>
+    <h1>خطوة واحدة<br>وتكون معانا.</h1>
+    <p>
+      نتأكد من هويتك لحماية حسابك وبياناتك.
+      شاشة تحقق موحدة لتأكيد الحساب أو استعادة
+      كلمة المرور، بخطوات واضحة وآمنة.
+    </p>
+  </div>
+
+  <div class="side-foot">
+    مصلحتك أولًا — معاك من أول اليوم لآخره
+  </div>
+
+</section>
+
+<section class="form-side">
+
+<div class="card">
+
+  <div class="mobile-brand">
+    <div class="mark">♥</div>
+    <div>
+      <strong>M3AK</strong>
+      <small>كل اللي تحتاجه.. معاك</small>
+    </div>
+  </div>
+
+  <span class="pill">التحقق الآمن</span>
+
+  <div class="icon">⌑</div>
+
+  <h2 id="title">تأكيد حسابك</h2>
+
+  <p class="desc" id="description">
+    أدخل رمز التحقق المكوّن من 6 أرقام
+    الذي تم إرساله إلى
+    <span class="destination" id="destination">
+      وسيلة التواصل المسجلة
+    </span>.
+  </p>
+
+  <form id="verifyForm" novalidate>
+
+    <div class="otp" aria-label="رمز التحقق">
+      <input inputmode="numeric" maxlength="1" autocomplete="one-time-code" aria-label="الرقم الأول">
+      <input inputmode="numeric" maxlength="1" aria-label="الرقم الثاني">
+      <input inputmode="numeric" maxlength="1" aria-label="الرقم الثالث">
+      <input inputmode="numeric" maxlength="1" aria-label="الرقم الرابع">
+      <input inputmode="numeric" maxlength="1" aria-label="الرقم الخامس">
+      <input inputmode="numeric" maxlength="1" aria-label="الرقم السادس">
+    </div>
+
+    <div id="resetFields" hidden>
+
+      <div class="field">
+        <label for="newPassword">كلمة المرور الجديدة</label>
+        <input
+          id="newPassword"
+          type="password"
+          minlength="8"
+          autocomplete="new-password"
+          placeholder="8 أحرف أو أرقام على الأقل">
+      </div>
+
+      <div class="field">
+        <label for="confirmPassword">تأكيد كلمة المرور</label>
+        <input
+          id="confirmPassword"
+          type="password"
+          minlength="8"
+          autocomplete="new-password"
+          placeholder="أعد كتابة كلمة المرور">
+      </div>
+
+    </div>
+
+    <button class="primary" type="submit" id="submit">
+      تأكيد الرمز
+    </button>
+
+  </form>
+
+  <div class="meta">
+    <span>لم يصلك الرمز؟</span>
+    <a href="#" id="resend">إعادة الإرسال</a>
+  </div>
+
+  <div class="notice" id="notice" role="status" aria-live="polite"></div>
+
+  <a class="back" href="login.html">
+    → العودة لتسجيل الدخول
+  </a>
+
+</div>
+
+</section>
+</main>
+
+<script>
+(() => {
+
+  const params = new URLSearchParams(location.search);
+
+  const mode = params.get('mode') === 'reset'
+    ? 'reset'
+    : 'account';
+
+  const target = params.get('to');
+
+  const title = document.getElementById('title');
+  const desc = document.getElementById('description');
+  const fields = document.getElementById('resetFields');
+  const submit = document.getElementById('submit');
+  const notice = document.getElementById('notice');
+
+  const boxes = [
+    ...document.querySelectorAll('.otp input')
+  ];
+
+  if (target) {
+    document.getElementById('destination').textContent = target;
+  }
+
+  if (mode === 'reset') {
+
+    title.textContent = 'استعادة كلمة المرور';
+
+    desc.innerHTML =
+      'أدخل رمز الاستعادة المرسل إلى ' +
+      '<span class="destination" id="destination"></span>' +
+      '، ثم اختر كلمة مرور جديدة.';
+
+    if (target) {
+      document.getElementById('destination').textContent = target;
+    }
+
+    fields.hidden = false;
+
+    submit.textContent = 'تأكيد الرمز وتغيير كلمة المرور';
+  }
+
+  boxes.forEach((box, index) => {
+
+    box.addEventListener('input', () => {
+
+      box.value = box.value.replace(/\D/g, '').slice(0, 1);
+
+      if (box.value && boxes[index + 1]) {
+        boxes[index + 1].focus();
+      }
+
+    });
+
+    box.addEventListener('keydown', event => {
+
+      if (
+        event.key === 'Backspace' &&
+        !box.value &&
+        boxes[index - 1]
+      ) {
+        boxes[index - 1].focus();
+      }
+
+    });
+
+    box.addEventListener('paste', event => {
+
+      const value = (
+        event.clipboardData || window.clipboardData
+      ).getData('text').replace(/\D/g, '').slice(0, 6);
+
+      if (value) {
+
+        event.preventDefault();
+
+        value.split('').forEach((digit, i) => {
+          boxes[i].value = digit;
+        });
+
+        boxes[Math.min(value.length, 5)].focus();
+      }
+
+    });
+
+  });
+
+  document.getElementById('verifyForm')
+    .addEventListener('submit', event => {
+
+      event.preventDefault();
+
+      const code = boxes.map(box => box.value).join('');
+
+      notice.classList.add('show');
+
+      if (code.length !== 6) {
+
+        notice.textContent =
+          'من فضلك أدخل رمز التحقق كاملًا (6 أرقام).';
+
+        boxes.find(box => !box.value)?.focus();
+
+        return;
+      }
+
+      if (mode === 'reset') {
+
+        const password =
+          document.getElementById('newPassword').value;
+
+        const confirm =
+          document.getElementById('confirmPassword').value;
+
+        if (password.length < 8) {
+
+          notice.textContent =
+            'كلمة المرور يجب ألا تقل عن 8 أحرف أو أرقام.';
+
+          return;
+        }
+
+        if (password !== confirm) {
+
+          notice.textContent =
+            'كلمتا المرور غير متطابقتين.';
+
+          return;
+        }
+
+      }
+
+      notice.textContent =
+        'واجهة التحقق جاهزة. لم يتم إرسال الرمز أو تأكيده بعد؛ ' +
+        'يلزم ربطها بخادم معاك لإتمام العملية بأمان.';
+
+    });
+
+  document.getElementById('resend')
+    .addEventListener('click', event => {
+
+      event.preventDefault();
+
+      notice.classList.add('show');
+
+      notice.textContent =
+        'إعادة إرسال الرمز ستعمل بعد ربط خدمة الرسائل والبريد بالخادم.';
+
+    });
+
+})();
+</script>
+
+</body>
+</html>
