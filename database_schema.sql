@@ -1316,7 +1316,8 @@ FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 DROP TRIGGER IF EXISTS purchase_complaints_updated_at ON purchase_complaints;
 CREATE TRIGGER purchase_complaints_updated_at
 BEFORE UPDATE ON purchase_complaints
-FOR EACH ROW EXECUTE FUNCTION 
+FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
 COMMIT;
 
 
