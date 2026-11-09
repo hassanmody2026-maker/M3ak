@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<meta name="theme-color" content="#7200a8">
+
+<title>M3AK - معاك من أول اليوم لآخره</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    width: 100%;
+    min-height: 100%;
+    background: #24003e;
+    font-family: Tahoma, Arial, sans-serif;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.welcome-container {
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+    overflow: hidden;
+    line-height: 0;
+}
+
+.welcome-image {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.hotspot {
+    position: absolute;
+    display: block;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.hotspot:focus-visible {
+    outline: 3px solid #ffffff;
+    outline-offset: 3px;
+    border-radius: 30px;
+}
+
+/* زر البدء الآن */
+.start-button {
+    left: 23%;
+    top: 76.8%;
+    width: 54%;
+    height: 8%;
+}
+
+/* الأحكام والشروط */
+.terms-button {
+    left: 15%;
+    top: 87.8%;
+    width: 34%;
+    height: 5.5%;
+}
+
+/* سياسة الخصوصية */
+.privacy-button {
+    left: 51%;
+    top: 87.8%;
+    width: 34%;
+    height: 5.5%;
+}
+
+@media (min-width: 601px) {
+    .welcome-container {
+        margin: 15px auto;
+        border-radius: 18px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<main class="welcome-container">
+
+    <img
+        src="./welcome-screen.png"
+        class="welcome-image"
+        alt="معاك M3AK - كل اللي تحتاجه معاك"
+    >
+
+    <a
+        href="signup.html"
+        class="hotspot start-button"
+        aria-label="البدء الآن">
+    </a>
+
+    <a
+        href="terms.html"
+        class="hotspot terms-button"
+        aria-label="الأحكام والشروط">
+    </a>
+
+    <a
+        href="privacy.html"
+        class="hotspot privacy-button"
+        aria-label="سياسة الخصوصية">
+    </a>
+
+</main>
+
+</body>
+</html>
