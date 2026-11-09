@@ -1838,6 +1838,455 @@ app.delete(
     });
   })
 );
+/* =========================================================
+   ADMIN CATALOG IMAGES
+========================================================= */
+
+// عرض صور منتج أو خدمة
+app.get(
+  '/api/admin/catalog/:id/images',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (req, res) => {
+    const result = await pool.query(
+      `
+      SELECT *
+      FROM catalog_item_images
+      WHERE item_id = $1
+      ORDER BY sort_order ASC, created_at ASC
+      `,
+      [req.params.id]
+    );
+
+    res.json({
+      success: true,
+      images: result.rows
+    });
+  })
+);
+
+
+// إضافة صورة
+app.post(
+  '/api/admin/catalog/:id/images',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (req, res) => {
+    const { image_url, alt_text, sort_order, is_primary } = req.body;
+
+    if (!image_url || typeof image_url !== 'string') {
+      return sendError(res, 400, 'رابط الصورة مطلوب.', 'IMAGE_URL_REQUIRED');
+    }
+
+    const item = await pool.query(
+      'SELECT id FROM catalog_items WHERE id = $1',
+      [req.params.id]
+    );
+
+    if (!item.rowCount) {
+      return sendError(res, 404, 'المنتج غير موجود.', 'CATALOG_ITEM_NOT_FOUND');
+    }
+
+    const client = await pool.connect();
+
+    try {
+      await client.query('BEGIN');
+
+      if (is_primary === true) {
+        await client.query(
+          'UPDATE catalog_item_images SET is_primary = FALSE WHERE item_id = $1',
+          [req.params.id]
+        );
+      }
+
+      const result = await client.query(
+        `
+        INSERT INTO catalog_item_images (
+          item_id,
+          image_url,
+          alt_text,
+          sort_order,
+          is_primary
+        )
+        VALUES ($1, $2, $3, $4, $5)
+        RETURNING *
+        `,
+        [
+          req.params.id,
+          image_url.trim(),
+          alt_text || null,
+          Number.isInteger(sort_order) && sort_order >= 0 ? sort_order : 0,
+          is_primary === true
+        ]
+      );
+
+      await client.query('COMMIT');
+
+      res.status(201).json({
+        success: true,
+        message: 'تمت إضافة الصورة.',
+        image: result.rows[0]
+      });
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+  })
+);
+
+
+// تحديد الصورة الرئيسية
+app.patch(
+  '/api/admin/catalog/:id/images/:imageId/primary',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (req, res) => {
+    const client = await pool.connect();
+
+    try {
+      await client.query('BEGIN');
+
+      const image = await client.query(
+        `
+        SELECT id
+        FROM catalog_item_images
+        WHERE id = $1 AND item_id = $2
+        FOR UPDATE
+        `,
+        [req.params.imageId, req.params.id]
+      );
+
+      if (!image.rowCount) {
+        await client.query('ROLLBACK');
+        return sendError(res, 404, 'الصورة غير موجودة.', 'IMAGE_NOT_FOUND');
+      }
+
+      await client.query(
+        'UPDATE catalog_item_images SET is_primary = FALSE WHERE item_id = $1',
+        [req.params.id]
+      );
+
+      await client.query(
+        `
+        UPDATE catalog_item_images
+        SET is_primary = TRUE
+        WHERE id = $1 AND item_id = $2
+        `,
+        [req.params.imageId, req.params.id]
+      );
+
+      await client.query('COMMIT');
+
+      res.json({
+        success: true,
+        message: 'تم تحديد الصورة الرئيسية.'
+      });
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+  })
+);
+
+
+// حذف صورة
+app.delete(
+  '/api/admin/catalog/:id/images/:imageId',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (req, res) => {
+    const result = await pool.query(
+      `
+      DELETE FROM catalog_item_images
+      WHERE id = $1 AND item_id = $2
+      RETURNING id
+      `,
+      [req.params.imageId, req.params.id]
+    );
+
+    if (!result.rowCount) {
+      return sendError(res, 404, 'الصورة غير موجودة.', 'IMAGE_NOT_FOUND');
+    }
+
+    res.json({
+      success: true,
+      message: 'تم حذف الصورة.'
+    });
+  })
+);
+
+
+/* =========================================================
+   ADMIN OFFERS AND DISCOUNTS
+========================================================= */
+
+// عرض جميع العروض
+app.get(
+  '/api/admin/offers',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (req, res) => {
+    const result = await pool.query(`
+      SELECT
+        o.*,
+        m.business_name,
+        ci.name AS item_name
+      FROM offers o
+      INNER JOIN merchants m ON m.id = o.merchant_id
+      LEFT JOIN catalog_items ci ON ci.id = o.item_id
+      ORDER BY o.created_at DESC
+      LIMIT 500
+    `);
+
+    res.json({
+      success: true,
+      offers: result.rows
+    });
+  })
+);
+
+
+// إنشاء عرض أو خصم
+app.post(
+  '/api/admin/offers',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (req, res) => {
+    const {
+      merchant_id,
+      item_id,
+      title,
+      description,
+      image_url,
+      original_price,
+      discounted_price,
+      starts_at,
+      ends_at
+    } = req.body;
+
+    const original = Number(original_price);
+    const discounted = Number(discounted_price);
+    const startDate = new Date(starts_at);
+    const endDate = new Date(ends_at);
+
+    if (
+      !merchant_id ||
+      !title ||
+      !Number.isFinite(original) ||
+      !Number.isFinite(discounted) ||
+      original <= 0 ||
+      discounted < 0 ||
+      discounted >= original ||
+      !starts_at ||
+      !ends_at ||
+      Number.isNaN(startDate.getTime()) ||
+      Number.isNaN(endDate.getTime()) ||
+      endDate <= startDate
+    ) {
+      return sendError(
+        res,
+        400,
+        'بيانات العرض أو الأسعار أو التواريخ غير صحيحة.',
+        'INVALID_OFFER_DATA'
+      );
+    }
+
+    const merchant = await pool.query(
+      'SELECT id FROM merchants WHERE id = $1',
+      [merchant_id]
+    );
+
+    if (!merchant.rowCount) {
+      return sendError(res, 404, 'المتجر غير موجود.', 'MERCHANT_NOT_FOUND');
+    }
+
+    if (item_id) {
+      const item = await pool.query(
+        `
+        SELECT id
+        FROM catalog_items
+        WHERE id = $1 AND merchant_id = $2
+        `,
+        [item_id, merchant_id]
+      );
+
+      if (!item.rowCount) {
+        return sendError(
+          res,
+          400,
+          'المنتج لا يتبع المتجر المحدد.',
+          'OFFER_ITEM_MERCHANT_MISMATCH'
+        );
+      }
+    }
+
+    const result = await pool.query(
+      `
+      INSERT INTO offers (
+        merchant_id,
+        item_id,
+        title,
+        description,
+        image_url,
+        original_price,
+        discounted_price,
+        starts_at,
+        ends_at,
+        status,
+        created_by_admin
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'draft', $10)
+      RETURNING *
+      `,
+      [
+        merchant_id,
+        item_id || null,
+        title.trim(),
+        description || null,
+        image_url || null,
+        original,
+        discounted,
+        starts_at,
+        ends_at,
+        req.user.id
+      ]
+    );
+
+    res.status(201).json({
+      success: true,
+      message: 'تم إنشاء العرض. وهو محفوظ كمسودة حتى تنشره الإدارة.',
+      offer: result.rows[0]
+    });
+  })
+);
+
+
+// تعديل عرض
+app.patch(
+  '/api/admin/offers/:id',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (req, res) => {
+    const {
+      title,
+      description,
+      image_url,
+      original_price,
+      discounted_price,
+      starts_at,
+      ends_at,
+      status
+    } = req.body;
+
+    const current = await pool.query(
+      'SELECT * FROM offers WHERE id = $1',
+      [req.params.id]
+    );
+
+    if (!current.rowCount) {
+      return sendError(res, 404, 'العرض غير موجود.', 'OFFER_NOT_FOUND');
+    }
+
+    const old = current.rows[0];
+
+    const original = original_price === undefined
+      ? Number(old.original_price)
+      : Number(original_price);
+
+    const discounted = discounted_price === undefined
+      ? Number(old.discounted_price)
+      : Number(discounted_price);
+
+    const start = starts_at === undefined ? old.starts_at : starts_at;
+    const end = ends_at === undefined ? old.ends_at : ends_at;
+
+    if (
+      !Number.isFinite(original) ||
+      !Number.isFinite(discounted) ||
+      original <= 0 ||
+      discounted < 0 ||
+      discounted >= original ||
+      new Date(end) <= new Date(start)
+    ) {
+      return sendError(res, 400, 'بيانات العرض غير صحيحة.', 'INVALID_OFFER_DATA');
+    }
+
+    if (
+      status !== undefined &&
+      !['draft', 'published', 'hidden', 'expired'].includes(status)
+    ) {
+      return sendError(res, 400, 'حالة العرض غير صحيحة.', 'INVALID_OFFER_STATUS');
+    }
+
+    const result = await pool.query(
+      `
+      UPDATE offers
+      SET
+        title = COALESCE($2, title),
+        description = COALESCE($3, description),
+        image_url = COALESCE($4, image_url),
+        original_price = $5,
+        discounted_price = $6,
+        starts_at = $7,
+        ends_at = $8,
+        status = COALESCE($9, status),
+        updated_at = NOW()
+      WHERE id = $1
+      RETURNING *
+      `,
+      [
+        req.params.id,
+        title?.trim() || null,
+        description ?? null,
+        image_url ?? null,
+        original,
+        discounted,
+        start,
+        end,
+        status ?? null
+      ]
+    );
+
+    res.json({
+      success: true,
+      message: 'تم تحديث العرض.',
+      offer: result.rows[0]
+    });
+  })
+);
+
+
+// إخفاء عرض
+app.delete(
+  '/api/admin/offers/:id',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (req, res) => {
+    const result = await pool.query(
+      `
+      UPDATE offers
+      SET status = 'hidden', updated_at = NOW()
+      WHERE id = $1
+      RETURNING id, title, status
+      `,
+      [req.params.id]
+    );
+
+    if (!result.rowCount) {
+      return sendError(res, 404, 'العرض غير موجود.', 'OFFER_NOT_FOUND');
+    }
+
+    res.json({
+      success: true,
+      message: 'تم إخفاء العرض.',
+      offer: result.rows[0]
+    });
+  })
+);
 app.get(
   '/api/auth/me',
   authenticate,
