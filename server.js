@@ -2288,6 +2288,412 @@ app.delete(
   })
 );
 /* =========================================================
+   ADMIN MERCHANT SUBSCRIPTIONS MANAGEMENT
+   إدارة اشتراكات التجار - الإدارة فقط
+========================================================= */
+
+// عرض اشتراكات التجار
+app.get(
+  '/api/admin/merchant-subscriptions',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (req, res) => {
+    const allowedStatuses = [
+      'trial',
+      'active',
+      'expired',
+      'suspended',
+      'cancelled'
+    ];
+
+    const conditions = [];
+    const values = [];
+
+    if (req.query.status) {
+      if (!allowedStatuses.includes(req.query.status)) {
+        return sendError(
+          res,
+          400,
+          'حالة الاشتراك غير صحيحة.',
+          'INVALID_SUBSCRIPTION_STATUS'
+        );
+      }
+
+      values.push(req.query.status);
+      conditions.push(`ms.status = $${values.length}`);
+    }
+
+    if (req.query.merchant_id) {
+      values.push(req.query.merchant_id);
+      conditions.push(`ms.merchant_id = $${values.length}`);
+    }
+
+    const whereClause = conditions.length
+      ? `WHERE ${conditions.join(' AND ')}`
+      : '';
+
+    const result = await pool.query(
+      `
+      SELECT
+        ms.*,
+        m.business_name,
+        m.status AS merchant_status,
+        u.full_name AS owner_name,
+        u.email AS owner_email,
+        mp.name AS plan_name,
+        mp.code AS plan_code
+      FROM merchant_subscriptions ms
+      JOIN merchants m ON m.id = ms.merchant_id
+      JOIN users u ON u.id = m.user_id
+      LEFT JOIN merchant_plans mp ON mp.id = ms.plan_id
+      ${whereClause}
+      ORDER BY ms.created_at DESC
+      `,
+      values
+    );
+
+    res.json({
+      success: true,
+      total: result.rowCount,
+      subscriptions: result.rows
+    });
+  })
+);
+
+
+// تجديد اشتراك تاجر
+app.post(
+  '/api/admin/merchants/:id/subscriptions/renew',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (req, res) => {
+    const {
+      plan_id,
+      billing_cycle,
+      payment_method,
+      payment_confirmed
+    } = req.body;
+
+    const cycles = {
+      monthly: {
+        column: 'monthly_price',
+        days: 30
+      },
+      quarterly: {
+        column: 'quarterly_price',
+        days: 90
+      },
+      semiannual: {
+        column: 'semiannual_price',
+        days: 180
+      },
+      annual: {
+        column: 'annual_price',
+        days: 365
+      }
+    };
+
+    const cycle = cycles[billing_cycle];
+
+    if (!plan_id || !cycle) {
+      return sendError(
+        res,
+        400,
+        'اختر باقة وفترة اشتراك صحيحة.',
+        'INVALID_RENEWAL_DATA'
+      );
+    }
+
+    if (payment_confirmed !== true) {
+      return sendError(
+        res,
+        400,
+        'يجب تأكيد استلام الدفع من الإدارة قبل تفعيل الاشتراك.',
+        'PAYMENT_NOT_CONFIRMED'
+      );
+    }
+
+    if (
+      typeof payment_method !== 'string' ||
+      !payment_method.trim() ||
+      payment_method.trim().length > 50
+    ) {
+      return sendError(
+        res,
+        400,
+        'يجب تحديد وسيلة الدفع.',
+        'INVALID_PAYMENT_METHOD'
+      );
+    }
+
+    const planResult = await pool.query(
+      `
+      SELECT id, name, is_active, ${cycle.column} AS price
+      FROM merchant_plans
+      WHERE id = $1
+      LIMIT 1
+      `,
+      [plan_id]
+    );
+
+    if (!planResult.rowCount || !planResult.rows[0].is_active) {
+      return sendError(
+        res,
+        404,
+        'الباقة غير موجودة أو غير مفعلة.',
+        'MERCHANT_PLAN_UNAVAILABLE'
+      );
+    }
+
+    const plan = planResult.rows[0];
+
+    if (
+      plan.price === null ||
+      plan.price === undefined ||
+      !Number.isFinite(Number(plan.price)) ||
+      Number(plan.price) <= 0
+    ) {
+      return sendError(
+        res,
+        409,
+        'سعر هذه الباقة لم يتم تحديده واعتماده بعد.',
+        'MERCHANT_PLAN_PRICE_NOT_SET'
+      );
+    }
+
+    const result = await withTransaction(async (client) => {
+      const merchantResult = await client.query(
+        `
+        SELECT id
+        FROM merchants
+        WHERE id = $1
+        FOR UPDATE
+        `,
+        [req.params.id]
+      );
+
+      if (!merchantResult.rowCount) {
+        return { notFound: true };
+      }
+
+      const currentResult = await client.query(
+        `
+        SELECT status, ends_at
+        FROM merchant_subscriptions
+        WHERE merchant_id = $1
+        ORDER BY created_at DESC
+        LIMIT 1
+        FOR UPDATE
+        `,
+        [req.params.id]
+      );
+
+      const current = currentResult.rows[0];
+      const now = new Date();
+
+      let startDate = now;
+
+      if (
+        current &&
+        ['trial', 'active'].includes(current.status) &&
+        new Date(current.ends_at) > now
+      ) {
+        startDate = new Date(current.ends_at);
+      }
+
+      const endDate = new Date(
+        startDate.getTime() + cycle.days * 24 * 60 * 60 * 1000
+      );
+
+      const inserted = await client.query(
+        `
+        INSERT INTO merchant_subscriptions (
+          merchant_id,
+          plan_id,
+          billing_cycle,
+          status,
+          amount,
+          currency,
+          started_at,
+          ends_at,
+          renewed_at,
+          payment_method,
+          auto_renew
+        )
+        VALUES (
+          $1, $2, $3, 'active', $4, 'EGP',
+          $5, $6, NOW(), $7, FALSE
+        )
+        RETURNING *
+        `,
+        [
+          req.params.id,
+          plan_id,
+          billing_cycle,
+          Number(plan.price),
+          startDate,
+          endDate,
+          payment_method.trim()
+        ]
+      );
+
+      return {
+        subscription: inserted.rows[0]
+      };
+    });
+
+    if (result.notFound) {
+      return sendError(
+        res,
+        404,
+        'التاجر غير موجود.',
+        'MERCHANT_NOT_FOUND'
+      );
+    }
+
+    res.status(201).json({
+      success: true,
+      message: 'تم تسجيل تجديد الاشتراك بعد تأكيد الإدارة للدفع.',
+      subscription: result.subscription
+    });
+  })
+);
+
+
+// إيقاف أو إلغاء أو إعادة تفعيل اشتراك تاجر
+app.patch(
+  '/api/admin/merchant-subscriptions/:id',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (req, res) => {
+    const {
+      status,
+      payment_method,
+      auto_renew,
+      ends_at
+    } = req.body;
+
+    const allowedStatuses = [
+      'active',
+      'suspended',
+      'cancelled'
+    ];
+
+    if (status !== undefined && !allowedStatuses.includes(status)) {
+      return sendError(
+        res,
+        400,
+        'حالة الاشتراك المطلوبة غير مسموح بها.',
+        'INVALID_SUBSCRIPTION_STATUS'
+      );
+    }
+
+    if (
+      payment_method !== undefined &&
+      payment_method !== null &&
+      (
+        typeof payment_method !== 'string' ||
+        payment_method.length > 50
+      )
+    ) {
+      return sendError(
+        res,
+        400,
+        'وسيلة الدفع غير صحيحة.',
+        'INVALID_PAYMENT_METHOD'
+      );
+    }
+
+    if (
+      auto_renew !== undefined &&
+      typeof auto_renew !== 'boolean'
+    ) {
+      return sendError(
+        res,
+        400,
+        'قيمة التجديد التلقائي غير صحيحة.',
+        'INVALID_AUTO_RENEW'
+      );
+    }
+
+    if (ends_at !== undefined) {
+      const parsedDate = new Date(ends_at);
+
+      if (Number.isNaN(parsedDate.getTime())) {
+        return sendError(
+          res,
+          400,
+          'تاريخ انتهاء الاشتراك غير صحيح.',
+          'INVALID_END_DATE'
+        );
+      }
+
+      if (status === 'active' && parsedDate <= new Date()) {
+        return sendError(
+          res,
+          400,
+          'لا يمكن تفعيل اشتراك بتاريخ انتهاء سابق أو حالي.',
+          'INVALID_ACTIVE_END_DATE'
+        );
+      }
+    }
+
+    if (
+      status === undefined &&
+      payment_method === undefined &&
+      auto_renew === undefined &&
+      ends_at === undefined
+    ) {
+      return sendError(
+        res,
+        400,
+        'لم يتم إرسال أي تعديل.',
+        'NO_UPDATE_FIELDS'
+      );
+    }
+
+    const result = await pool.query(
+      `
+      UPDATE merchant_subscriptions
+      SET
+        status = COALESCE($1, status),
+        payment_method = CASE
+          WHEN $2::boolean THEN $3
+          ELSE payment_method
+        END,
+        auto_renew = COALESCE($4, auto_renew),
+        ends_at = COALESCE($5, ends_at),
+        updated_at = NOW()
+      WHERE id = $6
+      RETURNING *
+      `,
+      [
+        status ?? null,
+        payment_method !== undefined,
+        payment_method ?? null,
+        auto_renew ?? null,
+        ends_at ?? null,
+        req.params.id
+      ]
+    );
+
+    if (!result.rowCount) {
+      return sendError(
+        res,
+        404,
+        'اشتراك التاجر غير موجود.',
+        'MERCHANT_SUBSCRIPTION_NOT_FOUND'
+      );
+    }
+
+    res.json({
+      success: true,
+      message: 'تم تحديث اشتراك التاجر.',
+      subscription: result.rows[0]
+    });
+  })
+);
+/* =========================================================
    ADMIN MERCHANT PLANS MANAGEMENT
    الإدارة وحدها تتحكم في باقات التجار وأسعارها
 ========================================================= */
