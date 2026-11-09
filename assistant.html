@@ -1,22 +1,22 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#54258f">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1b0829">
 <title>M3AK | المساعد الذكي</title>
 
 <style>
 :root {
-  --purple:#54258f;
-  --deep:#35145f;
+  --bg:#100719;
+  --surface:#1d1029;
+  --surface2:#291638;
+  --purple:#7b35a6;
   --pink:#e94c9b;
-  --teal:#35bdb4;
-  --ink:#29233a;
-  --muted:#827b91;
-  --bg:#f7f5fb;
-  --line:#eee9f4;
+  --teal:#35c8bd;
   --white:#fff;
+  --muted:#b9a9c5;
+  --line:#ffffff16;
 }
 
 * {
@@ -25,178 +25,707 @@
 
 body {
   margin:0;
-  background:var(--bg);
+  min-height:100vh;
+  background:
+    radial-gradient(circle at 10% 0%,#40165355,transparent 35%),
+    var(--bg);
+  color:var(--white);
   font-family:Tahoma,Arial,sans-serif;
-  color:var(--ink);
-  min-height:100dvh;
 }
 
-button,input {
+button,input,textarea {
   font-family:inherit;
 }
 
+button {
+  cursor:pointer;
+}
+
 .app {
+  width:100%;
   max-width:480px;
-  margin:auto;
   min-height:100dvh;
-  background:var(--bg);
+  margin:auto;
   display:flex;
   flex-direction:column;
-  box-shadow:0 0 35px #2c17400d;
+  padding-bottom:85px;
 }
 
 /* HEADER */
 
-.top {
-  background:linear-gradient(
-    135deg,
-    var(--deep),
-    var(--purple) 65%,
-    #7543ad
-  );
-  color:white;
-  padding:18px 18px 22px;
-  border-radius:0 0 25px 25px;
-  box-shadow:0 8px 24px #54258f25;
+.header {
+  padding:18px 17px 20px;
+  background:linear-gradient(135deg,#2b0c3d,#542078 65%,#71318b);
+  border-radius:0 0 27px 27px;
+  box-shadow:0 10px 30px #0004;
 }
 
-.toprow {
+.header-row {
   display:flex;
-  align-items:center;
   justify-content:space-between;
+  align-items:center;
 }
 
 .brand {
   display:flex;
   align-items:center;
-  gap:10px;
+  gap:11px;
 }
 
 .logo {
-  width:48px;
-  height:48px;
-  border-radius:15px;
-  background:linear-gradient(145deg,#fff,#f7dff0);
+  width:49px;
+  height:49px;
+  border-radius:16px;
+  background:linear-gradient(145deg,#fff,#f5dff0);
+  color:#542078;
   display:grid;
   place-items:center;
-  color:var(--purple);
-  font-weight:900;
   font-size:25px;
-  box-shadow:inset 0 0 0 2px #ffffff70;
+  font-weight:900;
+  box-shadow:inset 0 0 0 2px #ffffff55;
 }
 
 .brand strong {
-  font-size:20px;
-  letter-spacing:.4px;
+  font-size:21px;
+  letter-spacing:.5px;
 }
 
 .brand small {
   display:block;
-  color:#e9dff5;
-  font-size:11px;
   margin-top:4px;
+  color:#eadcf4;
+  font-size:10px;
 }
 
-.iconbtn {
-  border:1px solid #ffffff40;
-  background:#ffffff18;
-  color:#fff;
-  width:42px;
-  height:42px;
-  border-radius:14px;
-  font-size:20px;
-  cursor:pointer;
-}
-
-.title {
-  margin:21px 0 5px;
-  font-size:23px;
-}
-
-.subtitle {
-  font-size:12px;
-  color:#eee5f7;
-  line-height:1.9;
-}
-
-/* USAGE CARD */
-
-.status {
-  margin-top:17px;
-  background:#ffffff18;
-  border:1px solid #ffffff2b;
-  border-radius:15px;
-  padding:12px;
+.header-actions {
   display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:12px;
+  gap:8px;
+}
+
+.icon-btn {
+  width:40px;
+  height:40px;
+  border-radius:13px;
+  border:1px solid #ffffff35;
+  background:#ffffff15;
+  color:white;
+  font-size:19px;
+}
+
+.heading {
+  margin-top:23px;
+}
+
+.heading h1 {
+  font-size:22px;
+  margin:0 0 8px;
+}
+
+.heading p {
   font-size:11px;
+  line-height:1.9;
+  color:#eadcf4;
+  margin:0;
 }
 
-.status b {
-  color:#fff;
+.online {
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  margin-top:13px;
+  padding:7px 11px;
+  border-radius:20px;
+  background:#ffffff16;
+  color:#e8fff9;
+  font-size:10px;
 }
 
-.status-info {
-  opacity:.85;
-  margin-top:5px;
-  line-height:1.6;
+.online i {
+  width:7px;
+  height:7px;
+  background:#55e3b5;
+  border-radius:50%;
 }
 
-.usage-number {
+/* USAGE */
+
+.usage {
+  margin:15px 15px 0;
+  padding:13px;
+  border-radius:16px;
+  background:linear-gradient(120deg,#291438,#20102e);
+  border:1px solid var(--line);
+}
+
+.usage-top {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+
+.usage-title {
+  font-size:12px;
   font-weight:bold;
-  color:#fff;
-  white-space:nowrap;
 }
 
-.meter {
-  height:6px;
-  width:78px;
-  background:#ffffff45;
-  border-radius:9px;
-  overflow:hidden;
-  margin-top:7px;
+.usage-label {
+  font-size:10px;
+  color:var(--muted);
 }
 
-.meter i {
-  display:block;
-  width:35%;
-  height:100%;
-  background:#72e0d5;
-  border-radius:9px;
+.usage-note {
+  margin-top:8px;
+  color:var(--muted);
+  font-size:10px;
+  line-height:1.8;
 }
 
-/* CONTENT */
+/* CHAT */
 
-.content {
-  padding:18px 16px 14px;
+.chat-area {
+  padding:17px 15px 12px;
   flex:1;
 }
 
-.welcome {
-  background:white;
+.welcome-card {
+  padding:16px;
   border:1px solid var(--line);
   border-radius:19px;
-  padding:16px;
+  background:linear-gradient(140deg,#281439,#1c1028);
   display:flex;
-  gap:12px;
   align-items:center;
-  box-shadow:0 5px 18px #34204d08;
+  gap:12px;
 }
 
-.bot {
-  width:52px;
-  height:52px;
+.bot-avatar {
+  width:53px;
+  height:53px;
   flex:none;
   border-radius:17px;
-  background:linear-gradient(145deg,#e8e0fb,#d5f5f1);
   display:grid;
   place-items:center;
   font-size:27px;
+  background:linear-gradient(145deg,#8b4bb3,#35bdb4);
+  box-shadow:0 5px 20px #0003;
 }
 
-.welcome h2 {
-  font-size:14px;
-  margin:0 0 6px;
-  color:var(--
+.welcome-text h2 {
+  margin:0 0 7px;
+  font-size:13px;
+}
+
+.welcome-text p {
+  margin:0;
+  color:var(--muted);
+  font-size:10px;
+  line-height:1.8;
+}
+
+.section-title {
+  font-size:12px;
+  margin:22px 2px 12px;
+  color:#f3eafa;
+}
+
+.suggestions {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:9px;
+}
+
+.suggestion {
+  min-height:78px;
+  text-align:right;
+  padding:12px;
+  border:1px solid var(--line);
+  border-radius:15px;
+  background:var(--surface);
+  color:white;
+  transition:.2s;
+}
+
+.suggestion:active {
+  transform:scale(.97);
+  border-color:var(--pink);
+}
+
+.suggestion span {
+  display:block;
+  font-size:20px;
+  margin-bottom:8px;
+}
+
+.suggestion strong {
+  font-size:10px;
+  line-height:1.7;
+}
+
+/* MESSAGE AREA */
+
+.messages {
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  margin-top:18px;
+}
+
+.message {
+  max-width:88%;
+  padding:12px 14px;
+  border-radius:16px;
+  font-size:11px;
+  line-height:1.9;
+  overflow-wrap:anywhere;
+}
+
+.message.user {
+  align-self:flex-start;
+  background:linear-gradient(135deg,#71349a,#542078);
+  border-bottom-left-radius:5px;
+}
+
+.message.assistant {
+  align-self:flex-end;
+  background:#291638;
+  border:1px solid var(--line);
+  border-bottom-right-radius:5px;
+}
+
+.message small {
+  display:block;
+  margin-top:6px;
+  color:#c9b8d5;
+  font-size:9px;
+}
+
+/* COMPOSER */
+
+.composer-wrap {
+  position:sticky;
+  bottom:68px;
+  padding:10px 14px 12px;
+  background:linear-gradient(180deg,transparent,#100719 25%);
+}
+
+.composer {
+  display:flex;
+  align-items:flex-end;
+  gap:8px;
+  padding:9px;
+  background:#251431;
+  border:1px solid #ffffff24;
+  border-radius:19px;
+  box-shadow:0 8px 25px #0004;
+}
+
+.attach-btn {
+  width:40px;
+  height:40px;
+  flex:none;
+  border:0;
+  border-radius:13px;
+  background:#ffffff10;
+  color:#e7d4f2;
+  font-size:21px;
+}
+
+.composer textarea {
+  flex:1;
+  min-width:0;
+  max-height:110px;
+  min-height:40px;
+  resize:none;
+  border:0;
+  outline:0;
+  background:transparent;
+  color:white;
+  padding:11px 3px;
+  font-size:11px;
+  line-height:1.7;
+}
+
+.composer textarea::placeholder {
+  color:#a997b6;
+}
+
+.send-btn {
+  width:42px;
+  height:42px;
+  flex:none;
+  border:0;
+  border-radius:14px;
+  background:linear-gradient(135deg,var(--pink),var(--purple));
+  color:white;
+  font-size:19px;
+  box-shadow:0 4px 12px #0003;
+}
+
+.disclaimer {
+  text-align:center;
+  color:#8e7d9c;
+  font-size:9px;
+  margin-top:9px;
+}
+
+/* BOTTOM NAV */
+
+.bottom-nav {
+  position:fixed;
+  bottom:0;
+  left:50%;
+  transform:translateX(-50%);
+  width:100%;
+  max-width:480px;
+  min-height:68px;
+  display:flex;
+  align-items:center;
+  justify-content:space-around;
+  background:#1b1025;
+  border-top:1px solid var(--line);
+  padding:7px 3px calc(7px + env(safe-area-inset-bottom));
+  z-index:10;
+}
+
+.nav-item {
+  border:0;
+  background:none;
+  color:#a99ab4;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:5px;
+  min-width:53px;
+  font-size:9px;
+}
+
+.nav-item span {
+  font-size:20px;
+}
+
+.nav-item.active {
+  color:#f078bd;
+  font-weight:bold;
+}
+
+/* TOAST */
+
+.toast {
+  position:fixed;
+  z-index:30;
+  bottom:145px;
+  left:50%;
+  transform:translateX(-50%);
+  width:calc(100% - 35px);
+  max-width:420px;
+  padding:13px 15px;
+  border:1px solid #ffffff20;
+  border-radius:14px;
+  background:#38204a;
+  color:white;
+  text-align:center;
+  font-size:11px;
+  line-height:1.8;
+  box-shadow:0 8px 25px #0005;
+  display:none;
+}
+
+.toast.show {
+  display:block;
+}
+
+@media(max-width:360px) {
+  .suggestions {
+    gap:7px;
+  }
+
+  .suggestion {
+    padding:10px;
+  }
+
+  .heading h1 {
+    font-size:19px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<main class="app">
+
+<header class="header">
+
+  <div class="header-row">
+
+    <div class="brand">
+      <div class="logo">M</div>
+      <div>
+        <strong>M3AK</strong>
+        <small>كل اللي تحتاجه.. معاك</small>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <button class="icon-btn"
+        aria-label="الرئيسية"
+        onclick="go('home.html')">⌂</button>
+
+      <button class="icon-btn"
+        aria-label="الملف الشخصي"
+        onclick="go('profile.html')">☻</button>
+    </div>
+
+  </div>
+
+  <div class="heading">
+    <h1>مساعد معاك الذكي ✨</h1>
+    <p>
+      اسأل، قارن، خطط، واستكشف اختياراتك.
+      إحنا معاك علشان تساعدك تاخد قرار أفضل.
+    </p>
+
+    <div class="online">
+      <i></i>
+      واجهة المساعد جاهزة للربط
+    </div>
+  </div>
+
+</header>
+
+<section class="usage">
+
+  <div class="usage-top">
+    <span class="usage-title">استهلاك باقتك</span>
+    <span class="usage-label">بانتظار ربط الحساب</span>
+  </div>
+
+  <div class="usage-note">
+    ستظهر حدودك اليومية واستهلاكك الفعلي بعد الاتصال بالخادم.
+  </div>
+
+</section>
+
+<section class="chat-area">
+
+  <div class="welcome-card">
+
+    <div class="bot-avatar">🤖</div>
+
+    <div class="welcome-text">
+      <h2>أهلاً بيك في مساعد معاك</h2>
+      <p>
+        ابدأ بسؤالك، وأنا هساعدك ترتب أفكارك
+        وتوصل للمعلومة اللي تحتاجها.
+      </p>
+    </div>
+
+  </div>
+
+  <h3 class="section-title">ممكن أساعدك في إيه؟</h3>
+
+  <div class="suggestions">
+
+    <button class="suggestion"
+      data-prompt="ساعدني أقارن بين المنتجات قبل الشراء">
+      <span>🛍️</span>
+      <strong>مقارنة المنتجات والأسعار</strong>
+    </button>
+
+    <button class="suggestion"
+      data-prompt="ساعدني أخطط لرحلة مناسبة لميزانيتي">
+      <span>✈️</span>
+      <strong>تخطيط السفر والرحلات</strong>
+    </button>
+
+    <button class="suggestion"
+      data-prompt="ساعدني أنظم ميزانيتي ومصروفاتي">
+      <span>💰</span>
+      <strong>الميزانية والتوفير</strong>
+    </button>
+
+    <button class="suggestion"
+      data-prompt="ساعدني أختار خدمة مناسبة لاحتياجات أسرتي">
+      <span>👨‍👩‍👧‍👦</span>
+      <strong>احتياجات الأسرة والأطفال</strong>
+    </button>
+
+    <button class="suggestion"
+      data-prompt="ساعدني أتحقق من منتج قبل ما أشتريه">
+      <span>🛡️</span>
+      <strong>حماية المشتريات</strong>
+    </button>
+
+    <button class="suggestion"
+      data-prompt="ساعدني ألاقي خدمات مناسبة بالقرب مني">
+      <span>📍</span>
+      <strong>الخدمات القريبة</strong>
+    </button>
+
+  </div>
+
+  <div class="messages" id="messages"></div>
+
+</section>
+
+<div class="composer-wrap">
+
+  <div class="composer">
+
+    <button class="attach-btn"
+      id="attachButton"
+      aria-label="إرفاق صورة">＋</button>
+
+    <textarea
+      id="messageInput"
+      rows="1"
+      maxlength="4000"
+      placeholder="اكتب سؤالك هنا..."></textarea>
+
+    <button class="send-btn"
+      id="sendButton"
+      aria-label="إرسال">➤</button>
+
+  </div>
+
+  <div class="disclaimer">
+    لا تشارك كلمات المرور أو البيانات البنكية أو المعلومات السرية.
+  </div>
+
+</div>
+
+<nav class="bottom-nav">
+
+  <button class="nav-item" onclick="go('home.html')">
+    <span>⌂</span>
+    الرئيسية
+  </button>
+
+  <button class="nav-item" onclick="go('orders.html')">
+    <span>▣</span>
+    طلباتي
+  </button>
+
+  <button class="nav-item active" onclick="go('assistant.html')">
+    <span>✧</span>
+    المساعد
+  </button>
+
+  <button class="nav-item" onclick="go('notifications.html')">
+    <span>♧</span>
+    الإشعارات
+  </button>
+
+  <button class="nav-item" onclick="go('profile.html')">
+    <span>☻</span>
+    حسابي
+  </button>
+
+</nav>
+
+</main>
+
+<div class="toast" id="toast" role="status"></div>
+
+<input
+  type="file"
+  id="imageInput"
+  accept="image/*"
+  hidden>
+
+<script>
+"use strict";
+
+function go(page) {
+  window.location.href = page;
+}
+
+let toastTimer;
+
+function showMessage(message) {
+  const toast = document.getElementById("toast");
+
+  toast.textContent = message;
+  toast.classList.add("show");
+
+  clearTimeout(toastTimer);
+
+  toastTimer = setTimeout(() => {
+    toast.classList.remove("show");
+  }, 3500);
+}
+
+/*
+  نقطة الربط المستقبلية:
+  سيتم توصيل واجهة المحادثة بخادم M3AK
+  بعد إنشاء واختبار Backend.
+
+  لا توجد استجابات ذكاء اصطناعي تجريبية هنا.
+*/
+
+function sendMessage() {
+  const input = document.getElementById("messageInput");
+  const value = input.value.trim();
+
+  if (!value) {
+    showMessage("اكتب سؤالك الأول.");
+    return;
+  }
+
+  showMessage(
+    "المساعد جاهز من ناحية الواجهة، لكن الاتصال بخدمة الذكاء الاصطناعي لم يُفعّل بعد."
+  );
+}
+
+document.getElementById("sendButton")
+  .addEventListener("click", sendMessage);
+
+document.getElementById("messageInput")
+  .addEventListener("keydown", event => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      sendMessage();
+    }
+  });
+
+document.querySelectorAll(".suggestion")
+  .forEach(button => {
+    button.addEventListener("click", () => {
+      const prompt = button.dataset.prompt;
+      const input = document.getElementById("messageInput");
+
+      input.value = prompt;
+      input.focus();
+
+      showMessage("تم تجهيز سؤالك. اضغط إرسال بعد ربط المساعد بالخادم.");
+    });
+  });
+
+document.getElementById("attachButton")
+  .addEventListener("click", () => {
+    document.getElementById("imageInput").click();
+  });
+
+document.getElementById("imageInput")
+  .addEventListener("change", event => {
+    const file = event.target.files[0];
+
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      showMessage("من فضلك اختر ملف صورة صالح.");
+      event.target.value = "";
+      return;
+    }
+
+    showMessage(
+      "تم اختيار الصورة، لكن تحليل الصور سيتفعّل بعد ربط خدمة الذكاء الاصطناعي."
+    );
+
+    event.target.value = "";
+  });
+
+</script>
+
+</body>
+        </html>
