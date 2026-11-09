@@ -41,6 +41,28 @@ function validateEnvironment() {
     'JWT_SECRET'
   ];
 
+  for (const key of requiredEnvironment) {
+    if (!process.env[key]) {
+      throw new Error(
+        `Missing required environment variable: ${key}`
+      );
+    }
+  }
+
+  if (JWT_SECRET.length < 32) {
+    throw new Error(
+      'JWT_SECRET must contain at least 32 characters.'
+    );
+  }
+
+  if (NODE_ENV === 'production' && !process.env.APP_ORIGIN) {
+    throw new Error(
+      'APP_ORIGIN is required in production.'
+    );
+  }
+  }
+  
+
   if (NODE_ENV === 'production' && !process.env.APP_ORIGIN) {
   console.error('APP_ORIGIN is required in production.');
   process.exit(1);
