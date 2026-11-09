@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#180820">
+<title>مستلزمات الأطفال | M3AK</title>
+
+<style>
+:root{
+  --bg:#120719;
+  --purple:#7b1fa2;
+  --pink:#e91e63;
+  --turquoise:#21d4c2;
+  --text:#fff;
+  --muted:#bba9c5;
+  --border:rgba(255,255,255,.09);
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Tahoma,Arial,sans-serif;
+  background:linear-gradient(145deg,#2b0c3d,#12041a 65%);
+  color:var(--text);
+  min-height:100vh;
+  padding-bottom:90px;
+}
+button,input,textarea,select{font-family:inherit}
+button{cursor:pointer}
+.container{width:100%;max-width:650px;margin:auto;padding:16px}
+.header{text-align:center;padding:20px 10px 15px}
+.logo{
+  width:76px;height:76px;border-radius:25px;
+  margin:auto auto 10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:38px;
+  background:linear-gradient(135deg,var(--purple),var(--pink));
+  box-shadow:0 8px 30px #0005;
+}
+.header h1{font-size:23px;margin:8px 0}
+.header p{color:var(--muted);font-size:13px;margin:0}
+.back{
+  display:inline-block;color:#fff;text-decoration:none;
+  background:#ffffff12;padding:9px 15px;border-radius:12px;
+  margin-bottom:10px;font-size:13px;
+}
+.section{margin-top:24px}
+.section-title{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:13px;
+}
+.section-title h2{font-size:17px;margin:0}
+.section-title span{font-size:11px;color:var(--turquoise)}
+.card{
+  background:linear-gradient(145deg,#2a1537,#1d1028);
+  border:1px solid var(--border);
+  border-radius:18px;padding:16px;margin-bottom:13px;
+  box-shadow:0 8px 25px #0002;
+}
+.search-box{display:flex;gap:8px;margin-top:12px}
+input,select,textarea{
+  width:100%;background:#160b20;color:white;
+  border:1px solid var(--border);border-radius:12px;
+  padding:13px;font-size:13px;outline:none;
+}
+input::placeholder,textarea::placeholder{color:#9e8ba9}
+.search-box button,.main-btn{
+  border:0;border-radius:12px;padding:12px 17px;
+  color:white;background:linear-gradient(120deg,var(--purple),var(--pink));
+  font-weight:bold;white-space:nowrap;
+}
+.location-row{display:flex;gap:9px;margin-top:10px}
+.location-row button{
+  flex:1;border:1px solid var(--border);
+  border-radius:11px;padding:11px;background:#ffffff0b;
+  color:white;font-size:12px;
+}
+.age-tabs{
+  display:flex;gap:9px;overflow-x:auto;padding-bottom:8px;
+}
+.age-btn{
+  min-width:105px;padding:12px 9px;
+  border:1px solid var(--border);border-radius:13px;
+  background:#ffffff09;color:white;font-size:12px;
+}
+.age-btn.active{
+  background:linear-gradient(120deg,var(--purple),var(--pink));
+  border-color:transparent;
+}
+.categories{
+  display:grid;grid-template-columns:repeat(2,1fr);gap:10px;
+}
+.category{
+  border:1px solid var(--border);border-radius:15px;
+  padding:15px 10px;background:#ffffff08;
+  text-align:center;cursor:pointer;transition:.2s;
+}
+.category.active{
+  border-color:var(--turquoise);
+  background:#21d4c21a;
+}
+.category .icon{font-size:27px;margin-bottom:8px}
+.category .name{font-size:13px;font-weight:bold}
+.category .desc{font-size:10px;color:var(--muted);margin-top:5px}
+.offer-track{
+  display:flex;gap:12px;overflow-x:auto;padding-bottom:8px;
+  scrollbar-width:thin;
+}
+.offer-card{
+  min-width:175px;max-width:175px;
+  background:#ffffff09;border:1px solid var(--border);
+  border-radius:15px;overflow:hidden;
+}
+.offer-image{
+  height:115px;background:linear-gradient(135deg,#422052,#21102d);
+  display:flex;align-items:center;justify-content:center;
+  font-size:37px;position:relative;
+}
+.discount{
+  position:absolute;top:8px;right:8px;
+  background:var(--pink);padding:5px 8px;
+  border-radius:8px;font-size:10px;
+}
+.offer-info{padding:11px}
+.offer-info h3{font-size:13px;margin:0 0 7px}
+.offer-info p{font-size:10px;color:var(--muted);margin:0 0 8px}
+.old-price{font-size:11px;color:#a995b1;text-decoration:line-through}
+.new-price{font-size:15px;color:var(--turquoise);font-weight:bold;margin-top:4px}
+.empty-offers{
+  text-align:center;padding:22px 12px;
+  border:1px dashed #ffffff35;border-radius:15px;
+  color:var(--muted);font-size:12px;line-height:2;
+}
+.assistant{
+  background:linear-gradient(120deg,#422052,#25102f);
+  border:1px solid #a84bcb55;border-radius:18px;
+  padding:17px;display:flex;gap:12px;align-items:center;
+}
+.assistant-icon{
+  min-width:48px;height:48px;border-radius:15px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:25px;background:linear-gradient(135deg,var(--purple),var(--pink));
+}
+.assistant h3{font-size:14px;margin:0 0 5px}
+.assistant p{font-size:11px;color:var(--muted);margin:0;line-height:1.7}
+.assistant a{
+  display:inline-block;margin-top:8px;color:var(--turquoise);
+  text-decoration:none;font-size:12px;font-weight:bold;
+}
+.form-grid{display:grid;gap:10px}
+.note{font-size:11px;color:var(--muted);line-height:1.8}
+.main-btn{width:100%;padding:14px;margin-top:8px}
+.info-box{
+  background:#21d4c20d;border:1px solid #21d4c233;
+  border-radius:13px;padding:12px;color:#c9fff8;
+  font-size:11px;line-height:1.9;
+}
+.bottom-nav{
+  position:fixed;bottom:0;left:0;right:0;z-index:10;
+  max-width:650px;margin:auto;
+  background:#180c22f5;backdrop-filter:blur(15px);
+  border-top:1px solid var(--border);
+  display:grid;grid-template-columns:repeat(5,1fr);
+  padding:10px 4px 12px;
+}
+.bottom-nav a{
+  color:#bba9c5;text-decoration:none;text-align:center;
+  font-size:10px;
+}
+.bottom-nav a span{display:block;font-size:19px;margin-bottom:4px}
+@media(min-width:500px){
+  .categories{grid-template-columns:repeat(3,1fr)}
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<header class="header">
+  <a class="back" href="home.html">→ الرئيسية</a>
+  <div class="logo">🧸</div>
+  <h1>مستلزمات الأطفال</h1>
+  <p>كل احتياجات طفلك وراحتك.. معاك في مكان واحد</p>
+</header>
+
+<section class="section">
+  <div class="section-title">
+    <h2>اختار عمر الطفل</h2>
+    <span>لتسهيل البحث</span>
+  </div>
+
+  <div class="age-tabs" id="ageTabs">
+    <button class="age-btn active" onclick="setAge('all',this)">كل الأعمار</button>
+    <button class="age-btn" onclick="setAge('baby',this)">حديثو الولادة</button>
+    <button class="age-btn" onclick="setAge('0-2',this)">من 0 إلى سنتين</button>
+    <button class="age-btn" onclick="setAge('3-5',this)">من 3 إلى 5 سنوات</button>
+    <button class="age-btn" onclick="setAge('6-12',this)">من 6 إلى 12 سنة</button>
+    <button class="age-btn" onclick="setAge('13+',this)">من 13 سنة فأكثر</button>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-title">
+    <h2>ابحث عن منتج أو مستلزم</h2>
+  </div>
+
+  <div class="search-box">
+    <input id="searchInput" type="search"
+      placeholder="مثلاً: عربة أطفال، ملابس، ألعاب...">
+    <button onclick="searchCategories()">بحث</button>
+  </div>
+
+  <div class="location-row">
+    <button onclick="getLocation()">📍 تحديد موقعي</button>
+    <button onclick="enterArea()">🏙️ اختيار المنطقة</button>
+  </div>
+
+  <p id="locationStatus" class="note">
+    حدد منطقتك لتسهيل العثور على المنتجات والمتاجر القريبة.
+  </p>
+</section>
+
+<section class="section">
+  <div class="section-title">
+    <h2>أحدث العروض</h2>
+    <span>عروض الإدارة</span>
+  </div>
+
+  <div class="offer-track" id="offers">
+    <div class="empty-offers" style="min-width:100%">
+      🎁 ستظهر هنا أحدث عروض مستلزمات الأطفال.<br>
+      صورة المنتج ومواصفاته والسعر قبل وبعد الخصم.<br>
+      تتم إضافة العروض بواسطة إدارة معاك فقط.
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-title">
+    <h2>تصفح المنتجات</h2>
+    <span id="categoryCount"></span>
+  </div>
+
+  <div class="categories" id="categories"></div>
+</section>
+
+<section class="section">
+  <div class="assistant">
+    <div class="assistant-icon">🤖</div>
+    <div>
+      <h3>المساعد الذكي معاك</h3>
+      <p>
+        اسأل عن احتياجات طفلك، وقارن المواصفات،
+        واحصل على مساعدة في اختيار المنتجات المناسبة.
+      </p>
+      <a href="assistant.html">تحدث مع المساعد الذكي ←</a>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="requestSection">
+  <div class="section-title">
+    <h2>طلب منتج أو استفسار</h2>
+  </div>
+
+  <div class="card">
+    <form id="requestForm" class="form-grid">
+      <input id="customerName" type="text"
+        placeholder="اسم العميل" required>
+
+      <input id="customerPhone" type="tel"
+        placeholder="رقم الهاتف" required>
+
+      <input id="customerArea" type="text"
+        placeholder="المنطقة أو العنوان">
+
+      <input id="selectedProduct" type="text"
+        placeholder="المنتج المطلوب" required>
+
+      <select id="childAge">
+        <option value="">عمر الطفل (اختياري)</option>
+        <option>حديث الولادة</option>
+        <option>من 0 إلى سنتين</option>
+        <option>من 3 إلى 5 سنوات</option>
+        <option>من 6 إلى 12 سنة</option>
+        <option>13 سنة فأكثر</option>
+      </select>
+
+      <textarea id="requestDetails" rows="3"
+        placeholder="اكتب المواصفات أو التفاصيل المطلوبة"></textarea>
+
+      <button class="main-btn" type="submit">إرسال الطلب</button>
+    </form>
+
+    <p class="note">
+      إرسال الطلب فعليًا واستقباله لدى المتجر يحتاج إلى ربط
+      نظام الطلبات بالـBackend.
+    </p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="info-box">
+    🔒 إدارة معاك وحدها مسؤولة عن إضافة وتعديل وحذف المنتجات والمتاجر
+    والصور والأسعار والعروض.
+    التاجر يستطيع متابعة الطلبات والمراسلات والرد على العملاء فقط.
+  </div>
+</section>
+
+</div>
+
+<nav class="bottom-nav">
+  <a href="home.html"><span>🏠</span>الرئيسية</a>
+  <a href="orders.html"><span>📦</span>طلباتي</a>
+  <a href="assistant.html"><span>🤖</span>المساعد</a>
+  <a href="notifications.html"><span>🔔</span>الإشعارات</a>
+  <a href="profile.html"><span>👤</span>حسابي</a>
+</nav>
+
+<script>
+let currentAge = "all";
+let currentCategory = "";
+
+const categoryData = [
+  {
+    icon:"🍼",
+    name:"مستلزمات حديثي الولادة",
+    desc:"احتياجات الطفل في أول أيامه",
+    ages:["all","baby","0-2"]
+  },
+  {
+    icon:"👕",
+    name:"ملابس الأطفال",
+    desc:"ملابس يومية ومناسبات",
+    ages:["all","baby","0-2","3-5","6-12","13+"]
+  },
+  {
+    icon:"👟",
+    name:"أحذية الأطفال",
+    desc:"أحذية وصنادل لجميع الأعمار",
+    ages:["all","0-2","3-5","6-12","13+"]
+  },
+  {
+    icon:"🧸",
+    name:"الألعاب",
+    desc:"ألعاب متنوعة وترفيهية",
+    ages:["all","0-2","3-5","6-12","13+"]
+  },
+  {
+    icon:"🧠",
+    name:"الألعاب التعليمية",
+    desc:"التعلم والمهارات وتنمية الذكاء",
+    ages:["all","0-2","3-5","6-12","13+"]
+  },
+  {
+    icon:"🛒",
+    name:"عربات الأطفال",
+    desc:"عربات ومستلزمات التنقل",
+    ages:["all","baby","0-2"]
+  },
+  {
+    icon:"🚗",
+    name:"مقاعد السيارة",
+    desc:"مقاعد أمان ومستلزمات السيارة",
+    ages:["all","baby","0-2","3-5"]
+  },
+  {
+    icon:"🥣",
+    name:"التغذية والرضاعة",
+    desc:"زجاجات وأدوات وأدوات الطعام",
+    ages:["all","baby","0-2","3-5"]
+  },
+  {
+    icon:"🧴",
+    name:"النظافة والعناية",
+    desc:"حفاضات ومنتجات العناية",
+    ages:["all","baby","0-2","3-5","6-12"]
+  },
+  {
+    icon:"🛏️",
+    name:"الأثاث وغرف الأطفال",
+    desc:"أسرة وخزائن وتجهيز الغرف",
+    ages:["all","baby","0-2","3-5","6-12","13+"]
+  },
+  {
+    icon:"🎒",
+    name:"مستلزمات المدارس والحضانة",
+    desc:"حقائب وأدوات مدرسية",
+    ages:["all","3-5","6-12","13+"]
+  },
+  {
+    icon:"⚽",
+    name:"الرياضة والأنشطة",
+    desc:"أدوات رياضية وأنشطة الأطفال",
+    ages:["all","3-5","6-12","13+"]
+  },
+  {
+    icon:"🎨",
+    name:"الفنون والهوايات",
+    desc:"رسم وتلوين وأعمال يدوية",
+    ages:["all","3-5","6-12","13+"]
+  },
+  {
+    icon:"➕",
+    name:"مستلزمات أخرى",
+    desc:"احتياجات متنوعة للأطفال",
+    ages:["all","baby","0-2","3-5","6-12","13+"]
+  }
+];
+
+function renderCategories(list){
+  const container = document.getElementById("categories");
+  container.innerHTML = "";
+
+  list.forEach(item => {
+    const div = document.createElement("div");
+    div.className = "category" +
+      (currentCategory === item.name ? " active" : "");
+
+    const icon = document.createElement("div");
+    icon.className = "icon";
+    icon.textContent = item.icon;
+
+    const name = document.createElement("div");
+    name.className = "name";
+    name.textContent = item.name;
+
+    const desc = document.createElement("div");
+    desc.className = "desc";
+    desc.textContent = item.desc;
+
+    div.append(icon,name,desc);
+
+    div.onclick = () => {
+      currentCategory = item.name;
+      document.getElementById("selectedProduct").value = item.name;
+      renderCategories(getFilteredCategories());
+      document.getElementById("requestSection").scrollIntoView({
+        behavior:"smooth"
+      });
+    };
+
+    container.appendChild(div);
+  });
+
+  document.getElementById("categoryCount").textContent =
+    list.length + " تصنيف";
+}
+
+function getFilteredCategories(){
+  const query = document.getElementById("searchInput")
+    .value.trim().toLowerCase();
+
+  return categoryData.filter(item => {
+    const matchesAge = currentAge === "all" ||
+      item.ages.includes(currentAge);
+
+    const matchesSearch = !query ||
+      item.name.toLowerCase().includes(query) ||
+      item.desc.toLowerCase().includes(query);
+
+    return matchesAge && matchesSearch;
+  });
+}
+
+function setAge(age,button){
+  currentAge = age;
+  currentCategory = "";
+
+  document.querySelectorAll(".age-btn").forEach(btn =>
+    btn.classList.remove("active")
+  );
+
+  button.classList.add("active");
+  renderCategories(getFilteredCategories());
+}
+
+function searchCategories(){
+  renderCategories(getFilteredCategories());
+}
+
+function enterArea(){
+  const area = prompt("اكتب اسم المنطقة أو المدينة:");
+
+  if(area && area.trim()){
+    document.getElementById("customerArea").value = area.trim();
+
+    document.getElementById("locationStatus").textContent =
+      "المنطقة المختارة: " + area.trim();
+  }
+}
+
+function getLocation(){
+  const status = document.getElementById("locationStatus");
+
+  if(!navigator.geolocation){
+    status.textContent = "المتصفح لا يدعم تحديد الموقع.";
+    return;
+  }
+
+  status.textContent = "جارٍ تحديد موقعك...";
+
+  navigator.geolocation.getCurrentPosition(
+    position => {
+      window.currentLocation = {
+        latitude:position.coords.latitude,
+        longitude:position.coords.longitude
+      };
+
+      status.textContent =
+        "تم تحديد موقعك. سيتم استخدامه عند ربط البحث بالخدمات الفعلية.";
+    },
+    () => {
+      status.textContent =
+        "تعذر تحديد الموقع. يمكنك إدخال المنطقة يدويًا.";
+    },
+    {enableHighAccuracy:true,timeout:10000}
+  );
+}
+
+document.getElementById("requestForm")
+.addEventListener("submit",function(e){
+  e.preventDefault();
+
+  alert(
+    "تم تجهيز بيانات الطلب في الواجهة. إرسال الطلب فعليًا يتطلب ربط الـBackend."
+  );
+});
+
+renderCategories(getFilteredCategories());
+</script>
+
+</body>
+</html>
