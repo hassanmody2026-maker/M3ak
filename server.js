@@ -63,44 +63,6 @@ function validateEnvironment() {
   }
   
 
-  if (NODE_ENV === 'production' && !process.env.APP_ORIGIN) {
-  console.error('APP_ORIGIN is required in production.');
-  process.exit(1);
-  }
-
-  if (process.env.JWT_SECRET.length < 32) {
-    throw new Error(
-      'JWT_SECRET must contain at least 32 characters.'
-    );
-  }
-
-  if (
-    process.env.NODE_ENV === 'production' &&
-    !process.env.APP_ORIGIN
-  ) {
-    throw new Error(
-      'APP_ORIGIN is required in production.'
-    );
-  }
-}
-
-for (const key of requiredEnvironment) {
-  if (!process.env[key]) {
-    console.error(`Missing required environment variable: ${key}`);
-    process.exit(1);
-  }
-}
-
-if (JWT_SECRET.length < 32) {
-  console.error('JWT_SECRET must contain at least 32 characters.');
-  process.exit(1);
-}
-
-if (NODE_ENV === 'production' && !process.env.APP_ORIGIN) {
-  console.error('APP_ORIGIN is required in production.');
-  process.exit(1);
-}
-
 
 /* =========================================================
    DATABASE
