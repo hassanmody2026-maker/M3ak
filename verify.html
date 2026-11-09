@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#16051f">
 <title>التحقق الآمن | معاك M3AK</title>
 
@@ -222,6 +222,11 @@ h2 {
   margin-top:10px;
 }
 
+.primary:disabled {
+  opacity:.65;
+  cursor:not-allowed;
+}
+
 .meta {
   display:flex;
   justify-content:space-between;
@@ -333,9 +338,10 @@ h2 {
 
   <h2 id="title">تأكيد حسابك</h2>
 
-  <p class="desc" id="description">
-    أدخل رمز التحقق المكوّن من 6 أرقام
-    الذي تم إرساله إلى
+  <p class="desc">
+    <span id="descriptionText">
+      أدخل رمز التحقق المكوّن من 6 أرقام الذي تم إرساله إلى
+    </span>
     <span class="destination" id="destination">
       وسيلة التواصل المسجلة
     </span>.
@@ -410,7 +416,8 @@ h2 {
   const target = params.get('to');
 
   const title = document.getElementById('title');
-  const desc = document.getElementById('description');
+  const descriptionText = document.getElementById('descriptionText');
+  const destination = document.getElementById('destination');
   const fields = document.getElementById('resetFields');
   const submit = document.getElementById('submit');
   const notice = document.getElementById('notice');
@@ -419,38 +426,51 @@ h2 {
     ...document.querySelectorAll('.otp input')
   ];
 
+  function showNotice(message) {
+    notice.textContent = message;
+    notice.classList.add('show');
+  }
+
+  function normalizeDigits(value) {
+    return value
+      .replace(/[٠-٩]/g, digit =>
+        String(digit.charCodeAt(0) - 1632)
+      )
+      .replace(/[۰-۹]/g, digit =>
+        String(digit.charCodeAt(0) - 1776)
+      )
+      .replace(/\D/g, '');
+  }
+
   if (target) {
-    document.getElementById('destination').textContent = target;
+    destination.textContent = target;
   }
 
   if (mode === 'reset') {
-
     title.textContent = 'استعادة كلمة المرور';
 
-    desc.innerHTML =
-      'أدخل رمز الاستعادة المرسل إلى ' +
-      '<span class="destination" id="destination"></span>' +
-      '، ثم اختر كلمة مرور جديدة.';
-
-    if (target) {
-      document.getElementById('destination').textContent = target;
-    }
+    descriptionText.textContent =
+      'أدخل رمز الاستعادة المرسل إلى ';
 
     fields.hidden = false;
 
-    submit.textContent = 'تأكيد الرمز وتغيير كلمة المرور';
+    submit.textContent =
+      'تأكيد الرمز وتغيير كلمة المرور';
   }
 
   boxes.forEach((box, index) => {
 
     box.addEventListener('input', () => {
 
-      box.value = box.value.replace(/\D/g, '').slice(0, 1);
+      const digits = normalizeDigits(box.value);
+
+      box.value = digits.slice(-1);
 
       if (box.value && boxes[index + 1]) {
         boxes[index + 1].focus();
       }
 
+      notice.classList.remove('show');
     });
 
     box.addEventListener('keydown', event => {
@@ -463,24 +483,34 @@ h2 {
         boxes[index - 1].focus();
       }
 
+      if (event.key === 'ArrowLeft' && boxes[index + 1]) {
+        boxes[index + 1].focus();
+      }
+
+      if (event.key === 'ArrowRight' && boxes[index - 1]) {
+        boxes[index - 1].focus();
+      }
+
     });
 
     box.addEventListener('paste', event => {
 
-      const value = (
-        event.clipboardData || window.clipboardData
-      ).getData('text').replace(/\D/g, '').slice(0, 6);
+      const clipboard = event.clipboardData ||
+        window.clipboardData;
 
-      if (value) {
+      const value = normalizeDigits(
+        clipboard.getData('text')
+      ).slice(0, 6);
 
-        event.preventDefault();
+      if (!value) return;
 
-        value.split('').forEach((digit, i) => {
-          boxes[i].value = digit;
-        });
+      event.preventDefault();
 
-        boxes[Math.min(value.length, 5)].focus();
-      }
+      boxes.forEach((input, i) => {
+        input.value = value[i] || '';
+      });
+
+      boxes[Math.min(value.length, 5)].focus();
 
     });
 
@@ -491,14 +521,14 @@ h2 {
 
       event.preventDefault();
 
+      notice.classList.remove('show');
+
       const code = boxes.map(box => box.value).join('');
 
-      notice.classList.add('show');
-
       if (code.length !== 6) {
-
-        notice.textContent =
-          'من فضلك أدخل رمز التحقق كاملًا (6 أرقام).';
+        showNotice(
+          'من فضلك أدخل رمز التحقق كاملًا (6 أرقام).'
+        );
 
         boxes.find(box => !box.value)?.focus();
 
@@ -514,26 +544,24 @@ h2 {
           document.getElementById('confirmPassword').value;
 
         if (password.length < 8) {
-
-          notice.textContent =
-            'كلمة المرور يجب ألا تقل عن 8 أحرف أو أرقام.';
-
+          showNotice(
+            'كلمة المرور يجب ألا تقل عن 8 أحرف.'
+          );
           return;
         }
 
         if (password !== confirm) {
-
-          notice.textContent =
-            'كلمتا المرور غير متطابقتين.';
-
+          showNotice(
+            'كلمتا المرور غير متطابقتين.'
+          );
           return;
         }
 
       }
 
-      notice.textContent =
-        'واجهة التحقق جاهزة. لم يتم إرسال الرمز أو تأكيده بعد؛ ' +
-        'يلزم ربطها بخادم معاك لإتمام العملية بأمان.';
+      showNotice(
+        'تم إدخال البيانات. تأكيد الرمز وتفعيل العملية يحتاج إلى ربط الخادم.'
+      );
 
     });
 
@@ -542,10 +570,9 @@ h2 {
 
       event.preventDefault();
 
-      notice.classList.add('show');
-
-      notice.textContent =
-        'إعادة إرسال الرمز ستعمل بعد ربط خدمة الرسائل والبريد بالخادم.';
+      showNotice(
+        'إعادة إرسال الرمز ستعمل بعد ربط خدمة الرسائل والبريد بالخادم.'
+      );
 
     });
 
@@ -553,4 +580,4 @@ h2 {
 </script>
 
 </body>
-</html>
+  </html>
