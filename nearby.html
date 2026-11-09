@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#160820">
+<title>M3AK | الخدمات القريبة</title>
+
+<style>
+:root {
+  --bg:#100719;
+  --purple:#7b35a6;
+  --pink:#e94c9b;
+  --teal:#35c8bd;
+  --white:#fff;
+  --muted:#b9a9c5;
+  --line:#ffffff16;
+}
+* {box-sizing:border-box}
+body {
+  margin:0;
+  min-height:100vh;
+  background:radial-gradient(circle at 10% 0%,#40165355,transparent 35%),var(--bg);
+  color:var(--white);
+  font-family:Tahoma,Arial,sans-serif;
+}
+button,input {font-family:inherit}
+button {cursor:pointer}
+.app {
+  width:100%;
+  max-width:480px;
+  min-height:100dvh;
+  margin:auto;
+  padding-bottom:95px;
+}
+.header {
+  padding:18px 17px 23px;
+  background:linear-gradient(135deg,#2b0c3d,#542078 65%,#71318b);
+  border-radius:0 0 28px 28px;
+  box-shadow:0 10px 30px #0004;
+}
+.top {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+.brand {
+  display:flex;
+  align-items:center;
+  gap:11px;
+}
+.logo {
+  width:50px;
+  height:50px;
+  border-radius:16px;
+  background:linear-gradient(145deg,#fff,#f5dff0);
+  color:#542078;
+  display:grid;
+  place-items:center;
+  font-size:26px;
+  font-weight:900;
+}
+.brand strong {font-size:21px}
+.brand small {
+  display:block;
+  margin-top:4px;
+  color:#eadcf4;
+  font-size:10px;
+}
+.icon-btn {
+  width:41px;
+  height:41px;
+  border:1px solid #ffffff35;
+  border-radius:13px;
+  background:#ffffff15;
+  color:#fff;
+  font-size:19px;
+}
+.heading {margin-top:23px}
+.back {
+  border:0;
+  background:#ffffff18;
+  color:#fff;
+  border-radius:12px;
+  padding:9px 13px;
+  font-size:11px;
+}
+.heading small {
+  display:block;
+  margin-top:15px;
+  color:#eadcf4;
+  font-size:11px;
+}
+.heading h1 {
+  font-size:23px;
+  margin:8px 0;
+}
+.heading p {
+  margin:0;
+  color:#eadcf4;
+  font-size:11px;
+  line-height:1.9;
+}
+.content {padding:17px 15px}
+.ai-card {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:16px;
+  border:1px solid #ffffff20;
+  border-radius:20px;
+  background:linear-gradient(120deg,#35145f,#67329b,#8d398e);
+  box-shadow:0 9px 25px #0004;
+  cursor:pointer;
+}
+.ai-card h2 {
+  font-size:15px;
+  margin:6px 0;
+}
+.ai-card p {
+  font-size:10px;
+  color:#eadcf4;
+  line-height:1.8;
+  margin:0;
+}
+.ai-card small {
+  font-size:10px;
+  color:#eadcf4;
+}
+.ai-icon {
+  width:55px;
+  height:55px;
+  flex:none;
+  border-radius:18px;
+  display:grid;
+  place-items:center;
+  background:linear-gradient(145deg,#fff,#d9f5f1);
+  color:#542078;
+  font-size:28px;
+}
+.location-card {
+  margin-top:17px;
+  padding:16px;
+  border:1px solid #35c8bd35;
+  border-radius:19px;
+  background:linear-gradient(145deg,#18302f,#1b1026);
+}
+.location-top {
+  display:flex;
+  align-items:center;
+  gap:11px;
+}
+.location-icon {
+  width:43px;
+  height:43px;
+  flex:none;
+  display:grid;
+  place-items:center;
+  border-radius:14px;
+  background:#35c8bd20;
+  font-size:22px;
+}
+.location-top strong {
+  font-size:12px;
+}
+.location-top small {
+  display:block;
+  margin-top:5px;
+  color:var(--muted);
+  font-size:9px;
+}
+.location-input {
+  width:100%;
+  margin-top:13px;
+  padding:13px;
+  border:1px solid #ffffff20;
+  border-radius:12px;
+  background:#ffffff0b;
+  color:white;
+  font-size:11px;
+  outline:none;
+}
+.location-input::placeholder {color:#a997b6}
+.location-actions {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-top:10px;
+}
+.location-actions button {
+  padding:12px 7px;
+  border-radius:12px;
+  font-size:10px;
+}
+.locate-btn {
+  border:0;
+  background:linear-gradient(100deg,var(--purple),var(--pink));
+  color:white;
+}
+.manual-btn {
+  border:1px solid #ffffff25;
+  background:#ffffff0b;
+  color:white;
+}
+.search {
+  display:flex;
+  align-items:center;
+  gap:9px;
+  margin-top:17px;
+  padding:4px 12px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:#ffffff0c;
+}
+.search span {font-size:20px}
+.search input {
+  width:100%;
+  height:42px;
+  border:0;
+  outline:0;
+  background:transparent;
+  color:white;
+  font-size:11px;
+}
+.search input::placeholder {color:#b9a9c5}
+.section-title {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  margin:23px 2px 12px;
+}
+.section-title h2 {
+  font-size:14px;
+  margin:0;
+}
+.section-title small {
+  font-size:9px;
+  color:var(--muted);
+}
+.grid {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+}
+.category {
+  min-height:105px;
+  padding:13px 10px;
+  border:1px solid var(--line);
+  border-radius:17px;
+  background:linear-gradient(145deg,#251432,#1b1026);
+  color:#fff;
+  text-align:right;
+  display:flex;
+  align-items:center;
+  gap:11px;
+}
+.category:active {
+  transform:scale(.98);
+  border-color:#a65ac7;
+}
+.cat-icon {
+  width:45px;
+  height:45px;
+  flex:none;
+  display:grid;
+  place-items:center;
+  border-radius:15px;
+  background:#71349a35;
+  font-size:23px;
+}
+.category:nth-child(3n+2) .cat-icon {background:#e94c9b25}
+.category:nth-child(3n) .cat-icon {background:#35c8bd25}
+.category strong {
+  display:block;
+  font-size:10px;
+  line-height:1.7;
+}
+.category small {
+  display:block;
+  margin-top:4px;
+  color:var(--muted);
+  font-size:9px;
+  line-height:1.6;
+}
+.empty {
+  display:none;
+  grid-column:1/-1;
+  text-align:center;
+  color:var(--muted);
+  font-size:11px;
+  padding:20px;
+}
+.results {
+  margin-top:18px;
+  padding:16px;
+  border:1px solid var(--line);
+  border-radius:19px;
+  background:linear-gradient(145deg,#251432,#1b1026);
+}
+.results h3 {
+  margin:0 0 8px;
+  font-size:13px;
+}
+.results p {
+  margin:0;
+  color:var(--muted);
+  font-size:10px;
+  line-height:1.9;
+}
+.result-placeholder {
+  margin-top:13px;
+  padding:20px 12px;
+  border:1px dashed #ffffff30;
+  border-radius:14px;
+  text-align:center;
+}
+.result-placeholder span {
+  display:block;
+  font-size:27px;
+  margin-bottom:8px;
+}
+.result-placeholder strong {
+  display:block;
+  font-size:11px;
+}
+.result-placeholder small {
+  display:block;
+  margin-top:7px;
+  color:var(--muted);
+  font-size:9px;
+  line-height:1.8;
+}
+.feature-list {
+  display:grid;
+  gap:9px;
+  margin-top:12px;
+}
+.feature {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:12px;
+  border:1px solid var(--line);
+  border-radius:13px;
+  background:#ffffff08;
+}
+.feature span {font-size:19px}
+.feature strong {
+  font-size:10px;
+  display:block;
+}
+.feature small {
+  display:block;
+  color:var(--muted);
+  font-size:9px;
+  margin-top:4px;
+}
+.promo {
+  display:flex;
+  align-items:center;
+  gap:11px;
+  margin-top:17px;
+  padding:15px;
+  border:1px solid #ffffff14;
+  border-radius:17px;
+  background:linear-gradient(120deg,#3a194c,#251432);
+}
+.promo-icon {
+  width:43px;
+  height:43px;
+  flex:none;
+  border-radius:14px;
+  background:#ffffff15;
+  display:grid;
+  place-items:center;
+  font-size:21px;
+}
+.promo strong {font-size:11px}
+.promo p {
+  margin:5px 0 0;
+  color:var(--muted);
+  font-size:9px;
+  line-height:1.8;
+}
+.floating-ai {
+  position:fixed;
+  bottom:84px;
+  left:max(17px,calc((100vw - 480px)/2 + 17px));
+  width:54px;
+  height:54px;
+  border:2px solid #ffffff80;
+  border-radius:19px;
+  background:linear-gradient(135deg,var(--pink),var(--purple));
+  color:white;
+  font-size:25px;
+  box-shadow:0 8px 24px #0006;
+  z-index:8;
+}
+.bottom-nav {
+  position:fixed;
+  bottom:0;
+  left:50%;
+  transform:translateX(-50%);
+  width:100%;
+  max-width:480px;
+  min-height:68px;
+  display:flex;
+  align-items:center;
+  justify-content:space-around;
+  background:#1b1025;
+  border-top:1px solid var(--line);
+  padding:7px 3px calc(7px + env(safe-area-inset-bottom));
+  z-index:9;
+}
+.nav-item {
+  min-width:53px;
+  border:0;
+  background:none;
+  color:#a99ab4;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:5px;
+  font-size:9px;
+}
+.nav-item i {
+  font-style:normal;
+  font-size:20px;
+}
+.nav-item.active {
+  color:#f078bd;
+  font-weight:bold;
+}
+.toast {
+  position:fixed;
+  z-index:20;
+  bottom:150px;
+  left:50%;
+  transform:translateX(-50%);
+  width:calc(100% - 35px);
+  max-width:420px;
+  padding:13px 15px;
+  border:1px solid #ffffff20;
+  border-radius:14px;
+  background:#38204a;
+  color:white;
+  text-align:center;
+  font-size:10px;
+  line-height:1.8;
+  box-shadow:0 8px 25px #0005;
+  display:none;
+}
+.toast.show {display:block}
+@media(max-width:360px) {
+  .grid {gap:7px}
+  .category {padding:10px 7px}
+  .category strong {font-size:9px}
+  .heading h1 {font-size:20px}
+}
+</style>
+</head>
+
+<body>
+<main class="app">
+
+<header class="header">
+  <div class="top">
+    <div class="brand">
+      <div class="logo">M</div>
+      <div>
+        <strong>M3AK</strong>
+        <small>كل اللي تحتاجه.. معاك</small>
+      </div>
+    </div>
+    <button class="icon-btn"
+      aria-label="الملف الشخصي"
+      onclick="go('profile.html')">☻</button>
+  </div>
+
+  <div class="heading">
+    <button class="back" onclick="go('home.html')">→ الرئيسية</button>
+    <small>القسم الثالث من خدمات معاك</small>
+    <h1>الخدمات القريبة 📍</h1>
+    <p>
+      اكتشف الأماكن ومقدمي الخدمات حولك،
+      وابحث حسب نوع الخدمة والمنطقة.
+    </p>
+  </div>
+</header>
+
+<section class="content">
+
+  <div class="ai-card" onclick="go('assistant.html')">
+    <div>
+      <small>مساعدك الذكي معاك</small>
+      <h2>بتدور على خدمة قريبة منك؟</h2>
+      <p>اسأل المساعد يساعدك تحدد نوع الخدمة المناسبة.</p>
+    </div>
+    <div class="ai-icon">🤖</div>
+  </div>
+
+  <div class="location-card">
+    <div class="location-top">
+      <div class="location-icon">📍</div>
+      <div>
+        <strong>حدد موقع البحث</strong>
+        <small id="locationStatus">اكتب منطقتك أو استخدم موقع جهازك.</small>
+      </div>
+    </div>
+
+    <input class="location-input" id="areaInput"
+      placeholder="مثال: مدينة نصر، القاهرة"
+      autocomplete="address-level2">
+
+    <div class="location-actions">
+      <button class="locate-btn" id="useLocation">
+        📍 استخدم موقعي
+      </button>
+      <button class="manual-btn" id="manualLocation">
+        اعتماد المنطقة المكتوبة
+      </button>
+    </div>
+  </div>
+
+  <div class="search">
+    <span>⌕</span>
+    <input id="serviceSearch" type="search"
+      placeholder="ابحث عن نوع الخدمة..."
+      autocomplete="off">
+  </div>
+
+  <div class="section-title">
+    <h2>اختار نوع الخدمة</h2>
+    <small>خدمات بالقرب منك</small>
+  </div>
+
+  <div class="grid" id="categoryGrid">
+
+    <button class="category" data-title="الصيدليات">
+      <span class="cat-icon">💊</span>
+      <span><strong>الصيدليات</strong><small>صيدليات ومستلزمات طبية</small></span>
+    </button>
+
+    <button class="category" data-title="المستشفيات والعيادات">
+      <span class="cat-icon">🏥</span>
+      <span><strong>المستشفيات والعيادات</strong><small>مراكز طبية وعيادات</small></span>
+    </button>
+
+    <button class="category" data-title="السوبر ماركت">
+      <span class="cat-icon">🛒</span>
+      <span><strong>السوبر ماركت</strong><small>متاجر واحتياجات يومية</small></span>
+    </button>
+
+    <button class="category" data-title="صيانة السيارات">
+      <span class="cat-icon">🚗</span>
+      <span><strong>صيانة السيارات</strong><small>ورش ومراكز صيانة</small></span>
+    </button>
+
+    <button class="category" data-title="مغاسل الملابس">
+      <span class="cat-icon">👔</span>
+      <span><strong>مغاسل الملابس</strong><small>غسيل وكي وتنظيف</small></span>
+    </button>
+
+    <button class="category" data-title="البنوك وماكينات الصراف">
+      <span class="cat-icon">🏦</span>
+      <span><strong>البنوك وماكينات الصراف</strong><small>فروع وATM</small></span>
+    </button>
+
+    <button class="category" data-title="محطات الوقود">
+      <span class="cat-icon">⛽</span>
+      <span><strong>محطات الوقود</strong><small>محطات وخدمات السيارات</small></span>
+    </button>
+
+    <button class="category" data-title="خدمات التوصيل">
+      <span class="cat-icon">🛵</span>
+      <span><strong>خدمات التوصيل</strong><small>خدمات توصيل محلية</small></span>
+    </button>
+
+    <button class="category" data-title="مراكز الصيانة">
+      <span class="cat-icon">🔧</span>
+      <span><strong>مراكز الصيانة</strong><small>صيانة وإصلاحات متنوعة</small></span>
+    </button>
+
+    <button class="category" data-title="خدمات متنوعة">
+      <span class="cat-icon">🏪</span>
+      <span><strong>خدمات متنوعة</strong><small>أماكن وخدمات أخرى</small></span>
+    </button>
+
+    <div class="empty" id="emptyState">
+      مفيش تصنيف مطابق للبحث.
+    </div>
+  </div>
+
+  <div class="results">
+    <h3>الأماكن القريبة منك</h3>
+    <p id="resultDescription">
+      حدد المنطقة ونوع الخدمة لبدء البحث.
+    </p>
+
+    <div class="result-placeholder">
+      <span>🗺️</span>
+      <strong id="resultTitle">اكتشف الخدمات حولك</strong>
+      <small id="resultMessage">
+        ستظهر هنا الأماكن وبياناتها بعد ربط خدمة البحث الجغرافي
+        ومصادر بيانات الأماكن.
+      </small>
+    </div>
+  </div>
+
+  <div class="section-title">
+    <h2>مميزات الخدمات القريبة</h2>
+    <small>كل شيء حولك</small>
+  </div>
+
+  <div class="feature-list">
+    <div class="feature">
+      <span>📍</span>
+      <div>
+        <strong>البحث حسب الموقع</strong>
+        <small>اكتشف الأماكن وفقًا لموقعك أو منطقتك.</small>
+      </div>
+    </div>
+
+    <div class="feature">
+      <span>🔎</span>
+      <div>
+        <strong>تصنيفات متنوعة</strong>
+        <small>اختار نوع الخدمة التي تبحث عنها.</small>
+      </div>
+    </div>
+
+    <div class="feature">
+      <span>📞</span>
+      <div>
+        <strong>بيانات الأماكن</strong>
+        <small>التعرف على بيانات التواصل بعد ربط مصادر الأماكن.</small>
+      </div>
+    </div>
+
+    <div class="feature">
+      <span>🤖</span>
+      <div>
+        <strong>مساعدة ذكية</strong>
+        <small>استعن بالمساعد لتحديد الخدمة المناسبة.</small>
+      </div>
+    </div>
+  </div>
+
+  <div class="promo">
+    <div class="promo-icon">💜</div>
+    <div>
+      <strong>مصلحتك أولًا</strong>
+      <p>
+        معاك يساعدك تكتشف الخدمات المناسبة في محيطك
+        وتوصل للمعلومات التي تحتاجها.
+      </p>
+    </div>
+  </div>
+
+</section>
+
+<button class="floating-ai"
+  aria-label="افتح المساعد الذكي"
+  onclick="go('assistant.html')">✧</button>
+
+<nav class="bottom-nav">
+  <button class="nav-item" onclick="go('home.html')">
+    <i>⌂</i>الرئيسية
+  </button>
+  <button class="nav-item" onclick="go('orders.html')">
+    <i>▣</i>طلباتي
+  </button>
+  <button class="nav-item active" onclick="go('assistant.html')">
+    <i>✧</i>المساعد
+  </button>
+  <button class="nav-item" onclick="go('notifications.html')">
+    <i>♧</i>الإشعارات
+  </button>
+  <button class="nav-item" onclick="go('profile.html')">
+    <i>☻</i>حسابي
+  </button>
+</nav>
+
+</main>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+"use strict";
+
+function go(page) {
+  window.location.href = page;
+}
+
+const search = document.getElementById("serviceSearch");
+const cards = [...document.querySelectorAll(".category")];
+let selectedService = "";
+let selectedArea = "";
+
+function showToast(message) {
+  const toast = document.getElementById("toast");
+  toast.textContent = message;
+  toast.classList.add("show");
+
+  clearTimeout(window.toastTimer);
+  window.toastTimer = setTimeout(() => {
+    toast.classList.remove("show");
+  }, 4000);
+}
+
+search.addEventListener("input", () => {
+  const term = search.value.trim().toLocaleLowerCase("ar");
+  let count = 0;
+
+  cards.forEach(card => {
+    const match = card.dataset.title
+      .toLocaleLowerCase("ar").includes(term);
+
+    card.style.display = match ? "flex" : "none";
+    if (match) count++;
+  });
+
+  document.getElementById("emptyState").style.display =
+    count ? "none" : "block";
+});
+
+cards.forEach(card => {
+  card.addEventListener("click", () => {
+    selectedService = card.dataset.title;
+
+    document.getElementById("resultTitle").textContent =
+      selectedService;
+
+    updateSearchDescription();
+
+    document.getElementById("resultDescription")
+      .scrollIntoView({behavior:"smooth",block:"center"});
+  });
+});
+
+function updateSearchDescription() {
+  const description = document.getElementById("resultDescription");
+  const title = document.getElementById("resultTitle");
+  const message = document.getElementById("resultMessage");
+
+  if (selectedService && selectedArea) {
+    description.textContent =
+      "نوع الخدمة: " + selectedService + " | المنطقة: " + selectedArea;
+
+    title.textContent = "طلب البحث جاهز";
+
+    message.textContent =
+      "تم تحديد نوع الخدمة والمنطقة. عرض الأماكن الفعلية يحتاج إلى ربط Google Places.";
+  } else {
+    description.textContent =
+      "حدد المنطقة ونوع الخدمة لبدء البحث.";
+  }
+}
+
+document.getElementById("manualLocation")
+  .addEventListener("click", () => {
+    const area = document.getElementById("areaInput").value.trim();
+
+    if (!area) {
+      showToast("اكتب اسم المنطقة أو المدينة أولًا.");
+      return;
+    }
+
+    selectedArea = area;
+
+    document.getElementById("locationStatus").textContent =
+      "منطقة البحث: " + selectedArea;
+
+    updateSearchDescription();
+
+    showToast("تم تحديد منطقة البحث.");
+  });
+
+document.getElementById("useLocation")
+  .addEventListener("click", () => {
+
+    if (!navigator.geolocation) {
+      showToast("المتصفح لا يدعم تحديد الموقع.");
+      return;
+    }
+
+    if (!window.isSecureContext) {
+      showToast("تحديد الموقع يحتاج إلى اتصال HTTPS آمن.");
+      return;
+    }
+
+    document.getElementById("locationStatus").textContent =
+      "جارٍ طلب إذن الوصول إلى موقعك...";
+
+    navigator.geolocation.getCurrentPosition(
+      position => {
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+
+        selectedArea = "موقعك الحالي";
+
+        document.getElementById("locationStatus").textContent =
+          "تم تحديد موقع جهازك بنجاح.";
+
+        updateSearchDescription();
+
+        showToast(
+          "تم تحديد موقعك. البحث الفعلي يحتاج إلى ربط خدمة الأماكن."
+        );
+
+        // الإحداثيات محفوظة مؤقتًا في الذاكرة فقط.
+        // لا يتم إرسالها لأي جهة في هذه المرحلة.
+        window.currentLocation = {latitude,longitude};
+      },
+      error => {
+        document.getElementById("locationStatus").textContent =
+          "تعذر تحديد الموقع. يمكنك كتابة منطقتك يدويًا.";
+
+        if (error.code === 1) {
+          showToast("لم تسمح بالوصول إلى الموقع.");
+        } else if (error.code === 2) {
+          showToast("تعذر تحديد موقع الجهاز حاليًا.");
+        } else {
+          showToast("انتهت مهلة تحديد الموقع. حاول مرة أخرى.");
+        }
+      },
+      {
+        enableHighAccuracy:true,
+        timeout:12000,
+        maximumAge:60000
+      }
+    );
+});
+
+</script>
+
+</body>
+</html>
