@@ -2288,6 +2288,278 @@ app.delete(
   })
 );
 /* =========================================================
+   ADMIN MERCHANT PLANS MANAGEMENT
+   الإدارة وحدها تتحكم في باقات التجار وأسعارها
+========================================================= */
+
+// عرض جميع باقات التجار
+app.get(
+  '/api/admin/merchant-plans',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (req, res) => {
+    const result = await pool.query(`
+      SELECT *
+      FROM merchant_plans
+      ORDER BY created_at DESC
+    `);
+
+    res.json({
+      success: true,
+      total: result.rowCount,
+      plans: result.rows
+    });
+  })
+);
+
+
+// إضافة باقة تاجر جديدة
+app.post(
+  '/api/admin/merchant-plans',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (req, res) => {
+    const {
+      code,
+      name,
+      monthly_price,
+      quarterly_price,
+      semiannual_price,
+      annual_price,
+      description,
+      features
+    } = req.body;
+
+    if (
+      typeof code !== 'string' ||
+      !/^[A-Z0-9_]{2,30}$/.test(code) ||
+      typeof name !== 'string' ||
+      name.trim().length < 2 ||
+      name.trim().length > 100
+    ) {
+      return sendError(
+        res,
+        400,
+        'كود الباقة أو اسمها غير صحيح.',
+        'INVALID_PLAN_DATA'
+      );
+    }
+
+    const prices = {
+      monthly_price,
+      quarterly_price,
+      semiannual_price,
+      annual_price
+    };
+
+    for (const [key, value] of Object.entries(prices)) {
+      if (
+        value !== undefined &&
+        value !== null &&
+        (!Number.isFinite(Number(value)) || Number(value) < 0)
+      ) {
+        return sendError(
+          res,
+          400,
+          `قيمة ${key} غير صحيحة.`,
+          'INVALID_PLAN_PRICE'
+        );
+      }
+    }
+
+    if (
+      features !== undefined &&
+      (
+        features === null ||
+        typeof features !== 'object' ||
+        Array.isArray(features)
+      )
+    ) {
+      return sendError(
+        res,
+        400,
+        'مميزات الباقة يجب أن تكون بيانات صحيحة.',
+        'INVALID_PLAN_FEATURES'
+      );
+    }
+
+    const result = await pool.query(
+      `
+      INSERT INTO merchant_plans (
+        code,
+        name,
+        monthly_price,
+        quarterly_price,
+        semiannual_price,
+        annual_price,
+        description,
+        features,
+        is_active
+      )
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8::jsonb,TRUE)
+      RETURNING *
+      `,
+      [
+        code.trim(),
+        name.trim(),
+        monthly_price ?? null,
+        quarterly_price ?? null,
+        semiannual_price ?? null,
+        annual_price ?? null,
+        description || null,
+        JSON.stringify(features || {})
+      ]
+    );
+
+    res.status(201).json({
+      success: true,
+      message: 'تم إنشاء باقة التاجر.',
+      plan: result.rows[0]
+    });
+  })
+);
+
+
+// تعديل بيانات وأسعار باقة
+app.patch(
+  '/api/admin/merchant-plans/:id',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (req, res) => {
+    const allowedFields = [
+      'name',
+      'monthly_price',
+      'quarterly_price',
+      'semiannual_price',
+      'annual_price',
+      'description',
+      'features',
+      'is_active'
+    ];
+
+    const updates = [];
+    const values = [];
+
+    for (const field of allowedFields) {
+      if (!Object.prototype.hasOwnProperty.call(req.body, field)) {
+        continue;
+      }
+
+      const value = req.body[field];
+
+      if (
+        field === 'name' &&
+        (
+          typeof value !== 'string' ||
+          value.trim().length < 2 ||
+          value.trim().length > 100
+        )
+      ) {
+        return sendError(
+          res,
+          400,
+          'اسم الباقة غير صحيح.',
+          'INVALID_PLAN_NAME'
+        );
+      }
+
+      if (
+        field.endsWith('_price') &&
+        value !== null &&
+        (!Number.isFinite(Number(value)) || Number(value) < 0)
+      ) {
+        return sendError(
+          res,
+          400,
+          'سعر الباقة غير صحيح.',
+          'INVALID_PLAN_PRICE'
+        );
+      }
+
+      if (
+        field === 'features' &&
+        (
+          value === null ||
+          typeof value !== 'object' ||
+          Array.isArray(value)
+        )
+      ) {
+        return sendError(
+          res,
+          400,
+          'مميزات الباقة غير صحيحة.',
+          'INVALID_PLAN_FEATURES'
+        );
+      }
+
+      if (
+        field === 'is_active' &&
+        typeof value !== 'boolean'
+      ) {
+        return sendError(
+          res,
+          400,
+          'حالة الباقة غير صحيحة.',
+          'INVALID_PLAN_STATUS'
+        );
+      }
+
+      values.push(
+        field === 'name' && typeof value === 'string'
+          ? value.trim()
+          : field === 'features'
+            ? JSON.stringify(value)
+            : value
+      );
+
+      const column = field === 'features'
+        ? 'features'
+        : field;
+
+      updates.push(
+        `${column} = $${values.length}${field === 'features' ? '::jsonb' : ''}`
+      );
+    }
+
+    if (!updates.length) {
+      return sendError(
+        res,
+        400,
+        'لم يتم إرسال أي تعديلات.',
+        'NO_CHANGES'
+      );
+    }
+
+    values.push(req.params.id);
+
+    const result = await pool.query(
+      `
+      UPDATE merchant_plans
+      SET ${updates.join(', ')},
+          updated_at = NOW()
+      WHERE id = $${values.length}
+      RETURNING *
+      `,
+      values
+    );
+
+    if (!result.rowCount) {
+      return sendError(
+        res,
+        404,
+        'باقة التاجر غير موجودة.',
+        'MERCHANT_PLAN_NOT_FOUND'
+      );
+    }
+
+    res.json({
+      success: true,
+      message: 'تم تحديث باقة التاجر.',
+      plan: result.rows[0]
+    });
+  })
+);
+/* =========================================================
    ADMIN MERCHANT MANAGEMENT
 ========================================================= */
 
