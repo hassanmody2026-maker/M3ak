@@ -2505,9 +2505,11 @@ app.patch(
 
       // لا يظهر المتجر إلا بعد موافقة الإدارة وتفعيله
       const newVisibility =
-        is_visible === undefined
-          ? merchant.is_visible
-          : is_visible;
+      newStatus !== 'active'
+         ? false
+        : (is_visible === undefined
+        ? merchant.is_visible
+        : is_visible);
 
       if (
         newVisibility === true &&
