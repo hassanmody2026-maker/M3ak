@@ -1540,6 +1540,304 @@ app.post(
     });
   })
 );
+/* =========================================================
+   ADMIN CATALOG MANAGEMENT
+   الإدارة وحدها تتحكم في المنتجات والخدمات
+========================================================= */
+
+// عرض جميع المنتجات والخدمات للإدارة
+app.get(
+  '/api/admin/catalog',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (req, res) => {
+    const result = await pool.query(`
+      SELECT
+        ci.*,
+        m.business_name,
+        (
+          SELECT COUNT(*)
+          FROM catalog_item_images img
+          WHERE img.item_id = ci.id
+        ) AS images_count
+      FROM catalog_items ci
+      INNER JOIN merchants m ON m.id = ci.merchant_id
+      ORDER BY ci.created_at DESC
+      LIMIT 500
+    `);
+
+    res.json({
+      success: true,
+      items: result.rows
+    });
+  })
+);
+
+// إضافة منتج أو خدمة
+app.post(
+  '/api/admin/catalog',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (req, res) => {
+    const {
+      merchant_id,
+      section_code,
+      category_name,
+      item_type,
+      name,
+      description,
+      specifications,
+      price,
+      currency,
+      stock_quantity,
+      main_image_url
+    } = req.body;
+
+    if (
+      !merchant_id ||
+      !section_code ||
+      !name ||
+      !['product', 'service'].includes(item_type)
+    ) {
+      return sendError(
+        res,
+        400,
+        'بيانات المنتج أو الخدمة غير مكتملة.',
+        'INVALID_CATALOG_DATA'
+      );
+    }
+
+    if (
+      price !== undefined &&
+      price !== null &&
+      (!Number.isFinite(Number(price)) || Number(price) < 0)
+    ) {
+      return sendError(
+        res,
+        400,
+        'السعر غير صحيح.',
+        'INVALID_PRICE'
+      );
+    }
+
+    const result = await pool.query(
+      `
+      INSERT INTO catalog_items (
+        merchant_id,
+        section_code,
+        category_name,
+        item_type,
+        name,
+        description,
+        specifications,
+        price,
+        currency,
+        stock_quantity,
+        main_image_url,
+        status,
+        created_by_admin,
+        updated_by_admin
+      )
+      SELECT
+        m.id,
+        $2, $3, $4, $5, $6,
+        $7::jsonb,
+        $8, $9, $10, $11,
+        'draft',
+        $12,
+        $12
+      FROM merchants m
+      WHERE m.id = $1
+      RETURNING *
+      `,
+      [
+        merchant_id,
+        section_code,
+        category_name || null,
+        item_type,
+        name.trim(),
+        description || null,
+        JSON.stringify(specifications || {}),
+        price ?? null,
+        currency || 'EGP',
+        stock_quantity ?? null,
+        main_image_url || null,
+        req.user.id
+      ]
+    );
+
+    if (!result.rowCount) {
+      return sendError(
+        res,
+        404,
+        'المتجر غير موجود.',
+        'MERCHANT_NOT_FOUND'
+      );
+    }
+
+    res.status(201).json({
+      success: true,
+      message: 'تمت إضافة المنتج أو الخدمة.',
+      item: result.rows[0]
+    });
+  })
+);
+
+
+// تعديل بيانات منتج أو خدمة
+app.patch(
+  '/api/admin/catalog/:id',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (req, res) => {
+    const {
+      section_code,
+      category_name,
+      item_type,
+      name,
+      description,
+      specifications,
+      price,
+      currency,
+      stock_quantity,
+      main_image_url,
+      status
+    } = req.body;
+
+    if (
+      item_type !== undefined &&
+      !['product', 'service'].includes(item_type)
+    ) {
+      return sendError(
+        res,
+        400,
+        'نوع المنتج غير صحيح.',
+        'INVALID_ITEM_TYPE'
+      );
+    }
+
+    if (
+      status !== undefined &&
+      !['draft', 'published', 'hidden', 'archived'].includes(status)
+    ) {
+      return sendError(
+        res,
+        400,
+        'حالة النشر غير صحيحة.',
+        'INVALID_ITEM_STATUS'
+      );
+    }
+
+    if (
+      price !== undefined &&
+      price !== null &&
+      (!Number.isFinite(Number(price)) || Number(price) < 0)
+    ) {
+      return sendError(
+        res,
+        400,
+        'السعر غير صحيح.',
+        'INVALID_PRICE'
+      );
+    }
+
+    const result = await pool.query(
+      `
+      UPDATE catalog_items
+      SET
+        section_code = COALESCE($2, section_code),
+        category_name = COALESCE($3, category_name),
+        item_type = COALESCE($4, item_type),
+        name = COALESCE($5, name),
+        description = COALESCE($6, description),
+        specifications = COALESCE($7::jsonb, specifications),
+        price = COALESCE($8, price),
+        currency = COALESCE($9, currency),
+        stock_quantity = COALESCE($10, stock_quantity),
+        main_image_url = COALESCE($11, main_image_url),
+        status = COALESCE($12, status),
+        published_at = CASE
+          WHEN $12 = 'published' AND published_at IS NULL
+          THEN NOW()
+          ELSE published_at
+        END,
+        updated_by_admin = $13,
+        updated_at = NOW()
+      WHERE id = $1
+      RETURNING *
+      `,
+      [
+        req.params.id,
+        section_code ?? null,
+        category_name ?? null,
+        item_type ?? null,
+        name?.trim() || null,
+        description ?? null,
+        specifications === undefined
+          ? null
+          : JSON.stringify(specifications),
+        price ?? null,
+        currency ?? null,
+        stock_quantity ?? null,
+        main_image_url ?? null,
+        status ?? null,
+        req.user.id
+      ]
+    );
+
+    if (!result.rowCount) {
+      return sendError(
+        res,
+        404,
+        'المنتج أو الخدمة غير موجود.',
+        'CATALOG_ITEM_NOT_FOUND'
+      );
+    }
+
+    res.json({
+      success: true,
+      message: 'تم تحديث البيانات.',
+      item: result.rows[0]
+    });
+  })
+);
+
+
+// أرشفة منتج أو خدمة بدل الحذف النهائي
+app.delete(
+  '/api/admin/catalog/:id',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (req, res) => {
+    const result = await pool.query(
+      `
+      UPDATE catalog_items
+      SET
+        status = 'archived',
+        updated_by_admin = $2,
+        updated_at = NOW()
+      WHERE id = $1
+      RETURNING id, name, status
+      `,
+      [req.params.id, req.user.id]
+    );
+
+    if (!result.rowCount) {
+      return sendError(
+        res,
+        404,
+        'المنتج أو الخدمة غير موجود.',
+        'CATALOG_ITEM_NOT_FOUND'
+      );
+    }
+
+    res.json({
+      success: true,
+      message: 'تمت أرشفة المنتج أو الخدمة.',
+      item: result.rows[0]
+    });
+  })
+);
 app.get(
   '/api/auth/me',
   authenticate,
