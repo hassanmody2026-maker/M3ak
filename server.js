@@ -35,10 +35,35 @@ const NODE_ENV = process.env.NODE_ENV || 'development';
 const JWT_SECRET = process.env.JWT_SECRET;
 const DATABASE_URL = process.env.DATABASE_URL;
 
-const requiredEnvironment = [
-  'DATABASE_URL',
-  'JWT_SECRET'
-];
+function validateEnvironment() {
+  const requiredEnvironment = [
+    'DATABASE_URL',
+    'JWT_SECRET'
+  ];
+
+  for (const key of requiredEnvironment) {
+    if (!process.env[key]) {
+      throw new Error(
+        `Missing required environment variable: ${key}`
+      );
+    }
+  }
+
+  if (process.env.JWT_SECRET.length < 32) {
+    throw new Error(
+      'JWT_SECRET must contain at least 32 characters.'
+    );
+  }
+
+  if (
+    process.env.NODE_ENV === 'production' &&
+    !process.env.APP_ORIGIN
+  ) {
+    throw new Error(
+      'APP_ORIGIN is required in production.'
+    );
+  }
+}
 
 for (const key of requiredEnvironment) {
   if (!process.env[key]) {
@@ -2296,7 +2321,13 @@ app.use((error, req, res, next) => {
    SERVER START
 ========================================================= */
 
+/* =========================================================
+   SERVER START
+========================================================= */
+
 async function startServer() {
+  validateEnvironment();
+
   await pool.query('SELECT 1');
 
   if (mailer) {
@@ -2306,16 +2337,13 @@ async function startServer() {
     console.warn('Email service is not configured.');
   }
 
-  app.listen(PORT, () => {
+  const server = app.listen(PORT, () => {
     console.log(`M3AK API running on port ${PORT}`);
     console.log(`Environment: ${NODE_ENV}`);
   });
-}
 
-startServer().catch(error => {
-  console.error('Failed to start M3AK API:', error.message);
-  process.exit(1);
-});
+  return server;
+}
 
 
 /* =========================================================
@@ -2325,7 +2353,24 @@ startServer().catch(error => {
 module.exports = {
   app,
   pool,
+  startServer,
   verifyPaymobHmac,
   hashValue,
   signToken
 };
+
+
+/* =========================================================
+   START ONLY WHEN EXECUTED DIRECTLY
+========================================================= */
+
+if (require.main === module) {
+  startServer().catch(error => {
+    console.error(
+      'Failed to start M3AK API:',
+      error.message
+    );
+
+    process.exit(1);
+  });
+}
