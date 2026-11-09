@@ -19,9 +19,7 @@
   --line:#ffffff16;
 }
 
-* {
-  box-sizing:border-box;
-}
+* { box-sizing:border-box; }
 
 body {
   margin:0;
@@ -33,13 +31,8 @@ body {
   font-family:Tahoma,Arial,sans-serif;
 }
 
-button,input {
-  font-family:inherit;
-}
-
-button {
-  cursor:pointer;
-}
+button,input { font-family:inherit; }
+button { cursor:pointer; }
 
 .app {
   width:100%;
@@ -110,9 +103,7 @@ button {
   font-size:19px;
 }
 
-.greeting {
-  margin-top:25px;
-}
+.greeting { margin-top:25px; }
 
 .greeting small {
   color:#eadcf4;
@@ -159,15 +150,11 @@ button {
   font-size:11px;
 }
 
-.search-box input::placeholder {
-  color:#e2d2ec;
-}
+.search-box input::placeholder { color:#e2d2ec; }
 
 /* CONTENT */
 
-.content {
-  padding:18px 15px;
-}
+.content { padding:18px 15px; }
 
 .section-heading {
   display:flex;
@@ -216,10 +203,7 @@ button {
   box-shadow:0 0 0 25px #ffffff09;
 }
 
-.ai-info {
-  position:relative;
-  z-index:1;
-}
+.ai-info { position:relative; z-index:1; }
 
 .ai-info small {
   color:#eadcf4;
@@ -320,55 +304,6 @@ button {
   font-size:11px;
 }
 
-/* SPECIAL CARDS */
-
-.special-card {
-  display:flex;
-  align-items:center;
-  gap:12px;
-  margin-top:12px;
-  padding:15px;
-  border:1px solid var(--line);
-  border-radius:18px;
-  background:linear-gradient(145deg,#251432,#1b1026);
-  cursor:pointer;
-}
-
-.special-icon {
-  width:48px;
-  height:48px;
-  flex:none;
-  display:grid;
-  place-items:center;
-  border-radius:15px;
-  background:#35c8bd20;
-  font-size:23px;
-}
-
-.special-card:nth-of-type(2) .special-icon {
-  background:#e94c9b22;
-}
-
-.special-text {
-  flex:1;
-}
-
-.special-text strong {
-  font-size:11px;
-}
-
-.special-text p {
-  margin:5px 0 0;
-  color:var(--muted);
-  font-size:9px;
-  line-height:1.8;
-}
-
-.special-arrow {
-  color:#e7a5d2;
-  font-size:19px;
-}
-
 /* PROMO */
 
 .promo {
@@ -393,9 +328,7 @@ button {
   font-size:22px;
 }
 
-.promo-text strong {
-  font-size:11px;
-}
+.promo-text strong { font-size:11px; }
 
 .promo-text p {
   margin:5px 0 0;
@@ -484,27 +417,19 @@ button {
   display:none;
 }
 
-.toast.show {
-  display:block;
-}
+.toast.show { display:block; }
 
 @media(max-width:360px) {
-  .services-grid {
-    gap:7px;
-  }
+  .services-grid { gap:7px; }
 
   .service {
     min-height:115px;
     padding:10px 5px;
   }
 
-  .service strong {
-    font-size:9px;
-  }
+  .service strong { font-size:9px; }
 
-  .greeting h1 {
-    font-size:20px;
-  }
+  .greeting h1 { font-size:20px; }
 }
 </style>
 </head>
@@ -526,15 +451,11 @@ button {
     </div>
 
     <div class="header-actions">
-
-      <button class="icon-btn"
-        aria-label="الإشعارات"
+      <button class="icon-btn" aria-label="الإشعارات"
         onclick="go('notifications.html')">♧</button>
 
-      <button class="icon-btn"
-        aria-label="الملف الشخصي"
+      <button class="icon-btn" aria-label="الملف الشخصي"
         onclick="go('profile.html')">☻</button>
-
     </div>
 
   </div>
@@ -550,9 +471,7 @@ button {
 
   <div class="search-box">
     <span>⌕</span>
-    <input
-      id="search"
-      type="search"
+    <input id="search" type="search"
       placeholder="بتدور على إيه النهارده؟"
       autocomplete="off">
   </div>
@@ -562,94 +481,96 @@ button {
 <section class="content">
 
   <div class="ai-banner" onclick="go('assistant.html')">
-
     <div class="ai-info">
       <small>مساعدك الشخصي</small>
       <h3>اسأل مساعد معاك الذكي ✨</h3>
       <p>قارن، خطط، اسأل، واستكشف اختياراتك.</p>
     </div>
-
     <div class="ai-icon">🤖</div>
-
   </div>
 
   <div class="section-heading">
     <h2>اكتشف خدمات معاك</h2>
-    <small>كل احتياجاتك في مكان واحد</small>
+    <small>11 قسم لخدمتك</small>
   </div>
 
   <div class="services-grid" id="services">
 
-    <button class="service"
-      data-name="السفر والطيران"
-      data-section="travel">
-      <span class="service-icon">✈️</span>
-      <strong>السفر والطيران</strong>
-      <small>خطط رحلتك</small>
+    <button class="service" data-name="احتياجات المنزل"
+      data-page="home-needs.html">
+      <span class="service-icon">🏠</span>
+      <strong>احتياجات المنزل</strong>
+      <small>كل ما يحتاجه بيتك</small>
     </button>
 
-    <button class="service"
-      data-name="الفنادق والإقامة"
-      data-section="hotels">
+    <button class="service" data-name="التسوق ومقارنة الأسعار"
+      data-page="shopping.html">
+      <span class="service-icon">🛍️</span>
+      <strong>التسوق ومقارنة الأسعار</strong>
+      <small>قارن قبل ما تشتري</small>
+    </button>
+
+    <button class="service" data-name="الخدمات القريبة"
+      data-page="nearby.html">
+      <span class="service-icon">📍</span>
+      <strong>الخدمات القريبة</strong>
+      <small>خدمات في منطقتك</small>
+    </button>
+
+    <button class="service" data-name="الفنادق والمطاعم"
+      data-page="hotels-restaurants.html">
       <span class="service-icon">🏨</span>
-      <strong>الفنادق والإقامة</strong>
-      <small>اختيارات الإقامة</small>
+      <strong>الفنادق والمطاعم</strong>
+      <small>إقامة وتجارب طعام</small>
     </button>
 
-    <button class="service"
-      data-name="الصالونات والتجميل"
-      data-section="salons">
+    <button class="service" data-name="الصالونات والتجميل"
+      data-page="salons.html">
       <span class="service-icon">💇</span>
       <strong>الصالونات والتجميل</strong>
-      <small>خدمات العناية</small>
+      <small>العناية والجمال</small>
     </button>
 
-    <button class="service"
-      data-name="الملابس"
-      data-section="clothes">
-      <span class="service-icon">👔</span>
-      <strong>الملابس</strong>
-      <small>تسوق واختار</small>
+    <button class="service" data-name="مستلزمات الأطفال"
+      data-page="kids.html">
+      <span class="service-icon">🧸</span>
+      <strong>مستلزمات الأطفال</strong>
+      <small>احتياجات طفلك</small>
     </button>
 
-    <button class="service"
-      data-name="الأحذية"
-      data-section="shoes">
+    <button class="service" data-name="الملابس والأحذية"
+      data-page="clothes-shoes.html">
       <span class="service-icon">👟</span>
-      <strong>الأحذية</strong>
-      <small>اختيارات متنوعة</small>
+      <strong>الملابس والأحذية</strong>
+      <small>اختيارات تناسبك</small>
     </button>
 
-    <button class="service"
-      data-name="الموبايلات والإلكترونيات"
-      data-section="mobiles">
+    <button class="service" data-name="الموبايلات والإلكترونيات"
+      data-page="mobiles-electronics.html">
       <span class="service-icon">📱</span>
-      <strong>الموبايلات</strong>
-      <small>قارن قبل الشراء</small>
+      <strong>الموبايلات والإلكترونيات</strong>
+      <small>قارن المواصفات والأسعار</small>
     </button>
 
-    <button class="service"
-      data-name="الميزانية والتوفير"
-      data-section="budget">
+    <button class="service" data-name="الميزانية"
+      data-page="budget.html">
       <span class="service-icon">💰</span>
       <strong>الميزانية</strong>
-      <small>خطط مصروفاتك</small>
+      <small>نظّم مصروفاتك</small>
     </button>
 
-    <button class="service"
-      data-name="الأطفال والأسرة"
-      data-section="kids">
-      <span class="service-icon">👨‍👩‍👧‍👦</span>
-      <strong>الأطفال والأسرة</strong>
-      <small>كل ما يخص عيلتك</small>
+    <button class="service" data-name="حماية المشتريات"
+      data-page="purchase-protection.html">
+      <span class="service-icon">🛡️</span>
+      <strong>حماية المشتريات</strong>
+      <small>افحص قبل الشراء</small>
     </button>
 
-    <button class="service"
-      data-name="اللاندسكيب والعشب الصناعي"
-      data-section="landscape">
+    <button class="service" data-name="اللاندسكيب وتنسيق الحدائق"
+      data-page="landscape.html">
       <span class="service-icon">🌿</span>
-      <strong>اللاندسكيب</strong>
-      <small>جمال المساحات</small>
+      <strong>اللاندسكيب وتنسيق الحدائق</strong>
+      <small>جمال المساحات الخارجية</small>
     </button>
 
     <div class="no-results" id="noResults">
@@ -659,42 +580,12 @@ button {
   </div>
 
   <div class="section-heading">
-    <h2>خدمات إضافية</h2>
-    <small>قريبًا معاك</small>
-  </div>
-
-  <div class="special-card"
-    onclick="showMessage('خدمة البحث عن الأماكن القريبة ستُفعّل بعد ربط خدمة المواقع الجغرافية.')">
-
-    <div class="special-icon">📍</div>
-
-    <div class="special-text">
-      <strong>خدمات قريبة منك</strong>
-      <p>اكتشف الأماكن والخدمات المتاحة في منطقتك.</p>
-    </div>
-
-    <span class="special-arrow">←</span>
-
-  </div>
-
-  <div class="special-card"
-    onclick="showMessage('حماية المشتريات ستُفعّل بعد ربط خدمات التحقق ومراجعة المنتجات.')">
-
-    <div class="special-icon">🛡️</div>
-
-    <div class="special-text">
-      <strong>حماية مشترياتك</strong>
-      <p>ساعد نفسك تتأكد من اختياراتك قبل الشراء.</p>
-    </div>
-
-    <span class="special-arrow">←</span>
-
+    <h2>معاك في كل خطوة</h2>
+    <small>مساعدك الذكي متاح دائمًا</small>
   </div>
 
   <div class="promo">
-
     <div class="promo-icon">💜</div>
-
     <div class="promo-text">
       <strong>معاك في كل خطوة</strong>
       <p>
@@ -702,7 +593,6 @@ button {
         لاحتياجاتك وميزانيتك.
       </p>
     </div>
-
   </div>
 
 </section>
@@ -775,56 +665,46 @@ const serviceCards = [
 ];
 
 search.addEventListener("input", () => {
-
   const value = search.value.trim().toLowerCase();
   let visible = 0;
 
   serviceCards.forEach(card => {
-
     const name = card.dataset.name.toLowerCase();
     const match = name.includes(value);
 
     card.style.display = match ? "flex" : "none";
 
     if (match) visible++;
-
   });
 
   document.getElementById("noResults").style.display =
     visible === 0 ? "block" : "none";
-
 });
 
-/* SERVICE STATUS */
+/* SECTION NAVIGATION */
 
 serviceCards.forEach(card => {
-
   card.addEventListener("click", () => {
+    const page = card.dataset.page;
 
-    showMessage(
-      "قسم " + card.dataset.name +
-      " قيد التجهيز، وسيتم تفعيله وربطه بخدماته الفعلية."
-    );
-
+    if (page) {
+      go(page);
+    }
   });
-
 });
 
 /* USER DISPLAY */
 
 try {
-
   const savedName = localStorage.getItem("m3ak_user_name");
 
   if (savedName) {
     document.getElementById("userName").textContent =
       "أهلاً بيك يا " + savedName;
   }
-
 } catch(error) {
-  // الاسم المعروض هنا ليس إثباتًا لهوية المستخدم.
+  // الاسم المعروض ليس إثباتًا لهوية المستخدم.
 }
-
 </script>
 
 </body>
