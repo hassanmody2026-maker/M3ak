@@ -2287,6 +2287,343 @@ app.delete(
     });
   })
 );
+/* =========================================================
+   ADMIN MERCHANT MANAGEMENT
+========================================================= */
+
+// عرض التجار وطلبات الانضمام
+app.get(
+  '/api/admin/merchants',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (req, res) => {
+    const allowedStatuses = [
+      'pending',
+      'active',
+      'suspended',
+      'closed'
+    ];
+
+    const status = req.query.status;
+
+    if (status && !allowedStatuses.includes(status)) {
+      return sendError(
+        res,
+        400,
+        'حالة المتجر غير صحيحة.',
+        'INVALID_MERCHANT_STATUS'
+      );
+    }
+
+    const result = await pool.query(
+      `
+      SELECT
+        m.*,
+        u.full_name AS owner_name,
+        u.email AS owner_email,
+        u.phone AS owner_phone,
+
+        ms.id AS subscription_id,
+        ms.status AS subscription_status,
+        ms.billing_cycle,
+        ms.started_at AS subscription_started_at,
+        ms.ends_at AS subscription_ends_at,
+        ms.amount AS subscription_amount,
+        ms.payment_method
+
+      FROM merchants m
+
+      JOIN users u ON u.id = m.user_id
+
+      LEFT JOIN LATERAL (
+        SELECT *
+        FROM merchant_subscriptions
+        WHERE merchant_id = m.id
+        ORDER BY created_at DESC
+        LIMIT 1
+      ) ms ON TRUE
+
+      WHERE ($1::varchar IS NULL OR m.status = $1)
+
+      ORDER BY
+        CASE WHEN m.status = 'pending' THEN 0 ELSE 1 END,
+        m.created_at DESC
+
+      LIMIT 500
+      `,
+      [status || null]
+    );
+
+    res.json({
+      success: true,
+      total: result.rowCount,
+      merchants: result.rows
+    });
+  })
+);
+
+
+// عرض التفاصيل الكاملة لمتجر
+app.get(
+  '/api/admin/merchants/:id',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (req, res) => {
+    const result = await pool.query(
+      `
+      SELECT
+        m.*,
+        u.full_name AS owner_name,
+        u.email AS owner_email,
+        u.phone AS owner_phone,
+        u.account_status AS owner_account_status
+
+      FROM merchants m
+      JOIN users u ON u.id = m.user_id
+
+      WHERE m.id = $1
+      `,
+      [req.params.id]
+    );
+
+    if (!result.rowCount) {
+      return sendError(
+        res,
+        404,
+        'المتجر غير موجود.',
+        'MERCHANT_NOT_FOUND'
+      );
+    }
+
+    const subscriptions = await pool.query(
+      `
+      SELECT
+        ms.*,
+        mp.name AS plan_name,
+        mp.code AS plan_code
+
+      FROM merchant_subscriptions ms
+
+      LEFT JOIN merchant_plans mp ON mp.id = ms.plan_id
+
+      WHERE ms.merchant_id = $1
+
+      ORDER BY ms.created_at DESC
+      `,
+      [req.params.id]
+    );
+
+    res.json({
+      success: true,
+      merchant: result.rows[0],
+      subscriptions: subscriptions.rows
+    });
+  })
+);
+
+
+// قبول أو إيقاف أو إغلاق متجر والتحكم في ظهوره
+app.patch(
+  '/api/admin/merchants/:id/status',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (req, res) => {
+    const {
+      status,
+      is_visible
+    } = req.body;
+
+    const allowedStatuses = [
+      'pending',
+      'active',
+      'suspended',
+      'closed'
+    ];
+
+    if (
+      status !== undefined &&
+      !allowedStatuses.includes(status)
+    ) {
+      return sendError(
+        res,
+        400,
+        'حالة المتجر غير صحيحة.',
+        'INVALID_MERCHANT_STATUS'
+      );
+    }
+
+    if (
+      is_visible !== undefined &&
+      typeof is_visible !== 'boolean'
+    ) {
+      return sendError(
+        res,
+        400,
+        'قيمة الظهور يجب أن تكون true أو false.',
+        'INVALID_VISIBILITY'
+      );
+    }
+
+    if (status === undefined && is_visible === undefined) {
+      return sendError(
+        res,
+        400,
+        'لم يتم إرسال أي تعديل.',
+        'NO_CHANGES'
+      );
+    }
+
+    const client = await pool.connect();
+
+    try {
+      await client.query('BEGIN');
+
+      const merchantResult = await client.query(
+        `
+        SELECT *
+        FROM merchants
+        WHERE id = $1
+        FOR UPDATE
+        `,
+        [req.params.id]
+      );
+
+      if (!merchantResult.rowCount) {
+        await client.query('ROLLBACK');
+
+        return sendError(
+          res,
+          404,
+          'المتجر غير موجود.',
+          'MERCHANT_NOT_FOUND'
+        );
+      }
+
+      const merchant = merchantResult.rows[0];
+
+      const newStatus = status || merchant.status;
+
+      // لا يظهر المتجر إلا بعد موافقة الإدارة وتفعيله
+      const newVisibility =
+        is_visible === undefined
+          ? merchant.is_visible
+          : is_visible;
+
+      if (
+        newVisibility === true &&
+        newStatus !== 'active'
+      ) {
+        await client.query('ROLLBACK');
+
+        return sendError(
+          res,
+          400,
+          'لا يمكن إظهار متجر غير نشط.',
+          'MERCHANT_MUST_BE_ACTIVE'
+        );
+      }
+
+      await client.query(
+        `
+        UPDATE merchants
+        SET
+          status = $2,
+          is_visible = $3,
+          updated_at = NOW()
+        WHERE id = $1
+        `,
+        [
+          req.params.id,
+          newStatus,
+          newVisibility
+        ]
+      );
+
+      /*
+       * عند التفعيل لأول مرة:
+       * يبدأ شهر التجربة المجانية للتاجر.
+       * لا ننشئ تجربة جديدة إذا كان له اشتراك سابق.
+       */
+
+      if (
+        newStatus === 'active' &&
+        merchant.status !== 'active'
+      ) {
+        const existingSubscription = await client.query(
+          `
+          SELECT id
+          FROM merchant_subscriptions
+          WHERE merchant_id = $1
+          LIMIT 1
+          `,
+          [req.params.id]
+        );
+
+        if (!existingSubscription.rowCount) {
+          await client.query(
+            `
+            INSERT INTO merchant_subscriptions (
+              merchant_id,
+              billing_cycle,
+              status,
+              amount,
+              started_at,
+              ends_at,
+              auto_renew
+            )
+            VALUES (
+              $1,
+              'free_trial',
+              'trial',
+              0,
+              NOW(),
+              NOW() + INTERVAL '30 days',
+              FALSE
+            )
+            `,
+            [req.params.id]
+          );
+        }
+      }
+
+      // عند إيقاف المتجر نوقف ظهوره
+      if (newStatus !== 'active') {
+        await client.query(
+          `
+          UPDATE merchants
+          SET is_visible = FALSE
+          WHERE id = $1
+          `,
+          [req.params.id]
+        );
+      }
+
+      await client.query('COMMIT');
+
+      const updated = await pool.query(
+        `
+        SELECT *
+        FROM merchants
+        WHERE id = $1
+        `,
+        [req.params.id]
+      );
+
+      res.json({
+        success: true,
+        message: 'تم تحديث حالة المتجر.',
+        merchant: updated.rows[0]
+      });
+
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+
+    } finally {
+      client.release();
+    }
+  })
+);
 app.get(
   '/api/auth/me',
   authenticate,
