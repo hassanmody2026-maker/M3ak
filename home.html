@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#35145f">
+<title>M3AK | الرئيسية</title>
+
+<style>
+:root {
+  --purple:#54258f;
+  --deep:#35145f;
+  --pink:#e94c9b;
+  --teal:#35bdb4;
+  --bg:#f7f5fb;
+  --ink:#29233a;
+  --muted:#827b91;
+  --line:#eee9f4;
+  --white:#fff;
+}
+
+* {
+  box-sizing:border-box;
+}
+
+body {
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:Tahoma,Arial,sans-serif;
+}
+
+button,input {
+  font-family:inherit;
+}
+
+.app {
+  width:100%;
+  max-width:480px;
+  min-height:100dvh;
+  margin:auto;
+  background:var(--bg);
+  padding-bottom:90px;
+  box-shadow:0 0 35px #2c17400d;
+}
+
+/* HEADER */
+
+.header {
+  background:linear-gradient(
+    135deg,
+    #35145f,
+    #54258f 65%,
+    #7543ad
+  );
+  color:#fff;
+  padding:20px 18px 25px;
+  border-radius:0 0 27px 27px;
+  box-shadow:0 8px 24px #54258f25;
+}
+
+.header-top {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+
+.brand {
+  display:flex;
+  align-items:center;
+  gap:11px;
+}
+
+.logo {
+  width:49px;
+  height:49px;
+  border-radius:16px;
+  background:linear-gradient(145deg,#fff,#f7dff0);
+  display:grid;
+  place-items:center;
+  color:var(--purple);
+  font-size:25px;
+  font-weight:900;
+  box-shadow:inset 0 0 0 2px #ffffff70;
+}
+
+.brand strong {
+  font-size:21px;
+  letter-spacing:.5px;
+}
+
+.brand small {
+  display:block;
+  font-size:10px;
+  color:#e9dff5;
+  margin-top:4px;
+}
+
+.header-actions {
+  display:flex;
+  gap:9px;
+}
+
+.header-btn {
+  width:41px;
+  height:41px;
+  border:1px solid #ffffff40;
+  background:#ffffff18;
+  border-radius:13px;
+  color:white;
+  font-size:19px;
+  cursor:pointer;
+}
+
+.greeting {
+  margin-top:25px;
+}
+
+.greeting .welcome {
+  color:#e9dff5;
+  font-size:12px;
+}
+
+.greeting h1 {
+  margin:8px 0;
+  font-size:25px;
+}
+
+.greeting p {
+  color:#eee5f7;
+  font-size:12px;
+  line-height:1.9;
+  margin:0;
+}
+
+/* SEARCH */
+
+.search-box {
+  margin-top:20px;
+  background:#fff;
+  border:1px solid #ffffff60;
+  border-radius:15px;
+  padding:5px 13px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.search-box span {
+  color:var(--purple);
+  font-size:20px;
+}
+
+.search-box input {
+  width:100%;
+  height:43px;
+  border:0;
+  outline:0;
+  background:transparent;
+  color:var(--ink);
+  font-size:12px;
+}
+
+/* CONTENT */
+
+.content {
+  padding:19px 16px;
+}
+
+.section-heading {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin:5px 2px 13px;
+}
+
+.section-heading h2 {
+  font-size:15px;
+  margin:0;
+  color:var(--deep);
+}
+
+.section-heading span {
+  color:var(--muted);
+  font-size:10px;
+}
+
+/* AI BANNER */
+
+.ai-banner {
+  background:linear-gradient(
+    120deg,
+    #35145f,
+    #67329b,
+    #8d398e
+  );
+  border-radius:20px;
+  padding:17px;
+  color:white;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  position:relative;
+  overflow:hidden;
+  box-shadow:0 9px 22px #54258f20;
+  cursor:pointer;
+}
+
+.ai-banner:after {
+  content:"";
+  position:absolute;
+  width:140px;
+  height:140px;
+  border:1px solid #ffffff20;
+  border-radius:50%;
+  left:-40px;
+  top:-75px;
+  box-shadow:0 0 0 25px #ffffff09;
+}
+
+.ai-info {
+  position:relative;
+  z-index:1;
+}
+
+.ai-info small {
+  color:#e9dff5;
+  font-size:10px;
+}
+
+.ai-info h3 {
+  margin:7px 0;
+  font-size:17px;
+}
+
+.ai-info p {
+  margin:0;
+  color:#eee5f7;
+  font-size:10px;
+  line-height:1.8;
+}
+
+.ai-action {
+  position:relative;
+  z-index:1;
+  flex:none;
+  width:57px;
+  height:57px;
+  border-radius:18px;
+  background:linear-gradient(145deg,#fff,#d9f5f1);
+  display:grid;
+  place-items:center;
+  font-size:29px;
+  color:var(--purple);
+}
+
+/* SERVICES */
+
+.services-grid {
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:11px;
+}
+
+.service {
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:17px;
+  min-height:123px;
+  padding:13px 8px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.service:active {
+  transform:scale(.97);
+  border-color:#cbb8e3;
+}
+
+.service-icon {
+  width:48px;
+  height:48px;
+  border-radius:16px;
+  display:grid;
+  place-items:center;
+  font-size:24px;
+  margin-bottom:10px;
+  background:#f1eafa;
+}
+
+.service:nth-child(3n+2) .service-icon {
+  background:#fce9f3;
+}
+
+.service:nth-child(3n) .service-icon {
+  background:#e5f7f5;
+}
+
+.service strong {
+  font-size:11px;
+  color:var(--ink);
+  line-height:1.7;
+}
+
+.service small {
+  color:var(--muted);
+  font-size:9px;
+  margin-top:4px;
+}
+
+/* SPECIAL SECTION */
+
+.special-card {
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:16px;
+  margin-top:21px;
+}
+
+.special-row {
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.special-icon {
+  width:48px;
+  height:48px;
+  border-radius:15px;
+  background:#e5f7f5;
+  display:grid;
+  place-items:center;
+  font-size:23px;
+  flex:none;
+}
+
+.special-text {
+  flex:1;
+}
+
+.special-text strong {
+  font-size:12px;
+}
+
+.special-text p {
+  font-size:10px;
+  color:var(--muted);
+  line-height:1.7;
+  margin:5px 0 0;
+}
+
+.special-arrow {
+  color:var(--purple);
+  font-size:20px;
+}
+
+/* PROMO */
+
+.promo {
+  margin-top:18px;
+  padding:17px;
+  border-radius:18px;
+  background:linear-gradient(120deg,#fceaf3,#f0e9fa);
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.promo-icon {
+  width:46px;
+  height:46px;
+  border-radius:15px;
+  background:#fff;
+  display:grid;
+  place-items:center;
+  font-size:22px;
+  flex:none;
+}
+
+.promo-text strong {
+  font-size:12px;
+  color:var(--deep);
+}
+
+.promo-text p {
+  font-size:10px;
+  color:#766a82;
+  line-height:1.8;
+  margin:5px 0 0;
+}
+
+/* FLOATING AI BUTTON */
+
+.floating-ai {
+  position:fixed;
+  bottom:85px;
+  left:max(18px,calc((100vw - 480px)/2 + 18px));
+  width:57px;
+  height:57px;
+  border:3px solid #fff;
+  border-radius:19px;
+  background:linear-gradient(135deg,var(--pink),var(--purple));
+  color:white;
+  font-size:25px;
+  box-shadow:0 8px 24px #35145f45;
+  z-index:10;
+  cursor:pointer;
+}
+
+/* BOTTOM NAV */
+
+.bottom-nav {
+  position:fixed;
+  bottom:0;
+  left:50%;
+  transform:translateX(-50%);
+  width:100%;
+  max-width:480px;
+  min-height:68px;
+  background:#fff;
+  border-top:1px solid var(--line);
+  display:flex;
+  justify-content:space-around;
+  align-items:center;
+  padding:7px 3px calc(7px + env(safe-area-inset-bottom));
+  z-index:9;
+}
+
+.nav-item {
+  border:0;
+  background:none;
+  color:#928a9e;
+  font-size:10px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:5px;
+  min-width:53px;
+  cursor:pointer;
+}
+
+.nav-item i {
+  font-style:normal;
+  font-size:21px;
+}
+
+.nav-item.active {
+  color:var(--purple);
+  font-weight:bold;
+}
+
+/* TOAST */
+
+.toast {
+  position:fixed;
+  bottom:155px;
+  left:50%;
+  transform:translateX(-50%);
+  width:calc(100% - 40px);
+  max-width:420px;
+  background:#35145f;
+  color:#fff;
+  padding:13px 15px;
+  border-radius:13px;
+  font-size:11px;
+  line-height:1.8;
+  text-align:center;
+  box-shadow:0 8px 25px #0003;
+  display:none;
+  z-index:20;
+}
+
+.toast.show {
+  display:block;
+}
+
+.no-results {
+  display:none;
+  text-align:center;
+  padding:25px 10px;
+  color:var(--muted);
+  font-size:12px;
+  grid-column:1/-1;
+}
+
+@media(max-width:360px) {
+  .services-grid {
+    gap:7px;
+  }
+
+  .service {
+    min-height:115px;
+    padding:10px 5px;
+  }
+
+  .service strong {
+    font-size:10px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<main class="app">
+
+<!-- HEADER -->
+
+<header class="header">
+
+  <div class="header-top">
+
+    <div class="brand">
+
+      <div class="logo">M</div>
+
+      <div>
+        <strong>M3AK</strong>
+        <small>كل اللي تحتاجه.. معاك</small>
+      </div>
+
+    </div>
+
+    <div class="header-actions">
+
+      <button class="header-btn"
+        aria-label="الإشعارات"
+        onclick="go('notifications.html')">
+        ♧
+      </button>
+
+      <button class="header-btn"
+        aria-label="الملف الشخصي"
+        onclick="go('profile.html')">
+        ☻
+      </button>
+
+    </div>
+
+  </div>
+
+  <div class="greeting">
+
+    <span class="welcome">أهلاً بيك في معاك 👋</span>
+
+    <h1 id="userName">يومك أسهل مع M3AK</h1>
+
+    <p>
+      كل احتياجاتك وخدماتك في مكان واحد،
+      ومساعدك الذكي معاك في كل خطوة.
+    </p>
+
+  </div>
+
+  <div class="search-box">
+
+    <span>⌕</span>
+
+    <input
+      id="search"
+      type="search"
+      placeholder="بتدور على إيه النهارده؟">
+
+  </div>
+
+</header>
+
+<!-- CONTENT -->
+
+<section class="content">
+
+  <!-- AI ASSISTANT -->
+
+  <div class="ai-banner"
+    onclick="go('assistant.html')">
+
+    <div class="ai-info">
+
+      <small>مساعدك الشخصي متاح دايمًا</small>
+
+      <h3>اسأل مساعد معاك الذكي ✨</h3>
+
+      <p>
+        قارن، خطط، اسأل، وخد قراراتك بثقة.
+      </p>
+
+    </div>
+
+    <div class="ai-action">🤖</div>
+
+  </div>
+
+  <!-- SERVICES -->
+
+  <div class="section-heading" style="margin-top:25px">
+
+    <h2>اكتشف خدمات معاك</h2>
+
+    <span>كل احتياجاتك في مكان واحد</span>
+
+  </div>
+
+  <div class="services-grid" id="services">
+
+    <button class="service"
+      data-name="السفر والطيران"
+      data-section="travel">
+
+      <span class="service-icon">✈️</span>
+
+      <strong>السفر والطيران</strong>
+
+      <small>خطط رحلتك</small>
+
+    </button>
+
+    <button class="service"
+      data-name="الفنادق والإقامة"
+      data-section="hotels">
+
+      <span class="service-icon">🏨</span>
+
+      <strong>الفنادق والإقامة</strong>
+
+      <small>اختيارات الإقامة</small>
+
+    </button>
+
+    <button class="service"
+      data-name="الصالونات والتجميل"
+      data-section="salons">
+
+      <span class="service-icon">💇</span>
+
+      <strong>الصالونات والتجميل</strong>
+
+      <small>خدمات العناية</small>
+
+    </button>
+
+    <button class="service"
+      data-name="الملابس"
+      data-section="clothes">
+
+      <span class="service-icon">👔</span>
+
+      <strong>الملابس</strong>
+
+      <small>تسوق واختار</small>
+
+    </button>
+
+    <button class="service"
+      data-name="الأحذية"
+      data-section="shoes">
+
+      <span class="service-icon">👟</span>
+
+      <strong>الأحذية</strong>
+
+      <small>اختيارات متنوعة</small>
+
+    </button>
+
+    <button class="service"
+      data-name="الموبايلات والإلكترونيات"
+      data-section="mobiles">
+
+      <span class="service-icon">📱</span>
+
+      <strong>الموبايلات</strong>
+
+      <small>قارن قبل الشراء</small>
+
+    </button>
+
+    <button class="service"
+      data-name="الميزانية والتوفير"
+      data-section="budget">
+
+      <span class="service-icon">💰</span>
+
+      <strong>الميزانية</strong>
+
+      <small>خطط مصروفاتك</small>
+
+    </button>
+
+    <button class="service"
+      data-name="الأطفال والأسرة"
+      data-section="kids">
+
+      <span class="service-icon">👨‍👩‍👧‍👦</span>
+
+      <strong>الأطفال والأسرة</strong>
+
+      <small>كل ما يخص عيلتك</small>
+
+    </button>
+
+    <button class="service"
+      data-name="اللاندسكيب والعشب الصناعي"
+      data-section="landscape">
+
+      <span class="service-icon">🌿</span>
+
+      <strong>اللاندسكيب</strong>
+
+      <small>جمال المساحات</small>
+
+    </button>
+
+    <div class="no-results" id="noResults">
+      مفيش خدمة مطابقة للبحث.
+    </div>
+
+  </div>
+
+  <!-- NEARBY SERVICES -->
+
+  <div class="special-card"
+    onclick="showMessage('سيتم ربط البحث عن الخدمات القريبة بخدمة المواقع الجغرافية.')">
+
+    <div class="special-row">
+
+      <div class="special-icon">📍</div>
+
+      <div class="special-text">
+
+        <strong>خدمات قريبة منك</strong>
+
+        <p>
+          اكتشف الأماكن والخدمات المتاحة في منطقتك.
+        </p>
+
+      </div>
+
+      <span class="special-arrow">←</span>
+
+    </div>
+
+  </div>
+
+  <!-- SHOPPING PROTECTION -->
+
+  <div class="special-card"
+    onclick="showMessage('قسم حماية المشتريات سيتم ربطه بخدمات التحقق ومراجعة المنتجات.')">
+
+    <div class="special-row">
+
+      <div class="special-icon">🛡️</div>
+
+      <div class="special-text">
+
+        <strong>حماية مشترياتك</strong>
+
+        <p>
+          ساعد نفسك تتأكد من اختياراتك قبل الشراء.
+        </p>
+
+      </div>
+
+      <span class="special-arrow">←</span>
+
+    </div>
+
+  </div>
+
+  <!-- PROMO -->
+
+  <div class="promo">
+
+    <div class="promo-icon">💜</div>
+
+    <div class="promo-text">
+
+      <strong>معاك في كل خطوة</strong>
+
+      <p>
+        هدفنا نسهّل يومك ونساعدك تختار الأنسب
+        لاحتياجاتك وميزانيتك.
+      </p>
+
+    </div>
+
+  </div>
+
+</section>
+
+<!-- FLOATING AI -->
+
+<button class="floating-ai"
+  aria-label="افتح المساعد الذكي"
+  onclick="go('assistant.html')">
+  ✧
+</button>
+
+<!-- BOTTOM NAV -->
+
+<nav class="bottom-nav">
+
+  <button class="nav-item active"
+    onclick="go('home.html')">
+
+    <i>⌂</i>
+    الرئيسية
+
+  </button>
+
+  <button class="nav-item"
+    onclick="go('orders.html')">
+
+    <i>▣</i>
+    طلباتي
+
+  </button>
+
+  <button class="nav-item"
+    onclick="go('assistant.html')">
+
+    <i>✧</i>
+    المساعد
+
+  </button>
+
+  <button class="nav-item"
+    onclick="go('notifications.html')">
+
+    <i>♧</i>
+    الإشعارات
+
+  </button>
+
+  <button class="nav-item"
+    onclick="go('profile.html')">
+
+    <i>☻</i>
+    حسابي
+
+  </button>
+
+</nav>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+
+function go(page) {
+  window.location.href = page;
+}
+
+let toastTimer;
+
+function showMessage(message) {
+
+  const toast = document.getElementById('toast');
+
+  toast.textContent = message;
+
+  toast.classList.add('show');
+
+  clearTimeout(toastTimer);
+
+  toastTimer = setTimeout(() => {
+    toast.classList.remove('show');
+  },3500);
+
+}
+
+/* SEARCH SERVICES */
+
+const search = document.getElementById('search');
+
+const serviceCards = [
+  ...document.querySelectorAll('.service')
+];
+
+search.addEventListener('input',() => {
+
+  const value = search.value.trim().toLowerCase();
+
+  let visible = 0;
+
+  serviceCards.forEach(card => {
+
+    const name = card.dataset.name.toLowerCase();
+
+    const match = name.includes(value);
+
+    card.style.display = match ? 'flex' : 'none';
+
+    if (match) visible++;
+
+  });
+
+  document.getElementById('noResults').style.display =
+    visible === 0 ? 'block' : 'none';
+
+});
+
+/* SERVICE ACTIONS */
+
+serviceCards.forEach(card => {
+
+  card.addEventListener('click',() => {
+
+    const section = card.dataset.section;
+
+    showMessage(
+      'اخترت قسم ' + card.dataset.name +
+      '. سيتم فتح خدمات القسم بعد تجهيز شاشته وربط بياناته.'
+    );
+
+  });
+
+});
+
+/* USER NAME */
+
+try {
+
+  const savedName = localStorage.getItem('m3ak_user_name');
+
+  if (savedName) {
+    document.getElementById('userName').textContent =
+      'أهلاً بيك يا ' + savedName;
+  }
+
+} catch(error) {
+  // لا نعتمد على التخزين المحلي لتأكيد هوية المستخدم.
+}
+
+</script>
+
+</body>
+</html>
