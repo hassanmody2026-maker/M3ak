@@ -14,14 +14,12 @@
             --primary-purple: #7b1fa2;
             --secondary-pink: #e91e63;
             --accent-teal: #00bcd4;
-            --bg-gradient-start: #2b0c3d;
-            --bg-gradient-end: #12041a;
-            --glass-bg: rgba(255, 255, 255, 0.05);
-            --glass-border: rgba(255, 255, 255, 0.12);
-            --text-color: #ffffff;
-            --text-muted: #b0bec5;
-            --error-color: #ff5252;
-            --success-color: #69f0ae;
+            --bg-color: #ffffff;
+            --card-bg: #f8f9fa;
+            --card-border: #e0e0e0;
+            --text-color: #212121;
+            --text-muted: #666666;
+            --error-color: #d32f2f;
         }
 
         * {
@@ -32,7 +30,7 @@
         }
 
         body {
-            background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+            background-color: var(--bg-color);
             color: var(--text-color);
             min-height: 100vh;
             display: flex;
@@ -44,56 +42,55 @@
         .signup-container {
             width: 100%;
             max-width: 480px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--glass-border);
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
             border-radius: 24px;
             padding: 30px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
-            position: relative;
-            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
         }
 
-        .signup-container::before {
-            content: '';
-            position: absolute;
-            top: -50px;
-            right: -50px;
-            width: 120px;
-            height: 120px;
-            background: var(--accent-teal);
-            filter: blur(70px);
-            opacity: 0.3;
-            z-index: -1;
-        }
-
+        /* تنسيق الشعار والكلمة تحته */
         .logo-section {
             text-align: center;
             margin-bottom: 20px;
         }
 
-        .logo-section img {
-            width: 90px;
-            height: 90px;
-            border-radius: 20px;
-            object-fit: cover;
-            box-shadow: 0 0 20px rgba(123, 31, 162, 0.6);
-            border: 2px solid var(--accent-teal);
+        .logo-box {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            background: linear-gradient(135deg, #7b1fa2, #4a148c);
+            padding: 12px 25px;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(123, 31, 162, 0.3);
         }
 
+        .logo-brand {
+            color: #ffffff;
+            font-size: 22px;
+            font-weight: 900;
+            letter-spacing: 1px;
+        }
+
+        .logo-subtitle {
+            color: #e1bee7;
+            font-size: 11px;
+            font-weight: 600;
+            margin-top: 2px;
+            white-space: nowrap;
+        }
+
+        /* عنوان الشاشة */
         .header-section {
             text-align: center;
             margin-bottom: 25px;
         }
 
         .header-section h1 {
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 700;
-            margin-bottom: 8px;
-            background: linear-gradient(45deg, #fff, var(--accent-teal));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            margin-bottom: 6px;
+            color: var(--primary-purple);
         }
 
         .header-section p {
@@ -130,8 +127,8 @@
 
         .form-control {
             width: 100%;
-            background: rgba(0, 0, 0, 0.25);
-            border: 1px solid var(--glass-border);
+            background: #ffffff;
+            border: 1px solid #ccc;
             border-radius: 12px;
             padding: 12px 40px 12px 15px;
             color: var(--text-color);
@@ -145,9 +142,8 @@
 
         .form-control:focus {
             outline: none;
-            border-color: var(--accent-teal);
-            box-shadow: 0 0 10px rgba(0, 188, 212, 0.2);
-            background: rgba(0, 0, 0, 0.4);
+            border-color: var(--primary-purple);
+            box-shadow: 0 0 8px rgba(123, 31, 162, 0.2);
         }
 
         .phone-group {
@@ -156,8 +152,8 @@
         }
 
         .country-select {
-            background: rgba(0, 0, 0, 0.25);
-            border: 1px solid var(--glass-border);
+            background: #ffffff;
+            border: 1px solid #ccc;
             border-radius: 12px;
             color: var(--text-color);
             padding: 0 12px;
@@ -168,12 +164,7 @@
         }
 
         .country-select:focus {
-            border-color: var(--accent-teal);
-        }
-
-        .country-select option {
-            background: var(--bg-gradient-start);
-            color: var(--text-color);
+            border-color: var(--primary-purple);
         }
 
         .toggle-password {
@@ -186,7 +177,7 @@
         }
 
         .toggle-password:hover {
-            color: var(--accent-teal);
+            color: var(--primary-purple);
         }
 
         .error-msg {
@@ -205,14 +196,15 @@
         }
 
         .trial-notice {
-            background: rgba(123, 31, 162, 0.2);
+            background: rgba(123, 31, 162, 0.08);
             border: 1px dashed var(--primary-purple);
             border-radius: 10px;
             padding: 10px 12px;
             font-size: 12px;
             text-align: center;
-            color: #e1bee7;
+            color: var(--primary-purple);
             margin-bottom: 18px;
+            font-weight: 600;
         }
 
         .terms-group {
@@ -237,8 +229,9 @@
         }
 
         .terms-group a {
-            color: var(--accent-teal);
+            color: var(--primary-purple);
             text-decoration: none;
+            font-weight: bold;
         }
 
         .terms-group a:hover {
@@ -256,7 +249,7 @@
             font-weight: 700;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(233, 30, 99, 0.4);
+            box-shadow: 0 4px 15px rgba(233, 30, 99, 0.3);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -264,9 +257,9 @@
         }
 
         .btn-submit:hover {
-            opacity: 0.9;
+            opacity: 0.95;
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(233, 30, 99, 0.6);
+            box-shadow: 0 6px 20px rgba(233, 30, 99, 0.5);
         }
 
         .btn-submit:disabled {
@@ -283,9 +276,9 @@
         }
 
         .footer-text a {
-            color: var(--accent-teal);
+            color: var(--primary-purple);
             text-decoration: none;
-            font-weight: 600;
+            font-weight: 700;
         }
 
         .footer-text a:hover {
@@ -310,9 +303,12 @@
 <body>
 
     <div class="signup-container">
-        <!-- شعار التطبيق -->
+        <!-- شعار التطبيق مع الكلمة تحته -->
         <div class="logo-section">
-            <img src="1000050393.png" alt="شعار تطبيق M3AK">
+            <div class="logo-box">
+                <span class="logo-brand">M3AK</span>
+                <span class="logo-subtitle">معاك من أول اليوم لآخره</span>
+            </div>
         </div>
 
         <!-- عنوان الشاشة -->
