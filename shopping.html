@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#160820">
+<title>M3AK | التسوق ومقارنة الأسعار</title>
+
+<style>
+:root {
+  --bg:#100719;
+  --surface:#1d1029;
+  --purple:#7b35a6;
+  --pink:#e94c9b;
+  --teal:#35c8bd;
+  --white:#fff;
+  --muted:#b9a9c5;
+  --line:#ffffff16;
+}
+* {box-sizing:border-box}
+body {
+  margin:0;
+  min-height:100vh;
+  background:
+    radial-gradient(circle at 10% 0%,#40165355,transparent 35%),
+    var(--bg);
+  color:var(--white);
+  font-family:Tahoma,Arial,sans-serif;
+}
+button,input,textarea,select {font-family:inherit}
+button {cursor:pointer}
+.app {
+  width:100%;
+  max-width:480px;
+  min-height:100dvh;
+  margin:auto;
+  padding-bottom:95px;
+}
+.header {
+  padding:18px 17px 23px;
+  background:linear-gradient(135deg,#2b0c3d,#542078 65%,#71318b);
+  border-radius:0 0 28px 28px;
+  box-shadow:0 10px 30px #0004;
+}
+.top {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+.brand {
+  display:flex;
+  align-items:center;
+  gap:11px;
+}
+.logo {
+  width:50px;
+  height:50px;
+  border-radius:16px;
+  background:linear-gradient(145deg,#fff,#f5dff0);
+  color:#542078;
+  display:grid;
+  place-items:center;
+  font-size:26px;
+  font-weight:900;
+}
+.brand strong {font-size:21px}
+.brand small {
+  display:block;
+  margin-top:4px;
+  color:#eadcf4;
+  font-size:10px;
+}
+.icon-btn {
+  width:41px;
+  height:41px;
+  border:1px solid #ffffff35;
+  border-radius:13px;
+  background:#ffffff15;
+  color:#fff;
+  font-size:19px;
+}
+.heading {margin-top:23px}
+.back {
+  border:0;
+  background:#ffffff18;
+  color:#fff;
+  border-radius:12px;
+  padding:9px 13px;
+  font-size:11px;
+}
+.heading small {
+  display:block;
+  margin-top:15px;
+  color:#eadcf4;
+  font-size:11px;
+}
+.heading h1 {
+  font-size:23px;
+  margin:8px 0;
+}
+.heading p {
+  margin:0;
+  color:#eadcf4;
+  font-size:11px;
+  line-height:1.9;
+}
+.content {padding:17px 15px}
+.ai-card {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:16px;
+  border:1px solid #ffffff20;
+  border-radius:20px;
+  background:linear-gradient(120deg,#35145f,#67329b,#8d398e);
+  box-shadow:0 9px 25px #0004;
+  cursor:pointer;
+}
+.ai-card h2 {
+  font-size:15px;
+  margin:6px 0;
+}
+.ai-card p {
+  font-size:10px;
+  color:#eadcf4;
+  line-height:1.8;
+  margin:0;
+}
+.ai-card small {
+  font-size:10px;
+  color:#eadcf4;
+}
+.ai-icon {
+  width:55px;
+  height:55px;
+  flex:none;
+  border-radius:18px;
+  display:grid;
+  place-items:center;
+  background:linear-gradient(145deg,#fff,#d9f5f1);
+  color:#542078;
+  font-size:28px;
+}
+.search {
+  display:flex;
+  align-items:center;
+  gap:9px;
+  margin-top:17px;
+  padding:4px 12px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:#ffffff0c;
+}
+.search span {font-size:20px}
+.search input {
+  width:100%;
+  height:42px;
+  border:0;
+  outline:0;
+  background:transparent;
+  color:white;
+  font-size:11px;
+}
+.search input::placeholder {color:#b9a9c5}
+.section-title {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  margin:23px 2px 12px;
+}
+.section-title h2 {
+  font-size:14px;
+  margin:0;
+}
+.section-title small {
+  font-size:9px;
+  color:var(--muted);
+}
+.grid {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+}
+.category {
+  min-height:105px;
+  padding:13px 10px;
+  border:1px solid var(--line);
+  border-radius:17px;
+  background:linear-gradient(145deg,#251432,#1b1026);
+  color:#fff;
+  text-align:right;
+  display:flex;
+  align-items:center;
+  gap:11px;
+}
+.category:active {
+  transform:scale(.98);
+  border-color:#a65ac7;
+}
+.cat-icon {
+  width:45px;
+  height:45px;
+  flex:none;
+  display:grid;
+  place-items:center;
+  border-radius:15px;
+  background:#71349a35;
+  font-size:23px;
+}
+.category:nth-child(3n+2) .cat-icon {background:#e94c9b25}
+.category:nth-child(3n) .cat-icon {background:#35c8bd25}
+.category strong {
+  display:block;
+  font-size:10px;
+  line-height:1.7;
+}
+.category small {
+  display:block;
+  margin-top:4px;
+  color:var(--muted);
+  font-size:9px;
+  line-height:1.6;
+}
+.empty {
+  display:none;
+  grid-column:1/-1;
+  text-align:center;
+  color:var(--muted);
+  font-size:11px;
+  padding:20px;
+}
+.panel {
+  margin-top:18px;
+  padding:16px;
+  border:1px solid var(--line);
+  border-radius:19px;
+  background:linear-gradient(145deg,#251432,#1b1026);
+}
+.panel h3 {
+  margin:0 0 7px;
+  font-size:13px;
+}
+.panel>p {
+  margin:0 0 13px;
+  color:var(--muted);
+  font-size:10px;
+  line-height:1.8;
+}
+.field {margin-top:11px}
+.field label {
+  display:block;
+  margin-bottom:7px;
+  font-size:10px;
+  color:#eadcf4;
+}
+.field input,.field textarea,.field select {
+  width:100%;
+  border:1px solid #ffffff20;
+  border-radius:12px;
+  background:#ffffff0b;
+  color:white;
+  padding:12px;
+  font-size:11px;
+  outline:none;
+}
+.field select option {
+  background:#251432;
+  color:white;
+}
+.field textarea {
+  min-height:75px;
+  resize:vertical;
+  line-height:1.8;
+}
+.field input::placeholder,.field textarea::placeholder {
+  color:#a997b6;
+}
+.primary {
+  width:100%;
+  margin-top:14px;
+  padding:13px;
+  border:0;
+  border-radius:13px;
+  background:linear-gradient(100deg,var(--purple),var(--pink));
+  color:#fff;
+  font-size:11px;
+  font-weight:bold;
+}
+.secondary {
+  width:100%;
+  margin-top:9px;
+  padding:12px;
+  border:1px solid #ffffff25;
+  border-radius:13px;
+  background:#ffffff0b;
+  color:#fff;
+  font-size:10px;
+}
+.compare-card {
+  margin-top:18px;
+  padding:16px;
+  border:1px solid #35c8bd35;
+  border-radius:19px;
+  background:linear-gradient(145deg,#18302f,#1b1026);
+}
+.compare-card h3 {
+  margin:0 0 7px;
+  font-size:13px;
+}
+.compare-card p {
+  color:var(--muted);
+  font-size:10px;
+  line-height:1.8;
+}
+.compare-icon {
+  font-size:25px;
+  margin-bottom:8px;
+}
+.compare-card button {
+  width:100%;
+  border:1px solid #35c8bd70;
+  border-radius:12px;
+  background:#35c8bd18;
+  color:#7de5dc;
+  padding:12px;
+  font-size:10px;
+}
+.feature-list {
+  display:grid;
+  gap:9px;
+  margin-top:12px;
+}
+.feature {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:12px;
+  border:1px solid var(--line);
+  border-radius:13px;
+  background:#ffffff08;
+}
+.feature span {font-size:19px}
+.feature strong {
+  font-size:10px;
+  display:block;
+}
+.feature small {
+  display:block;
+  color:var(--muted);
+  font-size:9px;
+  margin-top:4px;
+}
+.promo {
+  display:flex;
+  align-items:center;
+  gap:11px;
+  margin-top:17px;
+  padding:15px;
+  border:1px solid #ffffff14;
+  border-radius:17px;
+  background:linear-gradient(120deg,#3a194c,#251432);
+}
+.promo-icon {
+  width:43px;
+  height:43px;
+  flex:none;
+  border-radius:14px;
+  background:#ffffff15;
+  display:grid;
+  place-items:center;
+  font-size:21px;
+}
+.promo strong {font-size:11px}
+.promo p {
+  margin:5px 0 0;
+  color:var(--muted);
+  font-size:9px;
+  line-height:1.8;
+}
+.floating-ai {
+  position:fixed;
+  bottom:84px;
+  left:max(17px,calc((100vw - 480px)/2 + 17px));
+  width:54px;
+  height:54px;
+  border:2px solid #ffffff80;
+  border-radius:19px;
+  background:linear-gradient(135deg,var(--pink),var(--purple));
+  color:white;
+  font-size:25px;
+  box-shadow:0 8px 24px #0006;
+  z-index:8;
+}
+.bottom-nav {
+  position:fixed;
+  bottom:0;
+  left:50%;
+  transform:translateX(-50%);
+  width:100%;
+  max-width:480px;
+  min-height:68px;
+  display:flex;
+  align-items:center;
+  justify-content:space-around;
+  background:#1b1025;
+  border-top:1px solid var(--line);
+  padding:7px 3px calc(7px + env(safe-area-inset-bottom));
+  z-index:9;
+}
+.nav-item {
+  min-width:53px;
+  border:0;
+  background:none;
+  color:#a99ab4;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:5px;
+  font-size:9px;
+}
+.nav-item i {
+  font-style:normal;
+  font-size:20px;
+}
+.nav-item.active {
+  color:#f078bd;
+  font-weight:bold;
+}
+.toast {
+  position:fixed;
+  z-index:20;
+  bottom:150px;
+  left:50%;
+  transform:translateX(-50%);
+  width:calc(100% - 35px);
+  max-width:420px;
+  padding:13px 15px;
+  border:1px solid #ffffff20;
+  border-radius:14px;
+  background:#38204a;
+  color:white;
+  text-align:center;
+  font-size:10px;
+  line-height:1.8;
+  box-shadow:0 8px 25px #0005;
+  display:none;
+}
+.toast.show {display:block}
+@media(max-width:360px) {
+  .grid {gap:7px}
+  .category {padding:10px 7px}
+  .category strong {font-size:9px}
+  .heading h1 {font-size:20px}
+}
+</style>
+</head>
+
+<body>
+<main class="app">
+
+<header class="header">
+  <div class="top">
+    <div class="brand">
+      <div class="logo">M</div>
+      <div>
+        <strong>M3AK</strong>
+        <small>كل اللي تحتاجه.. معاك</small>
+      </div>
+    </div>
+    <button class="icon-btn"
+      aria-label="الملف الشخصي"
+      onclick="go('profile.html')">☻</button>
+  </div>
+
+  <div class="heading">
+    <button class="back" onclick="go('home.html')">→ الرئيسية</button>
+    <small>القسم الثاني من خدمات معاك</small>
+    <h1>التسوق ومقارنة الأسعار 🛍️</h1>
+    <p>
+      دور على المنتج اللي محتاجه، واكتشف اختياراتك،
+      وقارن الأسعار والعروض قبل ما تقرر تشتري.
+    </p>
+  </div>
+</header>
+
+<section class="content">
+
+  <div class="ai-card" onclick="go('assistant.html')">
+    <div>
+      <small>مساعدك الذكي معاك</small>
+      <h2>مش عارف تختار المنتج المناسب؟</h2>
+      <p>اسأل المساعد عن المواصفات والاختيارات المناسبة لاحتياجك.</p>
+    </div>
+    <div class="ai-icon">🤖</div>
+  </div>
+
+  <div class="search">
+    <span>⌕</span>
+    <input id="productSearch" type="search"
+      placeholder="ابحث عن منتج أو ماركة..."
+      autocomplete="off">
+  </div>
+
+  <div class="section-title">
+    <h2>تسوق حسب التصنيف</h2>
+    <small>اختار القسم المناسب</small>
+  </div>
+
+  <div class="grid" id="categoryGrid">
+
+    <button class="category" data-title="الموبايلات والهواتف">
+      <span class="cat-icon">📱</span>
+      <span>
+        <strong>الموبايلات والهواتف</strong>
+        <small>هواتف وإكسسوارات</small>
+      </span>
+    </button>
+
+    <button class="category" data-title="الإلكترونيات">
+      <span class="cat-icon">🎧</span>
+      <span>
+        <strong>الإلكترونيات</strong>
+        <small>سماعات وأجهزة ذكية</small>
+      </span>
+    </button>
+
+    <button class="category" data-title="الأجهزة المنزلية">
+      <span class="cat-icon">🧺</span>
+      <span>
+        <strong>الأجهزة المنزلية</strong>
+        <small>أجهزة ومستلزمات البيت</small>
+      </span>
+    </button>
+
+    <button class="category" data-title="الأثاث والديكور">
+      <span class="cat-icon">🛋️</span>
+      <span>
+        <strong>الأثاث والديكور</strong>
+        <small>تجهيز وتأثيث المنزل</small>
+      </span>
+    </button>
+
+    <button class="category" data-title="الملابس">
+      <span class="cat-icon">👕</span>
+      <span>
+        <strong>الملابس</strong>
+        <small>ملابس لجميع الأعمار</small>
+      </span>
+    </button>
+
+    <button class="category" data-title="الأحذية والحقائب">
+      <span class="cat-icon">👟</span>
+      <span>
+        <strong>الأحذية والحقائب</strong>
+        <small>أحذية وشنط وإكسسوارات</small>
+      </span>
+    </button>
+
+    <button class="category" data-title="مستلزمات الأطفال">
+      <span class="cat-icon">🧸</span>
+      <span>
+        <strong>مستلزمات الأطفال</strong>
+        <small>منتجات واحتياجات الأطفال</small>
+      </span>
+    </button>
+
+    <button class="category" data-title="الصحة والعناية الشخصية">
+      <span class="cat-icon">🧴</span>
+      <span>
+        <strong>الصحة والعناية الشخصية</strong>
+        <small>العناية والاحتياجات اليومية</small>
+      </span>
+    </button>
+
+    <button class="category" data-title="المطبخ والأدوات المنزلية">
+      <span class="cat-icon">🍽️</span>
+      <span>
+        <strong>المطبخ والأدوات المنزلية</strong>
+        <small>أدوات وتجهيزات المطبخ</small>
+      </span>
+    </button>
+
+    <button class="category" data-title="الرياضة والهوايات">
+      <span class="cat-icon">⚽</span>
+      <span>
+        <strong>الرياضة والهوايات</strong>
+        <small>معدات وأدوات متنوعة</small>
+      </span>
+    </button>
+
+    <div class="empty" id="emptyState">
+      مفيش تصنيف مطابق للبحث.
+    </div>
+  </div>
+
+  <div class="compare-card">
+    <div class="compare-icon">⚖️</div>
+    <h3>قارن قبل ما تشتري</h3>
+    <p>
+      اكتب اسم المنتج والمواصفات المطلوبة لتجهيز عملية البحث
+      والمقارنة عند تفعيل مصادر الأسعار والعروض.
+    </p>
+    <button onclick="document.getElementById('comparePanel')
+      .scrollIntoView({behavior:'smooth',block:'center'})">
+      ابدأ مقارنة منتج
+    </button>
+  </div>
+
+  <div class="panel" id="comparePanel">
+    <h3>البحث عن منتج ومقارنة أسعاره</h3>
+    <p>
+      سجل بيانات المنتج الذي تبحث عنه لتحديد المواصفات المطلوبة.
+    </p>
+
+    <div class="field">
+      <label for="productName">اسم المنتج</label>
+      <input id="productName"
+        placeholder="مثال: هاتف Samsung Galaxy">
+    </div>
+
+    <div class="field">
+      <label for="productBrand">الماركة أو الشركة</label>
+      <input id="productBrand"
+        placeholder="اسم الماركة (اختياري)">
+    </div>
+
+    <div class="field">
+      <label for="productBudget">الميزانية المتوقعة بالجنيه</label>
+      <input id="productBudget"
+        type="number" min="0"
+        placeholder="مثال: 15000">
+    </div>
+
+    <div class="field">
+      <label for="productDetails">المواصفات المطلوبة</label>
+      <textarea id="productDetails"
+        placeholder="اكتب اللون أو الحجم أو الإمكانيات أو أي مواصفات مهمة..."></textarea>
+    </div>
+
+    <button class="primary" id="prepareComparison">
+      تجهيز طلب المقارنة
+    </button>
+
+    <div class="note">
+      المقارنة الفعلية للأسعار والتوافر والعروض تحتاج إلى ربط
+      مصادر بيانات المتاجر والتجار. لا يتم عرض أسعار تجريبية
+      على أنها أسعار حقيقية.
+    </div>
+  </div>
+
+  <div class="section-title">
+    <h2>مميزات التسوق مع معاك</h2>
+    <small>اختيار أذكى</small>
+  </div>
+
+  <div class="feature-list">
+    <div class="feature">
+      <span>🔎</span>
+      <div>
+        <strong>البحث عن المنتجات</strong>
+        <small>حدد المنتج والمواصفات التي تحتاجها.</small>
+      </div>
+    </div>
+
+    <div class="feature">
+      <span>⚖️</span>
+      <div>
+        <strong>مقارنة الأسعار</strong>
+        <small>مقارنة العروض بعد ربط مصادر الأسعار.</small>
+      </div>
+    </div>
+
+    <div class="feature">
+      <span>💜</span>
+      <div>
+        <strong>مساعدة ذكية في الاختيار</strong>
+        <small>استعن بالمساعد لفهم المواصفات والبدائل.</small>
+      </div>
+    </div>
+
+    <div class="feature">
+      <span>🛡️</span>
+      <div>
+        <strong>اهتمام بحماية مشترياتك</strong>
+        <small>راجع تفاصيل المنتج والبائع قبل الشراء.</small>
+      </div>
+    </div>
+  </div>
+
+  <div class="promo">
+    <div class="promo-icon">💜</div>
+    <div>
+      <strong>مصلحتك أولًا</strong>
+      <p>
+        هدفنا مساعدتك تختار المنتج المناسب وتفهم الفروق
+        بين البدائل قبل اتخاذ قرار الشراء.
+      </p>
+    </div>
+  </div>
+
+</section>
+
+<button class="floating-ai"
+  aria-label="افتح المساعد الذكي"
+  onclick="go('assistant.html')">✧</button>
+
+<nav class="bottom-nav">
+  <button class="nav-item" onclick="go('home.html')">
+    <i>⌂</i>الرئيسية
+  </button>
+  <button class="nav-item" onclick="go('orders.html')">
+    <i>▣</i>طلباتي
+  </button>
+  <button class="nav-item active" onclick="go('assistant.html')">
+    <i>✧</i>المساعد
+  </button>
+  <button class="nav-item" onclick="go('notifications.html')">
+    <i>♧</i>الإشعارات
+  </button>
+  <button class="nav-item" onclick="go('profile.html')">
+    <i>☻</i>حسابي
+  </button>
+</nav>
+
+</main>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+"use strict";
+
+function go(page) {
+  window.location.href = page;
+}
+
+const search = document.getElementById("productSearch");
+const cards = [...document.querySelectorAll(".category")];
+
+search.addEventListener("input", () => {
+  const term = search.value.trim().toLocaleLowerCase("ar");
+  let count = 0;
+
+  cards.forEach(card => {
+    const match = card.dataset.title
+      .toLocaleLowerCase("ar").includes(term);
+
+    card.style.display = match ? "flex" : "none";
+    if (match) count++;
+  });
+
+  document.getElementById("emptyState").style.display =
+    count ? "none" : "block";
+});
+
+cards.forEach(card => {
+  card.addEventListener("click", () => {
+    const categoryName = card.dataset.title;
+    document.getElementById("productName").value = categoryName;
+
+    document.getElementById("comparePanel")
+      .scrollIntoView({behavior:"smooth",block:"center"});
+  });
+});
+
+let toastTimer;
+
+function showToast(message) {
+  const toast = document.getElementById("toast");
+
+  toast.textContent = message;
+  toast.classList.add("show");
+
+  clearTimeout(toastTimer);
+
+  toastTimer = setTimeout(() => {
+    toast.classList.remove("show");
+  }, 4000);
+}
+
+document.getElementById("prepareComparison")
+  .addEventListener("click", () => {
+
+    const name = document.getElementById("productName").value.trim();
+    const budget = document.getElementById("productBudget").value;
+    const details = document.getElementById("productDetails").value.trim();
+
+    if (!name) {
+      showToast("اكتب اسم المنتج الذي تريد البحث عنه.");
+      return;
+    }
+
+    if (budget && Number(budget) < 0) {
+      showToast("اكتب ميزانية صحيحة.");
+      return;
+    }
+
+    if (!details) {
+      showToast("اكتب المواصفات المطلوبة للمنتج.");
+      return;
+    }
+
+    showToast(
+      "تم تجهيز بيانات المنتج. المقارنة الفعلية ستعمل بعد ربط مصادر الأسعار والمتاجر."
+    );
+});
+
+</script>
+
+</body>
+</html>
