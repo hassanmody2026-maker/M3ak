@@ -60,9 +60,7 @@ function validateEnvironment() {
       'APP_ORIGIN is required in production.'
     );
   }
-  }
-  
-
+}
 
 /* =========================================================
    DATABASE
