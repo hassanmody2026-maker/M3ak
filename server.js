@@ -4301,6 +4301,491 @@ app.post(
   })
 );
 /* =========================================================
+   ADMIN PURCHASE PROTECTION MANAGEMENT
+========================================================= */
+
+// عرض مشتريات العملاء المسجلة في حماية المشتريات
+app.get(
+  '/api/admin/protected-purchases',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (req, res) => {
+    const result = await pool.query(
+      `
+      SELECT
+        p.*,
+        u.full_name AS customer_name,
+        u.email AS customer_email,
+        u.phone AS customer_phone,
+        m.business_name AS merchant_name,
+        (
+          SELECT COUNT(*)
+          FROM warranties w
+          WHERE w.purchase_id = p.id
+        ) AS warranties_count,
+        (
+          SELECT COUNT(*)
+          FROM purchase_complaints c
+          WHERE c.purchase_id = p.id
+        ) AS complaints_count
+      FROM protected_purchases p
+      JOIN users u ON u.id = p.user_id
+      LEFT JOIN merchants m ON m.id = p.merchant_id
+      ORDER BY p.created_at DESC
+      LIMIT 200
+      `
+    );
+
+    res.json({
+      success: true,
+      purchases: result.rows
+    });
+  })
+);
+
+
+// تفاصيل عملية شراء مع الضمانات والشكاوى
+app.get(
+  '/api/admin/protected-purchases/:id',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (req, res) => {
+    const purchaseResult = await pool.query(
+      `
+      SELECT
+        p.*,
+        u.full_name AS customer_name,
+        u.email AS customer_email,
+        u.phone AS customer_phone,
+        m.business_name AS merchant_name
+      FROM protected_purchases p
+      JOIN users u ON u.id = p.user_id
+      LEFT JOIN merchants m ON m.id = p.merchant_id
+      WHERE p.id = $1
+      LIMIT 1
+      `,
+      [req.params.id]
+    );
+
+    if (!purchaseResult.rowCount) {
+      return sendError(
+        res,
+        404,
+        'عملية الشراء غير موجودة.',
+        'PURCHASE_NOT_FOUND'
+      );
+    }
+
+    const [warranties, complaints] = await Promise.all([
+      pool.query(
+        `
+        SELECT *
+        FROM warranties
+        WHERE purchase_id = $1
+        ORDER BY created_at DESC
+        `,
+        [req.params.id]
+      ),
+      pool.query(
+        `
+        SELECT
+          c.*,
+          u.full_name AS customer_name,
+          u.email AS customer_email
+        FROM purchase_complaints c
+        JOIN users u ON u.id = c.user_id
+        WHERE c.purchase_id = $1
+        ORDER BY c.created_at DESC
+        `,
+        [req.params.id]
+      )
+    ]);
+
+    res.json({
+      success: true,
+      purchase: purchaseResult.rows[0],
+      warranties: warranties.rows,
+      complaints: complaints.rows
+    });
+  })
+);
+
+
+// إضافة ضمان لعملية شراء
+app.post(
+  '/api/admin/protected-purchases/:id/warranties',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (req, res) => {
+    const {
+      provider_name,
+      warranty_number,
+      starts_at,
+      ends_at,
+      terms,
+      document_url,
+      status
+    } = req.body;
+
+    const allowedStatuses = [
+      'active',
+      'expired',
+      'claimed',
+      'cancelled'
+    ];
+
+    if (
+      status !== undefined &&
+      !allowedStatuses.includes(status)
+    ) {
+      return sendError(
+        res,
+        400,
+        'حالة الضمان غير صحيحة.',
+        'INVALID_WARRANTY_STATUS'
+      );
+    }
+
+    if (
+      starts_at &&
+      ends_at &&
+      new Date(ends_at) < new Date(starts_at)
+    ) {
+      return sendError(
+        res,
+        400,
+        'تاريخ انتهاء الضمان لا يمكن أن يسبق بدايته.',
+        'INVALID_WARRANTY_DATES'
+      );
+    }
+
+    const purchase = await pool.query(
+      `SELECT id FROM protected_purchases WHERE id = $1`,
+      [req.params.id]
+    );
+
+    if (!purchase.rowCount) {
+      return sendError(
+        res,
+        404,
+        'عملية الشراء غير موجودة.',
+        'PURCHASE_NOT_FOUND'
+      );
+    }
+
+    const result = await pool.query(
+      `
+      INSERT INTO warranties (
+        purchase_id,
+        provider_name,
+        warranty_number,
+        starts_at,
+        ends_at,
+        terms,
+        document_url,
+        status
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      RETURNING *
+      `,
+      [
+        req.params.id,
+        provider_name || null,
+        warranty_number || null,
+        starts_at || null,
+        ends_at || null,
+        terms || null,
+        document_url || null,
+        status || 'active'
+      ]
+    );
+
+    res.status(201).json({
+      success: true,
+      message: 'تم تسجيل الضمان.',
+      warranty: result.rows[0]
+    });
+  })
+);
+
+
+// تعديل بيانات أو حالة الضمان
+app.patch(
+  '/api/admin/warranties/:id',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (req, res) => {
+    const {
+      provider_name,
+      warranty_number,
+      starts_at,
+      ends_at,
+      terms,
+      document_url,
+      status
+    } = req.body;
+
+    const allowedStatuses = [
+      'active',
+      'expired',
+      'claimed',
+      'cancelled'
+    ];
+
+    if (
+      status !== undefined &&
+      !allowedStatuses.includes(status)
+    ) {
+      return sendError(
+        res,
+        400,
+        'حالة الضمان غير صحيحة.',
+        'INVALID_WARRANTY_STATUS'
+      );
+    }
+
+    const existing = await pool.query(
+      `SELECT * FROM warranties WHERE id = $1`,
+      [req.params.id]
+    );
+
+    if (!existing.rowCount) {
+      return sendError(
+        res,
+        404,
+        'الضمان غير موجود.',
+        'WARRANTY_NOT_FOUND'
+      );
+    }
+
+    const current = existing.rows[0];
+
+    const nextStart = starts_at !== undefined
+      ? starts_at
+      : current.starts_at;
+
+    const nextEnd = ends_at !== undefined
+      ? ends_at
+      : current.ends_at;
+
+    if (
+      nextStart &&
+      nextEnd &&
+      new Date(nextEnd) < new Date(nextStart)
+    ) {
+      return sendError(
+        res,
+        400,
+        'تاريخ انتهاء الضمان لا يمكن أن يسبق بدايته.',
+        'INVALID_WARRANTY_DATES'
+      );
+    }
+
+    const result = await pool.query(
+      `
+      UPDATE warranties
+      SET
+        provider_name = COALESCE($1, provider_name),
+        warranty_number = COALESCE($2, warranty_number),
+        starts_at = CASE WHEN $3::boolean THEN $4::date ELSE starts_at END,
+        ends_at = CASE WHEN $5::boolean THEN $6::date ELSE ends_at END,
+        terms = COALESCE($7, terms),
+        document_url = COALESCE($8, document_url),
+        status = COALESCE($9, status),
+        updated_at = NOW()
+      WHERE id = $10
+      RETURNING *
+      `,
+      [
+        provider_name ?? null,
+        warranty_number ?? null,
+        starts_at !== undefined,
+        starts_at ?? null,
+        ends_at !== undefined,
+        ends_at ?? null,
+        terms ?? null,
+        document_url ?? null,
+        status ?? null,
+        req.params.id
+      ]
+    );
+
+    res.json({
+      success: true,
+      message: 'تم تحديث بيانات الضمان.',
+      warranty: result.rows[0]
+    });
+  })
+);
+
+
+// عرض جميع شكاوى حماية المشتريات للإدارة
+app.get(
+  '/api/admin/purchase-complaints',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (req, res) => {
+    const allowedStatuses = [
+      'open',
+      'under_review',
+      'waiting_customer',
+      'resolved',
+      'rejected',
+      'closed'
+    ];
+
+    if (
+      req.query.status &&
+      !allowedStatuses.includes(req.query.status)
+    ) {
+      return sendError(
+        res,
+        400,
+        'حالة الشكوى غير صحيحة.',
+        'INVALID_COMPLAINT_STATUS'
+      );
+    }
+
+    const values = [];
+    let whereClause = '';
+
+    if (req.query.status) {
+      values.push(req.query.status);
+      whereClause = `WHERE c.status = $1`;
+    }
+
+    const result = await pool.query(
+      `
+      SELECT
+        c.*,
+        p.product_name,
+        p.purchase_date,
+        p.purchase_price,
+        u.full_name AS customer_name,
+        u.email AS customer_email,
+        u.phone AS customer_phone
+      FROM purchase_complaints c
+      JOIN protected_purchases p ON p.id = c.purchase_id
+      JOIN users u ON u.id = c.user_id
+      ${whereClause}
+      ORDER BY c.created_at DESC
+      LIMIT 200
+      `,
+      values
+    );
+
+    res.json({
+      success: true,
+      complaints: result.rows
+    });
+  })
+);
+
+
+// رد الإدارة وتحديث شكوى حماية المشتريات
+app.patch(
+  '/api/admin/purchase-complaints/:id',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (req, res) => {
+    const {
+      admin_response,
+      status
+    } = req.body;
+
+    const allowedStatuses = [
+      'open',
+      'under_review',
+      'waiting_customer',
+      'resolved',
+      'rejected',
+      'closed'
+    ];
+
+    if (
+      status !== undefined &&
+      !allowedStatuses.includes(status)
+    ) {
+      return sendError(
+        res,
+        400,
+        'حالة الشكوى غير صحيحة.',
+        'INVALID_COMPLAINT_STATUS'
+      );
+    }
+
+    if (
+      admin_response !== undefined &&
+      (
+        typeof admin_response !== 'string' ||
+        admin_response.trim().length > 5000
+      )
+    ) {
+      return sendError(
+        res,
+        400,
+        'نص رد الإدارة غير صحيح.',
+        'INVALID_ADMIN_RESPONSE'
+      );
+    }
+
+    if (
+      status === undefined &&
+      admin_response === undefined
+    ) {
+      return sendError(
+        res,
+        400,
+        'لم يتم إرسال أي تعديل.',
+        'NO_UPDATE_FIELDS'
+      );
+    }
+
+    const result = await pool.query(
+      `
+      UPDATE purchase_complaints
+      SET
+        admin_response = CASE
+          WHEN $1::boolean THEN $2
+          ELSE admin_response
+        END,
+        status = COALESCE($3, status),
+        resolved_at = CASE
+          WHEN $3 IN ('resolved', 'rejected', 'closed')
+            THEN COALESCE(resolved_at, NOW())
+          WHEN $3 IS NOT NULL
+            THEN NULL
+          ELSE resolved_at
+        END,
+        updated_at = NOW()
+      WHERE id = $4
+      RETURNING *
+      `,
+      [
+        admin_response !== undefined,
+        admin_response?.trim() || null,
+        status ?? null,
+        req.params.id
+      ]
+    );
+
+    if (!result.rowCount) {
+      return sendError(
+        res,
+        404,
+        'الشكوى غير موجودة.',
+        'COMPLAINT_NOT_FOUND'
+      );
+    }
+
+    res.json({
+      success: true,
+      message: 'تم تحديث شكوى حماية المشتريات.',
+      complaint: result.rows[0]
+    });
+  })
+);
+/* =========================================================
    ADMIN SUPPORT TICKETS MANAGEMENT
    إدارة شكاوى واستفسارات العملاء
 ========================================================= */
