@@ -4562,6 +4562,247 @@ app.patch(
   })
 );
 /* =========================================================
+   ADMIN PACKAGES MANAGEMENT
+   إدارة باقات المستخدمين
+========================================================= */
+
+// عرض جميع الباقات
+app.get(
+  '/api/admin/packages',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (req, res) => {
+    const result = await pool.query(`
+      SELECT
+        id,
+        code,
+        name,
+        monthly_price,
+        quarterly_price,
+        semiannual_price,
+        annual_price,
+        duration_days,
+        daily_word_limit,
+        daily_image_limit,
+        daily_product_search_limit,
+        daily_out_of_range_limit,
+        max_devices,
+        max_members,
+        is_trial,
+        is_active,
+        created_at,
+        updated_at
+      FROM packages
+      ORDER BY
+        CASE code
+          WHEN 'TRIAL' THEN 1
+          WHEN 'PLUS' THEN 2
+          WHEN 'FAMILY' THEN 3
+          WHEN 'ELITE' THEN 4
+          ELSE 5
+        END
+    `);
+
+    res.json({
+      success: true,
+      total: result.rowCount,
+      packages: result.rows
+    });
+  })
+);
+
+
+// تعديل أسعار وحدود الباقة
+app.patch(
+  '/api/admin/packages/:id',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (req, res) => {
+    const allowedFields = [
+      'name',
+      'monthly_price',
+      'quarterly_price',
+      'semiannual_price',
+      'annual_price',
+      'duration_days',
+      'daily_word_limit',
+      'daily_image_limit',
+      'daily_product_search_limit',
+      'daily_out_of_range_limit',
+      'is_active'
+    ];
+
+    const updates = Object.keys(req.body || {});
+
+    if (
+      !updates.length ||
+      updates.some(field => !allowedFields.includes(field))
+    ) {
+      return sendError(
+        res,
+        400,
+        'حقول التعديل غير صحيحة.',
+        'INVALID_PACKAGE_FIELDS'
+      );
+    }
+
+    const currentResult = await pool.query(
+      `
+      SELECT *
+      FROM packages
+      WHERE id = $1
+      LIMIT 1
+      `,
+      [req.params.id]
+    );
+
+    if (!currentResult.rowCount) {
+      return sendError(
+        res,
+        404,
+        'الباقة غير موجودة.',
+        'PACKAGE_NOT_FOUND'
+      );
+    }
+
+    const current = currentResult.rows[0];
+
+    if (
+      current.code === 'TRIAL' &&
+      req.body.is_active === false
+    ) {
+      return sendError(
+        res,
+        400,
+        'لا يمكن إيقاف باقة التجربة المجانية.',
+        'TRIAL_PACKAGE_REQUIRED'
+      );
+    }
+
+    const numericFields = [
+      'monthly_price',
+      'quarterly_price',
+      'semiannual_price',
+      'annual_price',
+      'duration_days',
+      'daily_word_limit',
+      'daily_image_limit',
+      'daily_product_search_limit',
+      'daily_out_of_range_limit'
+    ];
+
+    for (const field of numericFields) {
+      if (req.body[field] !== undefined) {
+        const value = req.body[field];
+
+        if (
+          typeof value !== 'number' ||
+          !Number.isFinite(value) ||
+          value < 0
+        ) {
+          return sendError(
+            res,
+            400,
+            `القيمة المدخلة للحقل ${field} غير صحيحة.`,
+            'INVALID_PACKAGE_VALUE'
+          );
+        }
+
+        if (
+          field === 'duration_days' &&
+          (!Number.isInteger(value) || value < 1)
+        ) {
+          return sendError(
+            res,
+            400,
+            'مدة الباقة يجب أن تكون يومًا واحدًا على الأقل.',
+            'INVALID_PACKAGE_DURATION'
+          );
+        }
+
+        if (
+          field !== 'duration_days' &&
+          !Number.isInteger(value) &&
+          field !== 'monthly_price' &&
+          field !== 'quarterly_price' &&
+          field !== 'semiannual_price' &&
+          field !== 'annual_price'
+        ) {
+          return sendError(
+            res,
+            400,
+            'حدود الاستخدام يجب أن تكون أرقامًا صحيحة.',
+            'INVALID_PACKAGE_LIMIT'
+          );
+        }
+      }
+    }
+
+    if (
+      req.body.name !== undefined &&
+      (
+        typeof req.body.name !== 'string' ||
+        req.body.name.trim().length < 2 ||
+        req.body.name.trim().length > 100
+      )
+    ) {
+      return sendError(
+        res,
+        400,
+        'اسم الباقة غير صحيح.',
+        'INVALID_PACKAGE_NAME'
+      );
+    }
+
+    if (
+      req.body.is_active !== undefined &&
+      typeof req.body.is_active !== 'boolean'
+    ) {
+      return sendError(
+        res,
+        400,
+        'حالة تفعيل الباقة غير صحيحة.',
+        'INVALID_PACKAGE_STATUS'
+      );
+    }
+
+    const values = [];
+    const setParts = [];
+
+    for (const field of updates) {
+      values.push(
+        field === 'name'
+          ? req.body[field].trim()
+          : req.body[field]
+      );
+
+      setParts.push(
+        `${field} = $${values.length}`
+      );
+    }
+
+    values.push(req.params.id);
+
+    const result = await pool.query(
+      `
+      UPDATE packages
+      SET
+        ${setParts.join(', ')},
+        updated_at = NOW()
+      WHERE id = $${values.length}
+      RETURNING *
+      `,
+      values
+    );
+
+    res.json({
+      success: true,
+      message: 'تم تحديث الباقة بنجاح.',
+      package: result.rows[0]
+    });
+  })
+);
+/* =========================================================
    ADMIN USER SUBSCRIPTIONS MANAGEMENT
    إدارة اشتراكات المستخدمين
 ========================================================= */
