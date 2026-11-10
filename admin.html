@@ -426,7 +426,7 @@ window.loadTrials = loadTrials;
       connectionStatus.textContent = 'متصل — تم التحقق من صلاحية المدير';
       loading.hidden = true;
       dashboard.hidden = false;
-
+      loadTrials();
     } catch (error) {
       if (error.status === 401 || error.status === 403) {
         clearSession();
