@@ -4562,6 +4562,298 @@ app.patch(
   })
 );
 /* =========================================================
+   ADMIN USER SUBSCRIPTIONS MANAGEMENT
+   إدارة اشتراكات المستخدمين
+========================================================= */
+
+// عرض اشتراكات المستخدمين
+app.get(
+  '/api/admin/user-subscriptions',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (req, res) => {
+    const allowedStatuses = [
+      'pending',
+      'active',
+      'expired',
+      'cancelled',
+      'suspended'
+    ];
+
+    const conditions = [];
+    const values = [];
+
+    if (req.query.status) {
+      if (!allowedStatuses.includes(req.query.status)) {
+        return sendError(
+          res,
+          400,
+          'حالة الاشتراك غير صحيحة.',
+          'INVALID_SUBSCRIPTION_STATUS'
+        );
+      }
+
+      values.push(req.query.status);
+      conditions.push(`s.status = $${values.length}`);
+    }
+
+    if (req.query.package) {
+      values.push(String(req.query.package).toUpperCase());
+      conditions.push(`p.code = $${values.length}`);
+    }
+
+    if (req.query.search) {
+      values.push(`%${String(req.query.search).trim()}%`);
+      conditions.push(`
+        (
+          u.full_name ILIKE $${values.length}
+          OR u.email ILIKE $${values.length}
+          OR u.phone ILIKE $${values.length}
+        )
+      `);
+    }
+
+    const whereClause = conditions.length
+      ? `WHERE ${conditions.join(' AND ')}`
+      : '';
+
+    const result = await pool.query(
+      `
+      SELECT
+        s.id,
+        s.user_id,
+        s.package_id,
+        s.billing_cycle,
+        s.status,
+        s.started_at,
+        s.ends_at,
+        s.trial_expires_at,
+        s.auto_renew,
+        s.created_at,
+
+        u.full_name AS user_name,
+        u.email AS user_email,
+        u.phone AS user_phone,
+        u.account_status,
+
+        p.code AS package_code,
+        p.name AS package_name,
+        p.monthly_price,
+        p.quarterly_price,
+        p.semiannual_price,
+        p.annual_price,
+        p.max_devices,
+        p.max_members,
+
+        (
+          SELECT COUNT(*)::int
+          FROM devices d
+          WHERE d.subscription_id = s.id
+            AND d.is_active = TRUE
+        ) AS active_devices,
+
+        (
+          SELECT COUNT(*)::int
+          FROM subscription_members sm
+          WHERE sm.subscription_id = s.id
+            AND sm.status = 'active'
+        ) AS active_members
+
+      FROM subscriptions s
+      JOIN users u ON u.id = s.user_id
+      JOIN packages p ON p.id = s.package_id
+
+      ${whereClause}
+
+      ORDER BY s.created_at DESC
+      LIMIT 200
+      `,
+      values
+    );
+
+    res.json({
+      success: true,
+      total: result.rowCount,
+      subscriptions: result.rows
+    });
+  })
+);
+
+
+// تفاصيل اشتراك مستخدم
+app.get(
+  '/api/admin/user-subscriptions/:id',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (req, res) => {
+    const subscriptionResult = await pool.query(
+      `
+      SELECT
+        s.*,
+
+        u.full_name AS user_name,
+        u.email AS user_email,
+        u.phone AS user_phone,
+        u.account_status,
+
+        p.code AS package_code,
+        p.name AS package_name,
+        p.monthly_price,
+        p.quarterly_price,
+        p.semiannual_price,
+        p.annual_price,
+        p.daily_word_limit,
+        p.daily_image_limit,
+        p.daily_product_search_limit,
+        p.daily_out_of_range_limit,
+        p.max_devices,
+        p.max_members
+
+      FROM subscriptions s
+      JOIN users u ON u.id = s.user_id
+      JOIN packages p ON p.id = s.package_id
+
+      WHERE s.id = $1
+      LIMIT 1
+      `,
+      [req.params.id]
+    );
+
+    if (!subscriptionResult.rowCount) {
+      return sendError(
+        res,
+        404,
+        'الاشتراك غير موجود.',
+        'SUBSCRIPTION_NOT_FOUND'
+      );
+    }
+
+    const subscription = subscriptionResult.rows[0];
+
+    const [devicesResult, membersResult] = await Promise.all([
+      pool.query(
+        `
+        SELECT
+          id,
+          device_name,
+          platform,
+          is_active,
+          last_seen_at,
+          created_at
+        FROM devices
+        WHERE subscription_id = $1
+        ORDER BY created_at DESC
+        `,
+        [req.params.id]
+      ),
+
+      pool.query(
+        `
+        SELECT
+          id,
+          user_id,
+          member_email,
+          member_role,
+          status,
+          invited_at,
+          joined_at
+        FROM subscription_members
+        WHERE subscription_id = $1
+        ORDER BY invited_at DESC
+        `,
+        [req.params.id]
+      )
+    ]);
+
+    res.json({
+      success: true,
+      subscription,
+      devices: devicesResult.rows,
+      members: membersResult.rows
+    });
+  })
+);
+
+
+// إيقاف الاشتراك أو إعادة تفعيله
+app.patch(
+  '/api/admin/user-subscriptions/:id/status',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (req, res) => {
+    const allowedStatuses = [
+      'active',
+      'suspended',
+      'cancelled',
+      'expired'
+    ];
+
+    const { status } = req.body;
+
+    if (!allowedStatuses.includes(status)) {
+      return sendError(
+        res,
+        400,
+        'حالة الاشتراك المطلوبة غير صحيحة.',
+        'INVALID_SUBSCRIPTION_STATUS'
+      );
+    }
+
+    const result = await pool.query(
+      `
+      UPDATE subscriptions
+      SET
+        status = $1,
+        updated_at = NOW()
+      WHERE id = $2
+        AND (
+          $1 <> 'active'
+          OR (
+            ends_at IS NOT NULL
+            AND ends_at > NOW()
+          )
+        )
+      RETURNING *
+      `,
+      [status, req.params.id]
+    );
+
+    if (!result.rowCount) {
+      const exists = await pool.query(
+        `
+        SELECT id, ends_at
+        FROM subscriptions
+        WHERE id = $1
+        LIMIT 1
+        `,
+        [req.params.id]
+      );
+
+      if (!exists.rowCount) {
+        return sendError(
+          res,
+          404,
+          'الاشتراك غير موجود.',
+          'SUBSCRIPTION_NOT_FOUND'
+        );
+      }
+
+      return sendError(
+        res,
+        400,
+        'لا يمكن تفعيل اشتراك انتهت مدته. يجب تجديده أولًا.',
+        'SUBSCRIPTION_EXPIRED'
+      );
+    }
+
+    res.json({
+      success: true,
+      message: 'تم تحديث حالة الاشتراك بنجاح.',
+      subscription: result.rows[0]
+    });
+  })
+);
+/* =========================================================
    ADMIN NOTIFICATIONS MANAGEMENT
 ========================================================= */
 
