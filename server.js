@@ -3017,8 +3017,8 @@ app.get(
         mp.name AS plan_name,
         mp.code AS plan_code
       FROM merchant_subscriptions ms
-      JOIN merchants m ON m.id = ms.merchant_id
-      JOIN users u ON u.id = m.user_id
+      JOIN merchants m ON m.id = ms.merchant_
+      LEFT JOIN users u ON u.id = m.user_id
       LEFT JOIN merchant_plans mp ON mp.id = ms.plan_id
       ${whereClause}
       ORDER BY ms.created_at DESC
