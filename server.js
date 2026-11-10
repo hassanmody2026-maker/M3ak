@@ -3642,7 +3642,121 @@ app.patch(
 /* =========================================================
    ADMIN MERCHANT MANAGEMENT
 ========================================================= */
+// إنشاء متجر جديد بواسطة المدير دون اشتراط حساب لصاحب المتجر
+app.post(
+  '/api/admin/merchants',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (req, res) => {
+    const {
+      business_name,
+      business_type,
+      description,
+      phone,
+      email,
+      address,
+      city,
+      latitude,
+      longitude,
+      logo_url,
+      cover_image_url
+    } = req.body;
 
+    if (
+      typeof business_name !== 'string' ||
+      !business_name.trim()
+    ) {
+      return sendError(
+        res,
+        400,
+        'اسم المتجر مطلوب.',
+        'MERCHANT_NAME_REQUIRED'
+      );
+    }
+
+    if (business_name.trim().length > 200) {
+      return sendError(
+        res,
+        400,
+        'اسم المتجر أطول من المسموح.',
+        'MERCHANT_NAME_TOO_LONG'
+      );
+    }
+
+    const coordinatesProvided =
+      latitude !== undefined || longitude !== undefined;
+
+    if (
+      coordinatesProvided &&
+      (
+        !Number.isFinite(Number(latitude)) ||
+        !Number.isFinite(Number(longitude)) ||
+        Number(latitude) < -90 ||
+        Number(latitude) > 90 ||
+        Number(longitude) < -180 ||
+        Number(longitude) > 180
+      )
+    ) {
+      return sendError(
+        res,
+        400,
+        'إحداثيات الموقع غير صحيحة.',
+        'INVALID_MERCHANT_COORDINATES'
+      );
+    }
+
+    const result = await pool.query(
+      `
+      INSERT INTO merchants (
+        user_id,
+        business_name,
+        business_type,
+        description,
+        phone,
+        email,
+        address,
+        city,
+        latitude,
+        longitude,
+        logo_url,
+        cover_image_url,
+        status,
+        is_visible,
+        created_by_admin
+      )
+      VALUES (
+        NULL,
+        $1, $2, $3, $4, $5, $6, $7,
+        $8, $9, $10, $11,
+        'pending',
+        FALSE,
+        $12
+      )
+      RETURNING *
+      `,
+      [
+        business_name.trim(),
+        business_type || null,
+        description || null,
+        phone || null,
+        email || null,
+        address || null,
+        city || null,
+        latitude ?? null,
+        longitude ?? null,
+        logo_url || null,
+        cover_image_url || null,
+        req.user.id
+      ]
+    );
+
+    res.status(201).json({
+      success: true,
+      message: 'تم إنشاء المتجر بنجاح. وهو غير منشور لحين تفعيله.',
+      merchant: result.rows[0]
+    });
+  })
+);
 // عرض التجار وطلبات الانضمام
 app.get(
   '/api/admin/merchants',
