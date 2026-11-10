@@ -501,6 +501,7 @@ window.loadUsers = loadUsers;
       loading.hidden = true;
       dashboard.hidden = false;
       loadTrials();
+      loadUsers();
     } catch (error) {
       if (error.status === 401 || error.status === 403) {
         clearSession();
