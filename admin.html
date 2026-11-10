@@ -303,6 +303,98 @@ button{font:inherit;cursor:pointer}
       ? number.toLocaleString('ar-EG')
       : '0';
   }
+  async function loadTrials() {
+  const trialType = document.getElementById('trialType');
+  const trialMessage = document.getElementById('trialMessage');
+  const trialRows = document.getElementById('trialRows');
+
+  if (!trialType || !trialMessage || !trialRows) return;
+
+  trialMessage.textContent = 'جارٍ تحميل بيانات التجارب...';
+  trialRows.replaceChildren();
+
+  try {
+    const data = await apiRequest(
+      `/admin/trial-monitoring?type=${encodeURIComponent(trialType.value || 'all')}`
+    );
+
+    if (!data.success) {
+      throw new Error('تعذر تحميل بيانات التجارب.');
+    }
+
+    const stats = data.stats || {};
+    const trials = Array.isArray(data.trials) ? data.trials : [];
+
+    document.getElementById('trialTotal').textContent =
+      formatNumber(stats.total);
+
+    document.getElementById('trialActive').textContent =
+      formatNumber(stats.active);
+
+    document.getElementById('trialEnding').textContent =
+      formatNumber(stats.ending_soon);
+
+    document.getElementById('trialClosed').textContent =
+      formatNumber(Number(stats.expired || 0) + Number(stats.converted || 0));
+
+    if (!trials.length) {
+      trialMessage.textContent = 'لا توجد تجارب مجانية في هذا التصنيف.';
+      return;
+    }
+
+    const labels = {
+      active: 'نشطة',
+      ending_soon: 'تنتهي خلال 48 ساعة',
+      expired: 'منتهية',
+      converted: 'تحولت لاشتراك مدفوع'
+    };
+
+    trials.forEach(trial => {
+      const row = document.createElement('tr');
+
+      const remaining = Math.max(
+        0,
+        Number(trial.remaining_seconds) || 0
+      );
+
+      const days = Math.floor(remaining / 86400);
+      const hours = Math.floor((remaining % 86400) / 3600);
+
+      const remainingText =
+        trial.trial_state === 'converted'
+          ? 'تم الاشتراك'
+          : trial.trial_state === 'expired'
+            ? 'انتهت التجربة'
+            : days > 0
+              ? `${formatNumber(days)} يوم و${formatNumber(hours)} ساعة`
+              : `${formatNumber(hours)} ساعة`;
+
+      const values = [
+        trial.trial_type === 'merchant' ? 'تاجر' : 'مستخدم',
+        trial.business_name || trial.full_name || '—',
+        trial.email || '—',
+        trial.phone || '—',
+        labels[trial.trial_state] || '—',
+        remainingText
+      ];
+
+      values.forEach(value => {
+        const cell = document.createElement('td');
+        cell.textContent = value;
+        row.appendChild(cell);
+      });
+
+      trialRows.appendChild(row);
+    });
+
+    trialMessage.textContent =
+      `عدد التجارب المعروضة: ${formatNumber(trials.length)}`;
+
+  } catch (error) {
+    trialMessage.textContent =
+      error.message || 'حدث خطأ أثناء تحميل التجارب.';
+  }
+  }
 window.loadUsers = loadUsers;
 window.loadTrials = loadTrials;
   async function loadUsers() {
