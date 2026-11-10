@@ -2288,6 +2288,145 @@ app.delete(
   })
 );
 /* =========================================================
+   MERCHANT SUBSCRIPTION EXPIRY REMINDERS
+   تذكير التجار قبل انتهاء الاشتراك بـ 48 ساعة
+========================================================= */
+
+app.post(
+  '/api/internal/merchant-expiry-reminders',
+  asyncRoute(async (req, res) => {
+    const secret = process.env.CRON_SECRET;
+    const provided = req.get('x-cron-secret') || '';
+
+    if (
+      !secret ||
+      !provided ||
+      Buffer.byteLength(secret) !== Buffer.byteLength(provided) ||
+      !crypto.timingSafeEqual(
+        Buffer.from(secret),
+        Buffer.from(provided)
+      )
+    ) {
+      return sendError(
+        res,
+        401,
+        'غير مصرح بتنفيذ العملية.',
+        'UNAUTHORIZED'
+      );
+    }
+
+    const dueResult = await pool.query(
+      `
+      SELECT
+        ms.id AS subscription_id,
+        ms.merchant_id,
+        ms.ends_at,
+        m.business_name,
+        u.id AS user_id,
+        u.email,
+        u.full_name
+      FROM merchant_subscriptions ms
+      JOIN merchants m ON m.id = ms.merchant_id
+      JOIN users u ON u.id = m.user_id
+      WHERE ms.status IN ('trial', 'active')
+        AND ms.ends_at > NOW()
+        AND ms.ends_at <= NOW() + INTERVAL '48 hours'
+        AND ms.reminder_sent_at IS NULL
+        AND u.email_verified = TRUE
+        AND u.account_status = 'active'
+      ORDER BY ms.ends_at ASC
+      LIMIT 100
+      `
+    );
+
+    let sent = 0;
+    let failed = 0;
+
+    for (const item of dueResult.rows) {
+      try {
+        const expiryDate = new Date(item.ends_at)
+          .toLocaleDateString('ar-EG', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            timeZone: 'Africa/Cairo'
+          });
+
+        await sendEmail(
+          item.email,
+          'تذكير: اشتراك متجرك في معاك يقترب من الانتهاء',
+          `مرحباً ${item.full_name || ''}،
+
+نذكرك بأن اشتراك متجرك (${item.business_name}) سينتهي خلال 48 ساعة، بتاريخ ${expiryDate}.
+
+يرجى التواصل مع إدارة معاك لتجديد الاشتراك وتجنب توقف ظهور متجرك للعملاء.
+
+مع تحيات فريق معاك.`
+        );
+
+        await withTransaction(async client => {
+          await client.query(
+            `
+            INSERT INTO notifications (
+              user_id,
+              title,
+              message,
+              notification_type,
+              metadata
+            )
+            VALUES (
+              $1,
+              $2,
+              $3,
+              'merchant_subscription',
+              $4::jsonb
+            )
+            `,
+            [
+              item.user_id,
+              'اشتراك متجرك يقترب من الانتهاء',
+              `اشتراك متجرك ${item.business_name} سينتهي خلال 48 ساعة.`,
+              JSON.stringify({
+                subscription_id: item.subscription_id,
+                merchant_id: item.merchant_id,
+                ends_at: item.ends_at
+              })
+            ]
+          );
+
+          await client.query(
+            `
+            UPDATE merchant_subscriptions
+            SET reminder_sent_at = NOW(),
+                updated_at = NOW()
+            WHERE id = $1
+              AND reminder_sent_at IS NULL
+            `,
+            [item.subscription_id]
+          );
+        });
+
+        sent++;
+      } catch (error) {
+        failed++;
+        console.error(
+          'Merchant expiry reminder failed:',
+          item.subscription_id,
+          error.message
+        );
+      }
+    }
+
+    res.json({
+      success: true,
+      checked: dueResult.rowCount,
+      sent,
+      failed,
+      message: 'انتهت عملية فحص تذكيرات اشتراكات التجار.'
+    });
+  })
+);
+/* =========================================================
    ADMIN MERCHANT SUBSCRIPTIONS MANAGEMENT
    إدارة اشتراكات التجار - الإدارة فقط
 ========================================================= */
