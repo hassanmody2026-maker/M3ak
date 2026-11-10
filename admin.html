@@ -425,7 +425,9 @@ async function loadUsers() {
     usersMessage.textContent =
       error.message || 'حدث خطأ أثناء تحميل المستخدمين.';
   }
-  }
+}
+
+window.loadUsers = loadUsers;
 window.loadTrials = loadTrials;
   async function loadUsers() {
   const search = document.getElementById('userSearch').value.trim();
