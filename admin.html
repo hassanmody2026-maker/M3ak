@@ -380,8 +380,6 @@ async function loadTrials() {
   }
 }
 window.loadTrials = loadTrials;
-document.getElementById('trialType').addEventListener('change', loadTrials);
-document.getElementById('refreshTrials').addEventListener('click', loadTrials);
   async function loadDashboard() {
     if (!token) {
       window.location.replace('login.html');
