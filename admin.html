@@ -371,10 +371,6 @@ async function loadTrials() {
         const cell = document.createElement('td');
         cell.textContent = value;
         row.appendChild(cell);
-      });
-
-      trialRows.appendChild(row);
-    });
 
   } catch (error) {
     trialMessage.textContent =
