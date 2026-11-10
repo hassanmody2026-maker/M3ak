@@ -371,7 +371,7 @@ async function loadTrials() {
         const cell = document.createElement('td');
         cell.textContent = value;
         row.appendChild(cell);
-
+  });
   } catch (error) {
     trialMessage.textContent =
       error.message || 'حدث خطأ أثناء تحميل التجارب.';
