@@ -4248,6 +4248,320 @@ app.patch(
   })
 );
 /* =========================================================
+   ADMIN USER ACCOUNTS MANAGEMENT
+========================================================= */
+
+// عرض الحسابات والبحث والفلترة
+app.get(
+  '/api/admin/users',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (req, res) => {
+    const allowedStatuses = [
+      'active',
+      'suspended',
+      'deleted'
+    ];
+
+    const allowedRoles = [
+      'user',
+      'admin',
+      'support',
+      'merchant'
+    ];
+
+    const values = [];
+    const conditions = [];
+
+    if (req.query.status) {
+      if (!allowedStatuses.includes(req.query.status)) {
+        return sendError(
+          res,
+          400,
+          'حالة الحساب غير صحيحة.',
+          'INVALID_ACCOUNT_STATUS'
+        );
+      }
+
+      values.push(req.query.status);
+      conditions.push(`u.account_status = $${values.length}`);
+    }
+
+    if (req.query.role) {
+      if (!allowedRoles.includes(req.query.role)) {
+        return sendError(
+          res,
+          400,
+          'نوع الحساب غير صحيح.',
+          'INVALID_USER_ROLE'
+        );
+      }
+
+      values.push(req.query.role);
+      conditions.push(`u.role = $${values.length}`);
+    }
+
+    if (req.query.search) {
+      values.push(`%${String(req.query.search).trim().slice(0, 100)}%`);
+      conditions.push(`
+        (
+          u.full_name ILIKE $${values.length}
+          OR u.email ILIKE $${values.length}
+          OR COALESCE(u.phone, '') ILIKE $${values.length}
+        )
+      `);
+    }
+
+    const whereClause = conditions.length
+      ? `WHERE ${conditions.join(' AND ')}`
+      : '';
+
+    const result = await pool.query(
+      `
+      SELECT
+        u.id,
+        u.full_name,
+        u.email,
+        u.phone,
+        u.role,
+        u.account_status,
+        u.email_verified,
+        u.phone_verified,
+        u.created_at,
+
+        latest.package_name,
+        latest.subscription_status,
+        latest.subscription_ends_at,
+
+        COALESCE(device_stats.active_devices, 0)::int
+          AS active_devices
+
+      FROM users u
+
+      LEFT JOIN LATERAL (
+        SELECT
+          p.name AS package_name,
+          s.status AS subscription_status,
+          s.ends_at AS subscription_ends_at
+        FROM subscriptions s
+        JOIN packages p ON p.id = s.package_id
+        WHERE s.user_id = u.id
+        ORDER BY s.created_at DESC
+        LIMIT 1
+      ) latest ON TRUE
+
+      LEFT JOIN LATERAL (
+        SELECT COUNT(*) AS active_devices
+        FROM devices d
+        WHERE d.user_id = u.id
+          AND d.is_active = TRUE
+      ) device_stats ON TRUE
+
+      ${whereClause}
+
+      ORDER BY u.created_at DESC
+      LIMIT 200
+      `,
+      values
+    );
+
+    res.json({
+      success: true,
+      total: result.rowCount,
+      users: result.rows
+    });
+  })
+);
+
+
+// عرض ملف مستخدم بالتفصيل
+app.get(
+  '/api/admin/users/:id',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (req, res) => {
+    const userResult = await pool.query(
+      `
+      SELECT
+        id,
+        full_name,
+        email,
+        phone,
+        role,
+        account_status,
+        email_verified,
+        phone_verified,
+        created_at,
+        updated_at
+      FROM users
+      WHERE id = $1
+      LIMIT 1
+      `,
+      [req.params.id]
+    );
+
+    if (!userResult.rowCount) {
+      return sendError(
+        res,
+        404,
+        'الحساب غير موجود.',
+        'USER_NOT_FOUND'
+      );
+    }
+
+    const [subscriptions, devices, usage, merchant] =
+      await Promise.all([
+        pool.query(
+          `
+          SELECT
+            s.id,
+            p.code AS package_code,
+            p.name AS package_name,
+            s.billing_cycle,
+            s.status,
+            s.started_at,
+            s.ends_at,
+            s.trial_expires_at,
+            s.auto_renew,
+            s.created_at
+          FROM subscriptions s
+          JOIN packages p ON p.id = s.package_id
+          WHERE s.user_id = $1
+          ORDER BY s.created_at DESC
+          LIMIT 50
+          `,
+          [req.params.id]
+        ),
+
+        pool.query(
+          `
+          SELECT
+            id,
+            device_name,
+            platform,
+            is_active,
+            last_seen_at,
+            created_at
+          FROM devices
+          WHERE user_id = $1
+          ORDER BY last_seen_at DESC
+          `,
+          [req.params.id]
+        ),
+
+        pool.query(
+          `
+          SELECT
+            usage_date,
+            words_used,
+            images_used,
+            product_searches_used,
+            out_of_range_searches_used
+          FROM usage_daily
+          WHERE user_id = $1
+          ORDER BY usage_date DESC
+          LIMIT 30
+          `,
+          [req.params.id]
+        ),
+
+        pool.query(
+          `
+          SELECT
+            id,
+            business_name,
+            status,
+            is_visible,
+            created_at
+          FROM merchants
+          WHERE user_id = $1
+          LIMIT 1
+          `,
+          [req.params.id]
+        )
+      ]);
+
+    res.json({
+      success: true,
+      user: userResult.rows[0],
+      subscriptions: subscriptions.rows,
+      devices: devices.rows,
+      usage: usage.rows,
+      merchant: merchant.rows[0] || null
+    });
+  })
+);
+
+
+// إيقاف حساب أو إعادة تفعيله
+app.patch(
+  '/api/admin/users/:id/status',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (req, res) => {
+    const { account_status } = req.body;
+
+    if (
+      !['active', 'suspended'].includes(account_status)
+    ) {
+      return sendError(
+        res,
+        400,
+        'يمكن تفعيل الحساب أو إيقافه فقط.',
+        'INVALID_ACCOUNT_STATUS'
+      );
+    }
+
+    if (req.params.id === req.user.id) {
+      return sendError(
+        res,
+        400,
+        'لا يمكن للإدارة إيقاف حسابها من هذه العملية.',
+        'SELF_STATUS_CHANGE_NOT_ALLOWED'
+      );
+    }
+
+    const result = await pool.query(
+      `
+      UPDATE users
+      SET
+        account_status = $1,
+        updated_at = NOW()
+      WHERE id = $2
+        AND account_status <> 'deleted'
+      RETURNING
+        id,
+        full_name,
+        email,
+        role,
+        account_status,
+        updated_at
+      `,
+      [
+        account_status,
+        req.params.id
+      ]
+    );
+
+    if (!result.rowCount) {
+      return sendError(
+        res,
+        404,
+        'الحساب غير موجود أو محذوف.',
+        'USER_NOT_FOUND'
+      );
+    }
+
+    res.json({
+      success: true,
+      message: account_status === 'active'
+        ? 'تم إعادة تفعيل الحساب.'
+        : 'تم إيقاف الحساب.',
+      user: result.rows[0]
+    });
+  })
+);
+/* =========================================================
    ADMIN NOTIFICATIONS MANAGEMENT
 ========================================================= */
 
