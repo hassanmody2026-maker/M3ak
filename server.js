@@ -5095,6 +5095,229 @@ app.patch(
   })
 );
 /* =========================================================
+   ADMIN PAYMENT TRANSACTIONS
+   إدارة ومراجعة مدفوعات المستخدمين
+========================================================= */
+
+// عرض سجل المدفوعات مع البحث والتصفية
+app.get(
+  '/api/admin/payments',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (req, res) => {
+    const allowedStatuses = [
+      'pending',
+      'paid',
+      'failed',
+      'cancelled',
+      'refunded'
+    ];
+
+    const conditions = [];
+    const values = [];
+
+    if (req.query.status) {
+      if (!allowedStatuses.includes(req.query.status)) {
+        return sendError(
+          res,
+          400,
+          'حالة الدفع غير صحيحة.',
+          'INVALID_PAYMENT_STATUS'
+        );
+      }
+
+      values.push(req.query.status);
+      conditions.push(`pt.status = $${values.length}`);
+    }
+
+    if (req.query.user_id) {
+      values.push(req.query.user_id);
+      conditions.push(`pt.user_id = $${values.length}`);
+    }
+
+    if (req.query.provider) {
+      values.push(String(req.query.provider).slice(0, 50));
+      conditions.push(`pt.provider = $${values.length}`);
+    }
+
+    if (req.query.search) {
+      values.push(`%${String(req.query.search).trim()}%`);
+      conditions.push(`
+        (
+          u.full_name ILIKE $${values.length}
+          OR u.email ILIKE $${values.length}
+          OR pt.provider_transaction_id ILIKE $${values.length}
+          OR pt.provider_order_id ILIKE $${values.length}
+        )
+      `);
+    }
+
+    const whereClause = conditions.length
+      ? `WHERE ${conditions.join(' AND ')}`
+      : '';
+
+    const [paymentsResult, statsResult] = await Promise.all([
+      pool.query(
+        `
+        SELECT
+          pt.id,
+          pt.user_id,
+          pt.subscription_id,
+          pt.order_id,
+          pt.provider,
+          pt.provider_transaction_id,
+          pt.provider_order_id,
+          pt.amount,
+          pt.currency,
+          pt.status,
+          pt.payment_method,
+          pt.webhook_verified,
+          pt.paid_at,
+          pt.created_at,
+          pt.updated_at,
+
+          u.full_name AS customer_name,
+          u.email AS customer_email,
+          u.phone AS customer_phone,
+
+          s.status AS subscription_status,
+          s.billing_cycle,
+          p.code AS package_code,
+          p.name AS package_name
+
+        FROM payment_transactions pt
+
+        JOIN users u ON u.id = pt.user_id
+
+        LEFT JOIN subscriptions s
+          ON s.id = pt.subscription_id
+
+        LEFT JOIN packages p
+          ON p.id = s.package_id
+
+        ${whereClause}
+
+        ORDER BY pt.created_at DESC
+        LIMIT 200
+        `,
+        values
+      ),
+
+      pool.query(`
+        SELECT
+          COUNT(*)::int AS total,
+
+          COUNT(*) FILTER (
+            WHERE status = 'paid'
+          )::int AS paid,
+
+          COUNT(*) FILTER (
+            WHERE status = 'pending'
+          )::int AS pending,
+
+          COUNT(*) FILTER (
+            WHERE status = 'failed'
+          )::int AS failed,
+
+          COUNT(*) FILTER (
+            WHERE status = 'cancelled'
+          )::int AS cancelled,
+
+          COUNT(*) FILTER (
+            WHERE status = 'refunded'
+          )::int AS refunded,
+
+          COALESCE(
+            SUM(amount) FILTER (
+              WHERE status = 'paid'
+            ),
+            0
+          ) AS total_paid_amount
+
+        FROM payment_transactions
+      `)
+    ]);
+
+    res.json({
+      success: true,
+      stats: statsResult.rows[0],
+      total: paymentsResult.rowCount,
+      payments: paymentsResult.rows
+    });
+  })
+);
+
+
+// عرض تفاصيل عملية دفع واحدة
+app.get(
+  '/api/admin/payments/:id',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (req, res) => {
+    const result = await pool.query(
+      `
+      SELECT
+        pt.id,
+        pt.user_id,
+        pt.subscription_id,
+        pt.order_id,
+        pt.provider,
+        pt.provider_transaction_id,
+        pt.provider_order_id,
+        pt.amount,
+        pt.currency,
+        pt.status,
+        pt.payment_method,
+        pt.webhook_verified,
+        pt.paid_at,
+        pt.created_at,
+        pt.updated_at,
+
+        u.full_name AS customer_name,
+        u.email AS customer_email,
+        u.phone AS customer_phone,
+        u.account_status,
+
+        s.status AS subscription_status,
+        s.billing_cycle,
+        s.started_at AS subscription_started_at,
+        s.ends_at AS subscription_ends_at,
+
+        p.code AS package_code,
+        p.name AS package_name
+
+      FROM payment_transactions pt
+
+      JOIN users u ON u.id = pt.user_id
+
+      LEFT JOIN subscriptions s
+        ON s.id = pt.subscription_id
+
+      LEFT JOIN packages p
+        ON p.id = s.package_id
+
+      WHERE pt.id = $1
+      LIMIT 1
+      `,
+      [req.params.id]
+    );
+
+    if (!result.rowCount) {
+      return sendError(
+        res,
+        404,
+        'عملية الدفع غير موجودة.',
+        'PAYMENT_NOT_FOUND'
+      );
+    }
+
+    res.json({
+      success: true,
+      payment: result.rows[0]
+    });
+  })
+);
+/* =========================================================
    ADMIN NOTIFICATIONS MANAGEMENT
 ========================================================= */
 
