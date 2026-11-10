@@ -728,6 +728,7 @@ usersRows.appendChild(row);
       dashboard.hidden = false;
       loadTrials();
       loadUsers();
+      loadMerchantPlans();
     } catch (error) {
       if (error.status === 401 || error.status === 403) {
         clearSession();
