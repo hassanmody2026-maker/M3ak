@@ -128,51 +128,104 @@ input::placeholder{color:#b6aabb}
       <div class="support">تحتاج مساعدة؟ <a href="support.html">تواصل مع الدعم</a></div>
       <div class="security"><span>◆</span> بياناتك محمية — تسجيل آمن</div>
     </div>
-  </section>
-</main>
-<script>
+  <script>
 (() => {
+  const API_BASE = window.M3AK_API_BASE || '/api';
+
   const form = document.getElementById('loginForm');
   const identity = document.getElementById('identity');
   const password = document.getElementById('password');
   const toggle = document.getElementById('togglePassword');
   const notice = document.getElementById('notice');
   const submit = document.getElementById('submitBtn');
+  const remember = document.getElementById('remember');
+
+  function showNotice(message, type = 'error') {
+    notice.className = `notice ${type}`;
+    notice.textContent = message;
+  }
 
   toggle.addEventListener('click', () => {
     const showing = password.type === 'text';
     password.type = showing ? 'password' : 'text';
     toggle.textContent = showing ? 'إظهار' : 'إخفاء';
-    toggle.setAttribute('aria-label', showing ? 'إظهار كلمة المرور' : 'إخفاء كلمة المرور');
+    toggle.setAttribute(
+      'aria-label',
+      showing ? 'إظهار كلمة المرور' : 'إخفاء كلمة المرور'
+    );
   });
 
-  form.addEventListener('submit', (event) => {
+  form.addEventListener('submit', async (event) => {
     event.preventDefault();
+
     notice.className = 'notice';
     notice.textContent = '';
 
-    const user = identity.value.trim();
-    const pass = password.value;
+    const userIdentity = identity.value.trim();
+    const userPassword = password.value;
 
-    if (!user || !pass) {
-      notice.className = 'notice error';
-      notice.textContent = 'من فضلك اكتب البريد الإلكتروني أو رقم الموبايل وكلمة المرور.';
-      (!user ? identity : password).focus();
+    if (!userIdentity || !userPassword) {
+      showNotice('اكتب البريد الإلكتروني أو رقم الموبايل وكلمة المرور.');
+      (!userIdentity ? identity : password).focus();
       return;
     }
-    if (pass.length < 8) {
-      notice.className = 'notice error';
-      notice.textContent = 'كلمة المرور يجب ألا تقل عن 8 أحرف أو أرقام.';
+
+    if (userPassword.length < 8) {
+      showNotice('كلمة المرور يجب ألا تقل عن 8 أحرف أو أرقام.');
       password.focus();
       return;
     }
 
-    // نقطة الربط الديناميكي: يُستبدل هذا التنبيه بطلب API حقيقي عند توصيل الخادم.
-    // لا يتم إنشاء جلسة وهمية أو اعتبار المستخدم مسجّل الدخول قبل التحقق من الخادم.
-    notice.className = 'notice info';
-    notice.textContent = 'تم التحقق من اكتمال البيانات. تسجيل الدخول الفعلي سيتفعّل عند ربط الشاشة بخادم معاك والتحقق من الحساب.';
+    submit.disabled = true;
+    submit.textContent = 'جارٍ تسجيل الدخول...';
+
+    try {
+      const response = await fetch(`${API_BASE}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          identity: userIdentity,
+          password: userPassword
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success || !data.token || !data.user) {
+        throw new Error(data.message || 'تعذر تسجيل الدخول. راجع بياناتك.');
+      }
+
+      if (remember.checked) {
+        localStorage.setItem('m3ak_token', data.token);
+        localStorage.setItem('m3ak_user', JSON.stringify(data.user));
+      } else {
+        sessionStorage.setItem('m3ak_token', data.token);
+        sessionStorage.setItem('m3ak_user', JSON.stringify(data.user));
+      }
+
+      showNotice('تم تسجيل الدخول بنجاح. جاري فتح حسابك...', 'info');
+
+      if (data.user.role === 'admin') {
+        window.location.href = 'admin.html';
+      } else {
+        window.location.href = 'home.html';
+      }
+
+    } catch (error) {
+      showNotice(
+        error.message === 'Failed to fetch'
+          ? 'تعذر الاتصال بالخادم. تأكد من إعداد رابط الخادم.'
+          : error.message
+      );
+    } finally {
+      submit.disabled = false;
+      submit.textContent = 'تسجيل الدخول';
+    }
   });
 })();
-</script>
+</main>
+<script>
 </body>
 </html>
