@@ -518,7 +518,168 @@ usersRows.appendChild(row);
       error.message || 'حدث خطأ أثناء تحميل المستخدمين.';
   }
 }
+  // إدارة باقات التجار
+  async function loadMerchantPlans() {
+    let section = document.getElementById('merchantPlansSection');
 
+    if (!section) {
+      dashboard.insertAdjacentHTML('beforeend', `
+        <section id="merchantPlansSection" class="admin-section">
+          <h2>إدارة باقات التجار</h2>
+          <p>باقة واحدة بمميزات موحدة، والاختلاف في مدة الاشتراك والسعر فقط.</p>
+
+          <div id="merchantPlansMessage" class="message"></div>
+
+          <form id="merchantPlanForm">
+            <div>
+              <label for="merchantMonthly">اشتراك شهري — جنيه</label>
+              <input id="merchantMonthly" type="number" min="0" step="0.01" required value="250">
+            </div>
+
+            <div>
+              <label for="merchantQuarterly">اشتراك 3 شهور — جنيه</label>
+              <input id="merchantQuarterly" type="number" min="0" step="0.01" required value="400">
+            </div>
+
+            <div>
+              <label for="merchantSemiannual">اشتراك 6 شهور — جنيه</label>
+              <input id="merchantSemiannual" type="number" min="0" step="0.01" required value="900">
+            </div>
+
+            <div>
+              <label for="merchantAnnual">اشتراك سنة — جنيه</label>
+              <input id="merchantAnnual" type="number" min="0" step="0.01" required value="2000">
+            </div>
+
+            <div>
+              <label>
+                <input id="merchantPlanActive" type="checkbox" checked>
+                الباقة مفعلة
+              </label>
+            </div>
+
+            <button type="submit" id="saveMerchantPlanBtn">
+              حفظ أسعار باقات التجار
+            </button>
+          </form>
+        </section>
+      `);
+
+      section = document.getElementById('merchantPlansSection');
+    }
+
+    const form = document.getElementById('merchantPlanForm');
+    const messageBox = document.getElementById('merchantPlansMessage');
+    const saveButton = document.getElementById('saveMerchantPlanBtn');
+
+    try {
+      messageBox.textContent = 'جارٍ تحميل باقات التجار...';
+
+      const data = await apiRequest('/admin/merchant-plans');
+
+      if (!data.success) {
+        throw new Error('تعذر تحميل باقات التجار.');
+      }
+
+      const plans = Array.isArray(data.plans) ? data.plans : [];
+      const plan = plans[0] || null;
+
+      if (plan) {
+        form.dataset.planId = plan.id;
+
+        document.getElementById('merchantMonthly').value =
+          plan.monthly_price ?? 250;
+
+        document.getElementById('merchantQuarterly').value =
+          plan.quarterly_price ?? 400;
+
+        document.getElementById('merchantSemiannual').value =
+          plan.semiannual_price ?? 900;
+
+        document.getElementById('merchantAnnual').value =
+          plan.annual_price ?? 2000;
+
+        document.getElementById('merchantPlanActive').checked =
+          plan.is_active === true;
+      } else {
+        delete form.dataset.planId;
+      }
+
+      messageBox.textContent = plan
+        ? 'تم تحميل بيانات باقة التجار.'
+        : 'لم يتم إنشاء الباقة بعد. راجع الأسعار ثم اضغط حفظ لإنشائها.';
+
+      if (!form.dataset.bound) {
+        form.dataset.bound = 'true';
+
+        form.addEventListener('submit', async event => {
+          event.preventDefault();
+
+          const prices = {
+            monthly_price: Number(document.getElementById('merchantMonthly').value),
+            quarterly_price: Number(document.getElementById('merchantQuarterly').value),
+            semiannual_price: Number(document.getElementById('merchantSemiannual').value),
+            annual_price: Number(document.getElementById('merchantAnnual').value)
+          };
+
+          if (Object.values(prices).some(value =>
+            !Number.isFinite(value) || value < 0
+          )) {
+            messageBox.textContent = 'تأكد من إدخال أسعار صحيحة.';
+            return;
+          }
+
+          const isActive =
+            document.getElementById('merchantPlanActive').checked;
+
+          saveButton.disabled = true;
+          messageBox.textContent = 'جارٍ حفظ الأسعار...';
+
+          try {
+            const planId = form.dataset.planId;
+
+            if (planId) {
+              await apiRequest(
+                `/admin/merchant-plans/${encodeURIComponent(planId)}`,
+                {
+                  method: 'PATCH',
+                  body: {
+                    ...prices,
+                    is_active: isActive
+                  }
+                }
+              );
+            } else {
+              await apiRequest('/admin/merchant-plans', {
+                method: 'POST',
+                body: {
+                  code: 'MERCHANT_MAIN',
+                  name: 'باقة التجار',
+                  ...prices,
+                  description: 'باقة تجار موحدة تختلف حسب مدة الاشتراك فقط.',
+                  features: {}
+                }
+              });
+
+              await loadMerchantPlans();
+              return;
+            }
+
+            messageBox.textContent = 'تم حفظ أسعار وحالة باقة التجار بنجاح.';
+          } catch (error) {
+            messageBox.textContent =
+              error.message || 'تعذر حفظ بيانات الباقة.';
+          } finally {
+            saveButton.disabled = false;
+          }
+        });
+      }
+
+    } catch (error) {
+      messageBox.textContent =
+        error.message || 'حدث خطأ أثناء تحميل باقات التجار.';
+    }
+  }
   async function loadDashboard() {
     if (!token) {
       window.location.replace('login.html');
