@@ -769,7 +769,9 @@ CREATE TABLE IF NOT EXISTS merchants (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
-
+-- السماح للمدير بإنشاء متاجر دون حساب مالك
+ALTER TABLE merchants
+ALTER COLUMN user_id DROP NOT NULL;
 CREATE INDEX IF NOT EXISTS merchants_status_idx
 ON merchants(status);
 
