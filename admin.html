@@ -374,11 +374,381 @@ body {
 
     </div>
 
-    <section class="section">
-      <h3>حالة لوحة الإدارة</h3>
-      <p id="adminName">تم التحقق من صلاحية المدير.</p>
-      <p>هذه هي المرحلة الأولى من لوحة الإدارة، وسيتم إضافة أقسام إدارة المستخدمين والاشتراكات والتجار والطلبات في الخطوات التالية.</p>
+        <section class="section" id="merchantManagement">
+      <h3>إدارة المتاجر والخدمات 🏪</h3>
+      <p>إضافة المتاجر وإدارتها ونشر المنتجات والخدمات من حساب المدير.</p>
+
+      <h3 style="margin-top:22px">➕ إضافة متجر جديد</h3>
+
+      <form id="adminMerchantForm">
+        <input id="mName" required placeholder="اسم المتجر أو النشاط" class="adminField">
+        <input id="mType" required placeholder="نوع النشاط: فندق، مطعم، كافيه..." class="adminField">
+        <input id="mCity" required placeholder="المدينة" class="adminField">
+        <input id="mPhone" placeholder="رقم الهاتف" class="adminField">
+        <input id="mAddress" placeholder="العنوان بالتفصيل" class="adminField">
+        <textarea id="mDescription" placeholder="وصف المتجر" class="adminField"></textarea>
+        <button class="trial-refresh" type="submit">إضافة المتجر</button>
+      </form>
+
+      <div id="merchantMessage" class="trial-empty"></div>
+
+      <h3 style="margin-top:25px">المتاجر المسجلة</h3>
+      <button class="trial-refresh" id="refreshMerchants" type="button">تحديث المتاجر</button>
+      <div id="merchantList" class="trial-empty">جارٍ التحميل...</div>
+
+      <hr style="margin:28px 0;border:0;border-top:1px solid #e9e2f0">
+
+      <h3>➕ إضافة منتج أو خدمة</h3>
+
+      <form id="adminCatalogForm">
+        <select id="cMerchant" required class="adminField">
+          <option value="">اختر المتجر</option>
+        </select>
+
+        <select id="cSection" required class="adminField">
+          <option value="">اختر القسم</option>
+          <option value="hotels">الفنادق والإقامة</option>
+          <option value="restaurants">المطاعم والكافيهات</option>
+        </select>
+
+        <select id="cType" required class="adminField">
+          <option value="service">خدمة</option>
+          <option value="product">منتج</option>
+        </select>
+
+        <input id="cName" required placeholder="اسم المنتج أو الخدمة" class="adminField">
+        <input id="cCategory" placeholder="التصنيف الفرعي" class="adminField">
+        <textarea id="cDescription" placeholder="الوصف والتفاصيل" class="adminField"></textarea>
+        <input id="cPrice" type="number" min="0" step="0.01" placeholder="السعر بالجنيه" class="adminField">
+        <input id="cImage" type="url" placeholder="رابط الصورة (إن وجد)" class="adminField">
+
+        <button class="trial-refresh" type="submit">إضافة المنتج أو الخدمة</button>
+      </form>
+
+      <div id="catalogMessage" class="trial-empty"></div>
+
+      <h3 style="margin-top:25px">إدارة المنتجات والخدمات</h3>
+      <button class="trial-refresh" id="refreshCatalog" type="button">تحديث القائمة</button>
+      <div id="catalogList" class="trial-empty">جارٍ التحميل...</div>
     </section>
+
+    <style>
+      .adminField {
+        display:block;
+        width:100%;
+        margin:10px 0;
+        padding:13px;
+        border:1px solid #e9e2f0;
+        border-radius:11px;
+        background:#fff;
+        color:#241638;
+        font:inherit;
+      }
+      #merchantList,#catalogList {
+        text-align:right;
+      }
+      .adminRecord {
+        padding:14px;
+        margin:12px 0;
+        border:1px solid #e9e2f0;
+        border-radius:13px;
+        background:#faf8fc;
+        color:#241638;
+      }
+      .adminRecord button {
+        margin:7px 4px 0 0;
+        padding:9px 12px;
+        border:0;
+        border-radius:9px;
+        background:#54258f;
+        color:white;
+        font:inherit;
+      }
+      .adminRecord button.danger {
+        background:#c52c60;
+      }
+    </style>
+
+    <script>
+    (() => {
+      const API = window.M3AK_API_BASE || '/api';
+      const token =
+        sessionStorage.getItem('m3ak_token') ||
+        localStorage.getItem('m3ak_token');
+
+      const request = async (path, method='GET', body=null) => {
+        const response = await fetch(API + path, {
+          method,
+          headers: {
+            'Authorization': 'Bearer ' + token,
+            'Accept': 'application/json',
+            ...(body ? {'Content-Type':'application/json'} : {})
+          },
+          ...(body ? {body:JSON.stringify(body)} : {})
+        });
+
+        let data = {};
+        try { data = await response.json(); } catch(e) {}
+
+        if (!response.ok) {
+          throw new Error(data.message || 'تعذر تنفيذ العملية.');
+        }
+        return data;
+      };
+
+      const msg = (id, text) => {
+        document.getElementById(id).textContent = text;
+      };
+
+      let merchants = [];
+
+      async function loadMerchants() {
+        const box = document.getElementById('merchantList');
+        box.textContent = 'جارٍ تحميل المتاجر...';
+
+        try {
+          const data = await request('/admin/merchants');
+          merchants = data.merchants || [];
+
+          const select = document.getElementById('cMerchant');
+          select.replaceChildren(new Option('اختر المتجر',''));
+
+          merchants.forEach(m => {
+            select.add(new Option(m.business_name, m.id));
+          });
+
+          box.replaceChildren();
+
+          if (!merchants.length) {
+            box.textContent = 'لا توجد متاجر حتى الآن.';
+            return;
+          }
+
+          merchants.forEach(m => {
+            const card = document.createElement('div');
+            card.className = 'adminRecord';
+
+            const title = document.createElement('strong');
+            title.textContent = m.business_name;
+
+            const details = document.createElement('p');
+            details.textContent =
+              'المدينة: ' + (m.city || '—') +
+              ' | الحالة: ' + m.status +
+              ' | الظهور: ' + (m.is_visible ? 'ظاهر' : 'مخفي');
+
+            card.append(title, details);
+
+            if (m.status !== 'active' || !m.is_visible) {
+              const activate = document.createElement('button');
+              activate.textContent = 'تفعيل ونشر المتجر';
+              activate.onclick = async () => {
+                try {
+                  await request(
+                    '/admin/merchants/' + encodeURIComponent(m.id) + '/status',
+                    'PATCH',
+                    {status:'active',is_visible:true}
+                  );
+                  await loadMerchants();
+                  msg('merchantMessage','تم تفعيل المتجر وإظهاره.');
+                } catch(e) {
+                  msg('merchantMessage',e.message);
+                }
+              };
+              card.appendChild(activate);
+            } else {
+              const hide = document.createElement('button');
+              hide.textContent = 'إخفاء المتجر';
+              hide.className = 'danger';
+              hide.onclick = async () => {
+                try {
+                  await request(
+                    '/admin/merchants/' + encodeURIComponent(m.id) + '/status',
+                    'PATCH',
+                    {is_visible:false}
+                  );
+                  await loadMerchants();
+                } catch(e) {
+                  msg('merchantMessage',e.message);
+                }
+              };
+              card.appendChild(hide);
+            }
+
+            box.appendChild(card);
+          });
+        } catch(e) {
+          box.textContent = e.message;
+        }
+      }
+
+      document.getElementById('adminMerchantForm')
+        .addEventListener('submit', async event => {
+          event.preventDefault();
+          msg('merchantMessage','جارٍ إضافة المتجر...');
+
+          try {
+            await request('/admin/merchants','POST',{
+              business_name:document.getElementById('mName').value.trim(),
+              business_type:document.getElementById('mType').value.trim(),
+              city:document.getElementById('mCity').value.trim(),
+              phone:document.getElementById('mPhone').value.trim(),
+              address:document.getElementById('mAddress').value.trim(),
+              description:document.getElementById('mDescription').value.trim()
+            });
+
+            event.target.reset();
+            msg('merchantMessage','تمت إضافة المتجر. فعّله من قائمة المتاجر ليظهر للجمهور.');
+            await loadMerchants();
+          } catch(e) {
+            msg('merchantMessage',e.message);
+          }
+        });
+
+      async function loadCatalog() {
+        const box = document.getElementById('catalogList');
+        box.textContent = 'جارٍ تحميل المنتجات والخدمات...';
+
+        try {
+          const data = await request('/admin/catalog');
+          box.replaceChildren();
+
+          const items = data.items || [];
+
+          if (!items.length) {
+            box.textContent = 'لا توجد منتجات أو خدمات حتى الآن.';
+            return;
+          }
+
+          items.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'adminRecord';
+
+            const title = document.createElement('strong');
+            title.textContent = item.name;
+
+            const details = document.createElement('p');
+            details.textContent =
+              'المتجر: ' + (item.business_name || '—') +
+              ' | السعر: ' + (item.price ?? 'غير محدد') +
+              ' جنيه | الحالة: ' + item.status;
+
+            card.append(title,details);
+
+            const edit = document.createElement('button');
+            edit.textContent = 'تعديل البيانات';
+            edit.onclick = async () => {
+              const name = prompt('اسم المنتج أو الخدمة:',item.name);
+              if (name === null || !name.trim()) return;
+
+              const price = prompt('السعر بالجنيه:',item.price ?? '');
+              if (price === null) return;
+
+              const description = prompt('الوصف:',item.description || '');
+              if (description === null) return;
+
+              const image = prompt('رابط الصورة:',item.main_image_url || '');
+              if (image === null) return;
+
+              try {
+                await request('/admin/catalog/' + encodeURIComponent(item.id),'PATCH',{
+                  name:name.trim(),
+                  price:price === '' ? null : Number(price),
+                  description,
+                  main_image_url:image
+                });
+                await loadCatalog();
+                msg('catalogMessage','تم تحديث بيانات المنتج أو الخدمة.');
+              } catch(e) {
+                msg('catalogMessage',e.message);
+              }
+            };
+            card.appendChild(edit);
+
+            if (item.status !== 'published') {
+              const publish = document.createElement('button');
+              publish.textContent = 'نشر';
+              publish.onclick = () => updateItem(item.id,{status:'published'});
+              card.appendChild(publish);
+            }
+
+            if (item.status === 'published') {
+              const hide = document.createElement('button');
+              hide.textContent = 'إخفاء';
+              hide.className = 'danger';
+              hide.onclick = () => updateItem(item.id,{status:'hidden'});
+              card.appendChild(hide);
+            }
+
+            if (item.status !== 'archived') {
+              const archive = document.createElement('button');
+              archive.textContent = 'أرشفة';
+              archive.className = 'danger';
+              archive.onclick = async () => {
+                if (!confirm('هل تريد أرشفة هذا العنصر؟')) return;
+                try {
+                  await request('/admin/catalog/' + encodeURIComponent(item.id),'DELETE');
+                  await loadCatalog();
+                } catch(e) {
+                  msg('catalogMessage',e.message);
+                }
+              };
+              card.appendChild(archive);
+            }
+
+            box.appendChild(card);
+          });
+        } catch(e) {
+          box.textContent = e.message;
+        }
+      }
+
+      async function updateItem(id, body) {
+        try {
+          await request('/admin/catalog/' + encodeURIComponent(id),'PATCH',body);
+          await loadCatalog();
+        } catch(e) {
+          msg('catalogMessage',e.message);
+        }
+      }
+
+      document.getElementById('adminCatalogForm')
+        .addEventListener('submit', async event => {
+          event.preventDefault();
+          msg('catalogMessage','جارٍ إضافة المنتج أو الخدمة...');
+
+          try {
+            const price = document.getElementById('cPrice').value;
+            await request('/admin/catalog','POST',{
+              merchant_id:document.getElementById('cMerchant').value,
+              section_code:document.getElementById('cSection').value,
+              item_type:document.getElementById('cType').value,
+              name:document.getElementById('cName').value.trim(),
+              category_name:document.getElementById('cCategory').value.trim(),
+              description:document.getElementById('cDescription').value.trim(),
+              price:price === '' ? null : Number(price),
+              currency:'EGP',
+              main_image_url:document.getElementById('cImage').value.trim()
+            });
+
+            event.target.reset();
+            msg('catalogMessage','تمت الإضافة كمسودة. اضغط نشر من قائمة المنتجات والخدمات.');
+            await loadCatalog();
+          } catch(e) {
+            msg('catalogMessage',e.message);
+          }
+        });
+
+      document.getElementById('refreshMerchants')
+        .addEventListener('click',loadMerchants);
+
+      document.getElementById('refreshCatalog')
+        .addEventListener('click',loadCatalog);
+
+      loadMerchants();
+      loadCatalog();
+    })();
+                                                                                     </script>
 
   </section>
 
