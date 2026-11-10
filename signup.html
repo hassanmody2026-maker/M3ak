@@ -40,7 +40,87 @@ input{width:100%;height:48px;border:1px solid var(--line);border-radius:12px;pad
 <p class="login">لديك حساب بالفعل؟ <a href="login.html">تسجيل الدخول</a></p></section>
 </section></main>
 <script>
-document.querySelectorAll('.toggle').forEach(button=>button.addEventListener('click',()=>{const input=document.getElementById(button.dataset.target);const showing=input.type==='password';input.type=showing?'text':'password';button.textContent=showing?'إخفاء':'إظهار'}));
-document.getElementById('signupForm').addEventListener('submit',event=>{event.preventDefault();const password=document.getElementById('password').value;const confirm=document.getElementById('confirmPassword').value;const message=document.getElementById('formMessage');message.style.display='block';if(password!==confirm){message.textContent='كلمتا المرور غير متطابقتين. راجع البيانات وحاول مرة أخرى.';document.getElementById('confirmPassword').focus();return}if(password.length<8){message.textContent='كلمة المرور يجب ألا تقل عن 8 أحرف.';return}message.textContent='التصميم جاهز للمعاينة. إنشاء الحساب الفعلي وربطه بالتحقق وقاعدة البيانات سيتم في مرحلة الربط البرمجي.'});
-</script>
+(() => {
+  const API_BASE = window.M3AK_API_BASE || '/api';
+
+  document.querySelectorAll('.toggle').forEach(button => {
+    button.addEventListener('click', () => {
+      const input = document.getElementById(button.dataset.target);
+      const showing = input.type === 'password';
+      input.type = showing ? 'text' : 'password';
+      button.textContent = showing ? 'إخفاء' : 'إظهار';
+    });
+  });
+
+  const form = document.getElementById('signupForm');
+  const message = document.getElementById('formMessage');
+  const submit = form.querySelector('.submit');
+
+  form.addEventListener('submit', async event => {
+    event.preventDefault();
+
+    message.style.display = 'block';
+
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+
+    if (password !== confirmPassword) {
+      message.textContent = 'كلمتا المرور غير متطابقتين.';
+      return;
+    }
+
+    if (password.length < 8) {
+      message.textContent = 'كلمة المرور يجب ألا تقل عن 8 أحرف.';
+      return;
+    }
+
+    if (!document.getElementById('agree').checked) {
+      message.textContent = 'يجب الموافقة على الشروط وسياسة الخصوصية.';
+      return;
+    }
+
+    const payload = {
+      fullName: document.getElementById('fullName').value.trim(),
+      email: document.getElementById('email').value.trim(),
+      countryCode: document.getElementById('countryCode').value,
+      phone: document.getElementById('phone').value.trim(),
+      password,
+      confirmPassword
+    };
+
+    submit.disabled = true;
+    submit.textContent = 'جارٍ إنشاء الحساب...';
+
+    try {
+      const response = await fetch(`${API_BASE}/auth/signup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || 'تعذر إنشاء الحساب.');
+      }
+
+      message.textContent = 'تم إنشاء الحساب. جاري الانتقال إلى تأكيد البريد الإلكتروني...';
+      message.style.background = '#effbf7';
+      message.style.color = '#18785e';
+
+      window.location.href =
+        `verify.html?to=${encodeURIComponent(data.destination || payload.email)}`;
+
+    } catch (error) {
+      message.textContent =
+        error.message === 'Failed to fetch'
+          ? 'تعذر الاتصال بالخادم. حاول مرة أخرى.'
+          : error.message;
+    } finally {
+      submit.disabled = false;
+      submit.textContent = 'إنشاء الحساب والمتابعة';
+    }
+  });
+})();
+ </script>
 </body></html>
