@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#210b35">
+<title>لوحة الإدارة | M3AK</title>
+
+<style>
+:root{
+  --bg:#12041a;
+  --panel:#210b35;
+  --card:#2b1040;
+  --purple:#8b35b5;
+  --pink:#e91e63;
+  --cyan:#25c7c5;
+  --text:#fff;
+  --muted:#c3afce;
+  --border:#ffffff18;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Tahoma,Arial,sans-serif;
+  background:linear-gradient(145deg,#12041a,#1b0829);
+  color:var(--text);
+  min-height:100vh;
+}
+button{font:inherit;cursor:pointer}
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:15px;
+  padding:18px 5%;
+  background:#210b35;
+  border-bottom:1px solid var(--border);
+  position:sticky;
+  top:0;
+  z-index:5;
+}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{
+  width:48px;height:48px;
+  border-radius:15px;
+  display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--purple),var(--pink));
+  font-size:23px;font-weight:900;
+}
+.brand h1{font-size:21px;margin:0}
+.brand small{display:block;color:var(--muted);margin-top:5px}
+.logout{
+  border:1px solid #ffffff35;
+  color:white;background:#ffffff10;
+  padding:10px 17px;border-radius:12px;
+}
+.container{width:min(1200px,92%);margin:30px auto}
+.welcome{margin-bottom:25px}
+.welcome h2{font-size:25px;margin:0 0 9px}
+.welcome p{color:var(--muted);margin:0;line-height:1.8}
+.status{
+  display:inline-flex;align-items:center;gap:8px;
+  background:#25c7c51a;color:#8ef0e9;
+  border:1px solid #25c7c540;
+  padding:8px 13px;border-radius:30px;
+  font-size:12px;margin-top:15px;
+}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--cyan)}
+.stats{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:15px;margin-top:25px;
+}
+.stat{
+  background:linear-gradient(145deg,#32134a,#210b35);
+  border:1px solid var(--border);
+  border-radius:19px;padding:20px;
+  min-height:135px;
+}
+.stat-label{font-size:12px;color:var(--muted);line-height:1.7}
+.stat-value{font-size:29px;font-weight:900;margin-top:15px}
+.stat:nth-child(2) .stat-value{color:var(--cyan)}
+.stat:nth-child(3) .stat-value{color:#d59aff}
+.stat:nth-child(4) .stat-value{color:#ff8ab8}
+.stat:nth-child(5) .stat-value{color:#ffd27c}
+.section{
+  background:#210b35;
+  border:1px solid var(--border);
+  border-radius:20px;padding:22px;
+  margin-top:22px;
+}
+.section h3{margin:0 0 12px;font-size:17px}
+.section p{color:var(--muted);font-size:13px;line-height:1.9;margin:0}
+.message{
+  display:none;
+  padding:13px 15px;
+  border-radius:12px;
+  margin-top:18px;
+  font-size:13px;line-height:1.8;
+}
+.message.error{display:block;background:#8d17331c;border:1px solid #e91e6355;color:#ffb4c9}
+.message.info{display:block;background:#25c7c51a;border:1px solid #25c7c555;color:#a6f3ed}
+.loading{color:var(--muted);padding:30px 0;text-align:center}
+@media(max-width:950px){
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:500px){
+  .topbar{padding:14px 4%}
+  .brand h1{font-size:17px}
+  .logo{width:42px;height:42px}
+  .logout{padding:9px 12px;font-size:12px}
+  .container{width:92%;margin:22px auto}
+  .stats{gap:10px}
+  .stat{padding:15px;min-height:115px}
+  .stat-value{font-size:25px}
+  .section{padding:17px}
+}
+</style>
+</head>
+
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="logo">M</div>
+    <div>
+      <h1>M3AK | معاك</h1>
+      <small>لوحة الإدارة الرئيسية</small>
+    </div>
+  </div>
+
+  <button class="logout" id="logoutBtn">تسجيل الخروج</button>
+</header>
+
+<main class="container">
+
+  <section class="welcome">
+    <h2>مرحبًا بك في لوحة الإدارة</h2>
+    <p>إدارة ومتابعة خدمات معاك من مكان واحد.</p>
+    <div class="status">
+      <span class="dot"></span>
+      <span id="connectionStatus">جارٍ التحقق من الحساب...</span>
+    </div>
+  </section>
+
+  <div id="loading" class="loading">جارٍ تحميل بيانات لوحة الإدارة...</div>
+
+  <section id="dashboard" hidden>
+
+    <div class="stats">
+
+      <article class="stat">
+        <div class="stat-label">إجمالي المستخدمين</div>
+        <div class="stat-value" id="totalUsers">—</div>
+      </article>
+
+      <article class="stat">
+        <div class="stat-label">المستخدمون النشطون</div>
+        <div class="stat-value" id="activeUsers">—</div>
+      </article>
+
+      <article class="stat">
+        <div class="stat-label">الاشتراكات النشطة</div>
+        <div class="stat-value" id="activeSubscriptions">—</div>
+      </article>
+
+      <article class="stat">
+        <div class="stat-label">عمليات الدفع الناجحة</div>
+        <div class="stat-value" id="successfulPayments">—</div>
+      </article>
+
+      <article class="stat">
+        <div class="stat-label">طلبات الدعم المفتوحة</div>
+        <div class="stat-value" id="openTickets">—</div>
+      </article>
+
+    </div>
+
+    <section class="section">
+      <h3>حالة لوحة الإدارة</h3>
+      <p id="adminName">تم التحقق من صلاحية المدير.</p>
+      <p>هذه هي المرحلة الأولى من لوحة الإدارة، وسيتم إضافة أقسام إدارة المستخدمين والاشتراكات والتجار والطلبات في الخطوات التالية.</p>
+    </section>
+
+  </section>
+
+  <div id="message" class="message" role="status" aria-live="polite"></div>
+
+</main>
+
+<script>
+(() => {
+  const API_BASE = window.M3AK_API_BASE || '/api';
+
+  const token =
+    sessionStorage.getItem('m3ak_token') ||
+    localStorage.getItem('m3ak_token');
+
+  const loading = document.getElementById('loading');
+  const dashboard = document.getElementById('dashboard');
+  const message = document.getElementById('message');
+  const connectionStatus = document.getElementById('connectionStatus');
+
+  function showError(text) {
+    loading.hidden = true;
+    message.className = 'message error';
+    message.textContent = text;
+  }
+
+  function clearSession() {
+    localStorage.removeItem('m3ak_token');
+    localStorage.removeItem('m3ak_user');
+    sessionStorage.removeItem('m3ak_token');
+    sessionStorage.removeItem('m3ak_user');
+  }
+
+  async function apiRequest(path) {
+    const response = await fetch(`${API_BASE}${path}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json'
+      }
+    });
+
+    let data = {};
+    try {
+      data = await response.json();
+    } catch (_) {}
+
+    if (!response.ok) {
+      const error = new Error(
+        data.message || 'تعذر تنفيذ الطلب.'
+      );
+      error.status = response.status;
+      throw error;
+    }
+
+    return data;
+  }
+
+  function formatNumber(value) {
+    const number = Number(value);
+    return Number.isFinite(number)
+      ? number.toLocaleString('ar-EG')
+      : '0';
+  }
+
+  async function loadDashboard() {
+    if (!token) {
+      window.location.replace('login.html');
+      return;
+    }
+
+    try {
+      const authData = await apiRequest('/auth/me');
+
+      if (!authData.success || !authData.user ||
+          authData.user.role !== 'admin') {
+        clearSession();
+        window.location.replace('login.html');
+        return;
+      }
+
+      const overviewData = await apiRequest('/admin/overview');
+
+      if (!overviewData.success || !overviewData.overview) {
+        throw new Error('لم تصل بيانات إحصائيات لوحة الإدارة.');
+      }
+
+      const stats = overviewData.overview;
+
+      document.getElementById('totalUsers').textContent =
+        formatNumber(stats.total_users);
+
+      document.getElementById('activeUsers').textContent =
+        formatNumber(stats.active_users);
+
+      document.getElementById('activeSubscriptions').textContent =
+        formatNumber(stats.active_subscriptions);
+
+      document.getElementById('successfulPayments').textContent =
+        formatNumber(stats.successful_payments);
+
+      document.getElementById('openTickets').textContent =
+        formatNumber(stats.open_tickets);
+
+      const name = authData.user.fullName || 'المدير';
+      document.getElementById('adminName').textContent =
+        `أهلًا ${name}، تم التحقق من صلاحية حسابك بنجاح.`;
+
+      connectionStatus.textContent = 'متصل — تم التحقق من صلاحية المدير';
+      loading.hidden = true;
+      dashboard.hidden = false;
+
+    } catch (error) {
+      if (error.status === 401 || error.status === 403) {
+        clearSession();
+        window.location.replace('login.html');
+        return;
+      }
+
+      showError(
+        error.message === 'Failed to fetch'
+          ? 'تعذر الاتصال بالخادم. راجع عنوان API وإعدادات الاستضافة.'
+          : error.message
+      );
+    }
+  }
+
+  document.getElementById('logoutBtn').addEventListener('click', async () => {
+    try {
+      if (token) {
+        await fetch(`${API_BASE}/auth/logout`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+      }
+    } catch (_) {
+      // يتم إنهاء الجلسة محليًا حتى لو تعذر الاتصال بالخادم.
+    }
+
+    clearSession();
+    window.location.replace('login.html');
+  });
+
+  loadDashboard();
+})();
+</script>
+
+</body>
+</html>
