@@ -521,7 +521,8 @@ document.getElementById('dashboard').insertAdjacentHTML('beforeend', `
 </section>
 
 `);
-
+document.getElementById('trialType').addEventListener('change', window.loadTrials);
+document.getElementById('refreshTrials').addEventListener('click', window.loadTrials);
 </script>
 
 </body>
