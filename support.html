@@ -476,17 +476,17 @@ body {
   border-color:#7540a5;
   box-shadow:0 8px 25px #24163825;
   }
-  /* M3AK LIGHT PREMIUM SHOPPING THEME */
+  /* M3AK LIGHT PREMIUM SUPPORT THEME */
 
 :root {
   --bg:#f8f5fb;
-  --surface:#ffffff;
+  --card:#ffffff;
   --purple:#54258f;
   --pink:#e94c9b;
-  --teal:#35bdb4;
+  --cyan:#35bdb4;
   --white:#241638;
   --muted:#81758f;
-  --line:#e9e2f0;
+  --border:#e9e2f0;
 }
 
 body {
@@ -499,98 +499,104 @@ body {
   box-shadow:0 8px 24px #54258f20;
 }
 
-.icon-btn,.back {
-  background:#ffffff20;
-  border-color:#ffffff55;
+.brand {
   color:#ffffff;
 }
 
-.heading h1 {
-  color:#ffffff;
+.brand span {
+  color:#8ce5dc;
 }
 
-.heading p,.heading small {
+.tagline {
   color:#f1e5f7;
 }
 
-.content {
-  background:#f8f5fb;
+.hero {
+  background:linear-gradient(135deg,#ffffff,#f4edf9);
+  border:1px solid #e9e2f0;
+  box-shadow:0 5px 18px #24163808;
 }
 
-.ai-card {
-  background:linear-gradient(120deg,#54258f,#7540a5,#a34b9b);
-  border-color:#ffffff55;
-  box-shadow:0 7px 20px #54258f20;
+.hero h1 {
+  color:#54258f;
 }
 
-.ai-card h2 {
-  color:#ffffff;
-}
-
-.search {
-  background:#ffffff;
-  border-color:#e9e2f0;
-  box-shadow:0 3px 12px #24163808;
+.hero p {
+  color:#81758f;
 }
 
 .search input {
+  background:#ffffff;
   color:#241638;
+  border:1px solid #e9e2f0;
+  box-shadow:0 3px 12px #24163808;
 }
 
 .search input::placeholder {
   color:#9a8da5;
 }
 
-.section-title h2 {
-  color:#352044;
+.section-title {
+  color:#54258f;
 }
 
-.section-title small {
-  color:#81758f;
-}
-
-.category {
+.topic {
   background:#ffffff;
   border:1px solid #e9e2f0;
-  color:#352044;
+  color:#241638;
   box-shadow:0 4px 13px #24163808;
 }
 
-.cat-icon {
-  background:#eee4f7;
-}
-
-.category:nth-child(3n+2) .cat-icon {
-  background:#fbe6f1;
-}
-
-.category:nth-child(3n) .cat-icon {
-  background:#e1f6f3;
-}
-
-.category strong {
+.topic-name {
   color:#352044;
 }
 
-.category small {
+.topic-desc {
   color:#81758f;
 }
 
-.empty {
-  color:#81758f;
+.ai-card {
+  background:linear-gradient(120deg,#54258f,#7540a5,#a34b9b);
+  border:1px solid #ffffff55;
+  box-shadow:0 7px 20px #54258f20;
 }
 
-.panel {
+.ai-content strong,
+.ai-content p {
+  color:#ffffff;
+}
+
+.ai-button {
+  background:#ffffff;
+  color:#54258f;
+}
+
+.faq-item {
   background:#ffffff;
   border:1px solid #e9e2f0;
-  box-shadow:0 4px 14px #24163808;
+  box-shadow:0 3px 10px #24163808;
 }
 
-.panel h3 {
+.faq-question {
   color:#352044;
 }
 
-.panel>p {
+.faq-question span:last-child {
+  color:#e94c9b;
+}
+
+.faq-answer {
+  color:#81758f;
+  border-top:1px solid #f0eaf4;
+}
+
+.contact-card {
+  background:#ffffff;
+  border:1px solid #e9e2f0;
+  box-shadow:0 4px 15px #24163808;
+}
+
+.contact-card p {
   color:#81758f;
 }
 
@@ -599,16 +605,11 @@ body {
 }
 
 .field input,
-.field textarea,
-.field select {
+.field select,
+.field textarea {
   background:#ffffff;
   color:#241638;
   border:1px solid #e3d9eb;
-}
-
-.field select option {
-  background:#ffffff;
-  color:#241638;
 }
 
 .field input::placeholder,
@@ -616,71 +617,19 @@ body {
   color:#9a8da5;
 }
 
-.primary {
+.field select option {
+  background:#ffffff;
+  color:#241638;
+}
+
+.submit {
   background:linear-gradient(100deg,#54258f,#e94c9b);
   color:#ffffff;
   box-shadow:0 4px 12px #54258f20;
 }
 
-.secondary {
-  background:#f5eff9;
-  border:1px solid #e9e2f0;
-  color:#54258f;
-}
-
-.compare-card {
-  background:linear-gradient(145deg,#e5f7f4,#ffffff);
-  border:1px solid #bde9e3;
-}
-
-.compare-card h3 {
-  color:#285b56;
-}
-
-.compare-card p {
-  color:#647d79;
-}
-
-.compare-card button {
-  background:#d9f3ef;
-  border-color:#a8ded6;
-  color:#237c72;
-}
-
-.feature {
-  background:#ffffff;
-  border:1px solid #e9e2f0;
-}
-
-.feature strong {
-  color:#352044;
-}
-
-.feature small {
+.notice {
   color:#81758f;
-}
-
-.promo {
-  background:linear-gradient(120deg,#ffffff,#f4edf9);
-  border:1px solid #e9e2f0;
-  box-shadow:0 4px 14px #24163808;
-}
-
-.promo-icon {
-  background:#eee4f7;
-}
-
-.promo strong {
-  color:#352044;
-}
-
-.promo p {
-  color:#81758f;
-}
-
-.floating-ai {
-  border-color:#ffffff;
-  box-shadow:0 7px 22px #54258f35;
 }
 
 .bottom-nav {
