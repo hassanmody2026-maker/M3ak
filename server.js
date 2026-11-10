@@ -4428,7 +4428,6 @@ app.post(
 /* =========================================================
    AI IMAGE ANALYSIS
 ========================================================= */
-
 app.post(
   '/api/assistant/analyze-image',
   authenticate,
@@ -4464,39 +4463,59 @@ app.post(
       );
     }
 
-    await consumeUsage(
+    const reservation = await reserveUsage(
       req.user.id,
       'images',
       1
     );
 
-    const completion = await openai.chat.completions.create({
-      model: process.env.OPENAI_VISION_MODEL || 'gpt-4o',
-      messages: [
-        {
-          role: 'user',
-          content: [
-            {
-              type: 'text',
-              text: question.slice(0, 2000)
-            },
-            {
-              type: 'image_url',
-              image_url: {
-                url: imageUrl
+    try {
+      const completion = await openai.chat.completions.create({
+        model: process.env.OPENAI_VISION_MODEL || 'gpt-4o',
+        messages: [
+          {
+            role: 'user',
+            content: [
+              {
+                type: 'text',
+                text: question.slice(0, 2000)
+              },
+              {
+                type: 'image_url',
+                image_url: {
+                  url: imageUrl
+                }
               }
-            }
-          ]
-        }
-      ],
-      max_tokens: 1200
-    });
+            ]
+          }
+        ],
+        max_tokens: 1200
+      });
 
-    res.json({
-      success: true,
-      answer:
-        completion.choices?.[0]?.message?.content || ''
-    });
+      return res.json({
+        success: true,
+        answer:
+          completion.choices?.[0]?.message?.content || ''
+      });
+
+    } catch (error) {
+      console.error('OpenAI image analysis error:', error.message);
+
+      try {
+        await refundUsage(reservation.reservation);
+      } catch (refundError) {
+        console.error(
+          'CRITICAL: Image usage refund failed:',
+          refundError.message
+        );
+      }
+
+      throw new ApiError(
+        502,
+        'تعذر تحليل الصورة حاليًا.',
+        'AI_IMAGE_PROVIDER_ERROR'
+      );
+    }
   })
 );
 
