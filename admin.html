@@ -380,6 +380,80 @@ async function loadTrials() {
   }
 }
 window.loadTrials = loadTrials;
+  async function loadUsers() {
+  const search = document.getElementById('userSearch').value.trim();
+  const status = document.getElementById('userStatus').value;
+  const usersMessage = document.getElementById('usersMessage');
+  const usersRows = document.getElementById('usersRows');
+
+  usersMessage.textContent = 'جارٍ تحميل المستخدمين...';
+  usersRows.replaceChildren();
+
+  try {
+    const params = new URLSearchParams();
+    if (search) params.set('search', search);
+    if (status) params.set('status', status);
+
+    const data = await apiRequest(
+      `/admin/users?${params.toString()}`
+    );
+
+    if (!data.success) {
+      throw new Error('تعذر تحميل المستخدمين.');
+    }
+
+    const users = Array.isArray(data.users) ? data.users : [];
+
+    if (!users.length) {
+      usersMessage.textContent = 'لا توجد حسابات مطابقة للبحث.';
+      return;
+    }
+
+    usersMessage.textContent =
+      `عدد الحسابات المعروضة: ${formatNumber(data.total ?? users.length)}`;
+
+    users.forEach(user => {
+      const row = document.createElement('tr');
+
+      const statusText = {
+        active: 'نشط',
+        suspended: 'موقوف',
+        deleted: 'محذوف'
+      };
+
+      const subscriptionText = {
+        active: 'نشط',
+        expired: 'منتهي',
+        cancelled: 'ملغي',
+        pending: 'قيد الانتظار'
+      };
+
+      const values = [
+        user.full_name || '—',
+        user.email || '—',
+        user.phone || '—',
+        statusText[user.account_status] || user.account_status || '—',
+        user.package_name || 'بدون باقة',
+        subscriptionText[user.subscription_status] ||
+          user.subscription_status || '—'
+      ];
+
+      values.forEach(value => {
+        const cell = document.createElement('td');
+        cell.textContent = value;
+        row.appendChild(cell);
+      });
+
+      usersRows.appendChild(row);
+    });
+
+  } catch (error) {
+    usersMessage.textContent =
+      error.message || 'حدث خطأ أثناء تحميل المستخدمين.';
+  }
+}
+
+window.loadUsers = loadUsers;
   async function loadDashboard() {
     if (!token) {
       window.location.replace('login.html');
