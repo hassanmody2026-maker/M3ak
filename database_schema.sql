@@ -1317,7 +1317,48 @@ DROP TRIGGER IF EXISTS purchase_complaints_updated_at ON purchase_complaints;
 CREATE TRIGGER purchase_complaints_updated_at
 BEFORE UPDATE ON purchase_complaints
 FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+-- =========================================================
+-- 34. FREE TRIAL REMINDER LOGS
+-- سجل تنبيهات التجارب المجانية
+-- =========================================================
 
+CREATE TABLE IF NOT EXISTS trial_reminder_logs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    trial_type VARCHAR(20) NOT NULL
+        CHECK (trial_type IN ('user', 'merchant')),
+
+    subscription_id UUID NOT NULL,
+
+    user_id UUID NOT NULL
+        REFERENCES users(id) ON DELETE CASCADE,
+
+    reminder_hours INTEGER NOT NULL DEFAULT 48
+        CHECK (reminder_hours > 0),
+
+    channel VARCHAR(20) NOT NULL DEFAULT 'email'
+        CHECK (channel IN ('email', 'in_app', 'sms')),
+
+    status VARCHAR(20) NOT NULL DEFAULT 'pending'
+        CHECK (status IN ('pending', 'sent', 'failed')),
+
+    recipient VARCHAR(255),
+
+    failure_reason TEXT,
+
+    sent_at TIMESTAMPTZ,
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS trial_reminder_logs_subscription_idx
+ON trial_reminder_logs(trial_type, subscription_id, created_at DESC);
+
+CREATE INDEX IF NOT EXISTS trial_reminder_logs_user_idx
+ON trial_reminder_logs(user_id, created_at DESC);
+
+CREATE INDEX IF NOT EXISTS trial_reminder_logs_status_idx
+ON trial_reminder_logs(status, created_at DESC);
 COMMIT;
 
 
