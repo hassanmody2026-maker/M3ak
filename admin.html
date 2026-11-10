@@ -301,7 +301,87 @@ button{font:inherit;cursor:pointer}
       ? number.toLocaleString('ar-EG')
       : '0';
   }
+async function loadTrials() {
+  const type = document.getElementById('trialType').value;
+  const trialMessage = document.getElementById('trialMessage');
+  const trialRows = document.getElementById('trialRows');
 
+  trialMessage.textContent = 'جارٍ تحميل بيانات التجارب...';
+  trialRows.replaceChildren();
+
+  try {
+    const data = await apiRequest(
+      `/admin/trial-monitoring?type=${encodeURIComponent(type)}`
+    );
+
+    if (!data.success) {
+      throw new Error('تعذر تحميل بيانات التجارب.');
+    }
+
+    const stats = data.stats || {};
+    const trials = Array.isArray(data.trials) ? data.trials : [];
+
+    document.getElementById('trialTotal').textContent =
+      formatNumber(stats.total);
+
+    document.getElementById('trialActive').textContent =
+      formatNumber(stats.active);
+
+    document.getElementById('trialEnding').textContent =
+      formatNumber(stats.ending_soon);
+
+    document.getElementById('trialClosed').textContent =
+      formatNumber((Number(stats.expired) || 0) +
+                   (Number(stats.converted) || 0));
+
+    trialRows.replaceChildren();
+
+    if (trials.length === 0) {
+      trialMessage.textContent = 'لا توجد تجارب مجانية مسجلة حاليًا.';
+      return;
+    }
+
+    trialMessage.textContent = '';
+
+    trials.forEach(trial => {
+      const row = document.createElement('tr');
+
+      const values = [
+        trial.trial_type === 'merchant' ? 'تاجر' : 'مستخدم',
+        trial.business_name || trial.full_name || '—',
+        trial.email || '—',
+        trial.phone || '—',
+        ({
+          active: 'نشطة',
+          ending_soon: 'تنتهي قريبًا',
+          expired: 'منتهية',
+          converted: 'اشتراك مدفوع'
+        })[trial.trial_state] || 'غير محددة',
+        trial.trial_state === 'expired' ||
+        trial.trial_state === 'converted'
+          ? '—'
+          : formatNumber(
+              Math.ceil((Number(trial.remaining_seconds) || 0) / 3600)
+            ) + ' ساعة'
+      ];
+
+      values.forEach(value => {
+        const cell = document.createElement('td');
+        cell.textContent = value;
+        row.appendChild(cell);
+      });
+
+      trialRows.appendChild(row);
+    });
+
+  } catch (error) {
+    trialMessage.textContent =
+      error.message || 'حدث خطأ أثناء تحميل التجارب.';
+  }
+}
+
+document.getElementById('trialType').addEventListener('change', loadTrials);
+document.getElementById('refreshTrials').addEventListener('click', loadTrials);
   async function loadDashboard() {
     if (!token) {
       window.location.replace('login.html');
