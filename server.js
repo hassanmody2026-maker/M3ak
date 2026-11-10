@@ -1753,6 +1753,135 @@ app.patch(
   })
 );
 /* =========================================================
+   PUBLIC CATALOG
+   عرض المتاجر والمنتجات المنشورة للعملاء
+========================================================= */
+
+app.get(
+  '/api/catalog',
+  asyncRoute(async (req, res) => {
+    const {
+      section,
+      city,
+      q,
+      type,
+      page = '1',
+      limit = '30'
+    } = req.query;
+
+    const currentPage = Math.max(1, Number.parseInt(page, 10) || 1);
+    const pageSize = Math.min(
+      100,
+      Math.max(1, Number.parseInt(limit, 10) || 30)
+    );
+
+    if (
+      type &&
+      !['product', 'service'].includes(type)
+    ) {
+      return sendError(
+        res,
+        400,
+        'نوع العنصر غير صحيح.',
+        'INVALID_CATALOG_TYPE'
+      );
+    }
+
+    const conditions = [
+      "ci.status = 'published'",
+      "m.status = 'active'",
+      "m.is_visible = TRUE"
+    ];
+
+    const values = [];
+
+    if (section) {
+      values.push(String(section).trim());
+      conditions.push(`ci.section_code = $${values.length}`);
+    }
+
+    if (city) {
+      values.push(String(city).trim());
+      conditions.push(`m.city ILIKE $${values.length}`);
+    }
+
+    if (type) {
+      values.push(type);
+      conditions.push(`ci.item_type = $${values.length}`);
+    }
+
+    if (q) {
+      values.push(`%${String(q).trim()}%`);
+      conditions.push(`
+        (
+          ci.name ILIKE $${values.length}
+          OR ci.description ILIKE $${values.length}
+          OR ci.category_name ILIKE $${values.length}
+          OR m.business_name ILIKE $${values.length}
+        )
+      `);
+    }
+
+    const whereClause = conditions.join(' AND ');
+
+    values.push(pageSize);
+    const limitIndex = values.length;
+
+    values.push((currentPage - 1) * pageSize);
+    const offsetIndex = values.length;
+
+    const result = await pool.query(
+      `
+      SELECT
+        ci.id,
+        ci.merchant_id,
+        ci.section_code,
+        ci.category_name,
+        ci.item_type,
+        ci.name,
+        ci.description,
+        ci.specifications,
+        ci.price,
+        ci.currency,
+        ci.stock_quantity,
+        ci.main_image_url,
+        ci.published_at,
+
+        m.business_name,
+        m.business_type,
+        m.phone AS merchant_phone,
+        m.address AS merchant_address,
+        m.city AS merchant_city,
+        m.latitude AS merchant_latitude,
+        m.longitude AS merchant_longitude,
+        m.logo_url AS merchant_logo,
+        m.cover_image_url AS merchant_cover
+
+      FROM catalog_items ci
+
+      INNER JOIN merchants m
+        ON m.id = ci.merchant_id
+
+      WHERE ${whereClause}
+
+      ORDER BY ci.published_at DESC NULLS LAST, ci.created_at DESC
+
+      LIMIT $${limitIndex}
+      OFFSET $${offsetIndex}
+      `,
+      values
+    );
+
+    res.json({
+      success: true,
+      page: currentPage,
+      limit: pageSize,
+      total: result.rowCount,
+      items: result.rows
+    });
+  })
+);
+/* =========================================================
    ADMIN CATALOG MANAGEMENT
    الإدارة وحدها تتحكم في المنتجات والخدمات
 ========================================================= */
