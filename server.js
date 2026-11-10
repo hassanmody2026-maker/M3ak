@@ -4248,6 +4248,190 @@ app.patch(
   })
 );
 /* =========================================================
+   ADMIN FREE TRIAL MONITORING
+   متابعة التجارب المجانية للمستخدمين والتجار
+========================================================= */
+
+app.get(
+  '/api/admin/trial-monitoring',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (req, res) => {
+    const allowedTypes = ['all', 'users', 'merchants'];
+    const type = req.query.type || 'all';
+
+    if (!allowedTypes.includes(type)) {
+      return sendError(
+        res,
+        400,
+        'نوع التجربة غير صحيح.',
+        'INVALID_TRIAL_TYPE'
+      );
+    }
+
+    const [userTrials, merchantTrials] = await Promise.all([
+      type === 'merchants'
+        ? Promise.resolve({ rows: [] })
+        : pool.query(`
+          SELECT
+            s.id AS trial_id,
+            s.user_id,
+            s.started_at,
+            s.ends_at,
+            s.trial_expires_at,
+            s.status AS subscription_status,
+
+            u.full_name,
+            u.email,
+            u.phone,
+            u.account_status,
+
+            p.code AS package_code,
+            p.name AS package_name,
+
+            EXISTS (
+              SELECT 1
+              FROM subscriptions paid
+              JOIN packages paid_package
+                ON paid_package.id = paid.package_id
+              WHERE paid.user_id = s.user_id
+                AND paid.id <> s.id
+                AND paid_package.code <> 'TRIAL'
+                AND paid.status IN ('active', 'pending')
+            ) AS converted_to_paid,
+
+            GREATEST(
+              0,
+              EXTRACT(
+                EPOCH FROM (
+                  COALESCE(s.trial_expires_at, s.ends_at) - NOW()
+                )
+              )
+            )::BIGINT AS remaining_seconds,
+
+            CASE
+              WHEN EXISTS (
+                SELECT 1
+                FROM subscriptions paid
+                JOIN packages paid_package
+                  ON paid_package.id = paid.package_id
+                WHERE paid.user_id = s.user_id
+                  AND paid.id <> s.id
+                  AND paid_package.code <> 'TRIAL'
+                  AND paid.status IN ('active', 'pending')
+              ) THEN 'converted'
+
+              WHEN COALESCE(s.trial_expires_at, s.ends_at) <= NOW()
+                THEN 'expired'
+
+              WHEN COALESCE(s.trial_expires_at, s.ends_at)
+                   <= NOW() + INTERVAL '48 hours'
+                THEN 'ending_soon'
+
+              ELSE 'active'
+            END AS trial_state
+
+          FROM subscriptions s
+          JOIN packages p ON p.id = s.package_id
+          JOIN users u ON u.id = s.user_id
+          WHERE p.code = 'TRIAL'
+          ORDER BY s.created_at DESC
+          LIMIT 500
+        `),
+
+      type === 'users'
+        ? Promise.resolve({ rows: [] })
+        : pool.query(`
+          SELECT
+            ms.id AS trial_id,
+            ms.merchant_id,
+            ms.started_at,
+            ms.ends_at,
+            ms.status AS subscription_status,
+
+            m.business_name,
+            m.status AS merchant_status,
+
+            u.id AS user_id,
+            u.full_name,
+            u.email,
+            u.phone,
+            u.account_status,
+
+            EXISTS (
+              SELECT 1
+              FROM merchant_subscriptions paid
+              WHERE paid.merchant_id = ms.merchant_id
+                AND paid.id <> ms.id
+                AND paid.status = 'active'
+                AND paid.billing_cycle <> 'free_trial'
+            ) AS converted_to_paid,
+
+            GREATEST(
+              0,
+              EXTRACT(
+                EPOCH FROM (ms.ends_at - NOW())
+              )
+            )::BIGINT AS remaining_seconds,
+
+            CASE
+              WHEN EXISTS (
+                SELECT 1
+                FROM merchant_subscriptions paid
+                WHERE paid.merchant_id = ms.merchant_id
+                  AND paid.id <> ms.id
+                  AND paid.status = 'active'
+                  AND paid.billing_cycle <> 'free_trial'
+              ) THEN 'converted'
+
+              WHEN ms.ends_at <= NOW()
+                THEN 'expired'
+
+              WHEN ms.ends_at <= NOW() + INTERVAL '48 hours'
+                THEN 'ending_soon'
+
+              ELSE 'active'
+            END AS trial_state
+
+          FROM merchant_subscriptions ms
+          JOIN merchants m ON m.id = ms.merchant_id
+          JOIN users u ON u.id = m.user_id
+          WHERE ms.billing_cycle = 'free_trial'
+          ORDER BY ms.created_at DESC
+          LIMIT 500
+        `)
+    ]);
+
+    const users = userTrials.rows.map(row => ({
+      ...row,
+      trial_type: 'user'
+    }));
+
+    const merchants = merchantTrials.rows.map(row => ({
+      ...row,
+      trial_type: 'merchant'
+    }));
+
+    const trials = [...users, ...merchants];
+
+    const stats = {
+      total: trials.length,
+      users: users.length,
+      merchants: merchants.length,
+      active: trials.filter(x => x.trial_state === 'active').length,
+      ending_soon: trials.filter(x => x.trial_state === 'ending_soon').length,
+      expired: trials.filter(x => x.trial_state === 'expired').length,
+      converted: trials.filter(x => x.trial_state === 'converted').length
+    };
+
+    res.json({
+      success: true,
+      stats,
+      trials
+    });
+  })
+);
+/* =========================================================
    ADMIN USER ACCOUNTS MANAGEMENT
 ========================================================= */
 
