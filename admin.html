@@ -270,30 +270,32 @@ button{font:inherit;cursor:pointer}
     sessionStorage.removeItem('m3ak_user');
   }
 
-  async function apiRequest(path) {
-    const response = await fetch(`${API_BASE}${path}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Accept': 'application/json'
-      }
-    });
+  async function apiRequest(path, options = {}) {
+  const response = await fetch(`${API_BASE}${path}`, {
+    method: options.method || 'GET',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Accept': 'application/json',
+      ...(options.body ? { 'Content-Type': 'application/json' } : {})
+    },
+    ...(options.body ? { body: JSON.stringify(options.body) } : {})
+  });
 
-    let data = {};
-    try {
-      data = await response.json();
-    } catch (_) {}
+  let data = {};
+  try {
+    data = await response.json();
+  } catch (_) {}
 
-    if (!response.ok) {
-      const error = new Error(
-        data.message || 'تعذر تنفيذ الطلب.'
-      );
-      error.status = response.status;
-      throw error;
-    }
-
-    return data;
+  if (!response.ok) {
+    const error = new Error(
+      data.message || 'تعذر تنفيذ الطلب.'
+    );
+    error.status = response.status;
+    throw error;
   }
+
+  return data;
+    }
 
   function formatNumber(value) {
     const number = Number(value);
