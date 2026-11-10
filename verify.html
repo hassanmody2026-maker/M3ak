@@ -404,97 +404,7 @@ h2 {
 </section>
 </main>
 
-<script>
-(() => {
-
-  const params = new URLSearchParams(location.search);
-
-  const mode = params.get('mode') === 'reset'
-    ? 'reset'
-    : 'account';
-
-  const target = params.get('to');
-
-  const title = document.getElementById('title');
-  const descriptionText = document.getElementById('descriptionText');
-  const destination = document.getElementById('destination');
-  const fields = document.getElementById('resetFields');
-  const submit = document.getElementById('submit');
-  const notice = document.getElementById('notice');
-
-  const boxes = [
-    ...document.querySelectorAll('.otp input')
-  ];
-
-  function showNotice(message) {
-    notice.textContent = message;
-    notice.classList.add('show');
-  }
-
-  function normalizeDigits(value) {
-    return value
-      .replace(/[٠-٩]/g, digit =>
-        String(digit.charCodeAt(0) - 1632)
-      )
-      .replace(/[۰-۹]/g, digit =>
-        String(digit.charCodeAt(0) - 1776)
-      )
-      .replace(/\D/g, '');
-  }
-
-  if (target) {
-    destination.textContent = target;
-  }
-
-  if (mode === 'reset') {
-    title.textContent = 'استعادة كلمة المرور';
-
-    descriptionText.textContent =
-      'أدخل رمز الاستعادة المرسل إلى ';
-
-    fields.hidden = false;
-
-    submit.textContent =
-      'تأكيد الرمز وتغيير كلمة المرور';
-  }
-
-  boxes.forEach((box, index) => {
-
-    box.addEventListener('input', () => {
-
-      const digits = normalizeDigits(box.value);
-
-      box.value = digits.slice(-1);
-
-      if (box.value && boxes[index + 1]) {
-        boxes[index + 1].focus();
-      }
-
-      notice.classList.remove('show');
-    });
-
-    box.addEventListener('keydown', event => {
-
-      if (
-        event.key === 'Backspace' &&
-        !box.value &&
-        boxes[index - 1]
-      ) {
-        boxes[index - 1].focus();
-      }
-
-      if (event.key === 'ArrowLeft' && boxes[index + 1]) {
-        boxes[index + 1].focus();
-      }
-
-      if (event.key === 'ArrowRight' && boxes[index - 1]) {
-        boxes[index - 1].focus();
-      }
-
-    });
-
-    box.addEventListener('paste', event => {
-
+const 
       const clipboard = event.clipboardData ||
         window.clipboardData;
 
@@ -581,3 +491,6 @@ h2 {
 
 </body>
   </html>
+
+
+  
