@@ -1876,7 +1876,7 @@ app.get(
       success: true,
       page: currentPage,
       limit: pageSize,
-      total: result.rowCount,
+      returned: result.rowCount,
       items: result.rows
     });
   })
