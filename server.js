@@ -37,9 +37,10 @@ const DATABASE_URL = process.env.DATABASE_URL;
 
 function validateEnvironment() {
   const requiredEnvironment = [
-    'DATABASE_URL',
-    'JWT_SECRET'
-  ];
+  'DATABASE_URL',
+  'JWT_SECRET',
+  'CRON_SECRET'
+];
 
   for (const key of requiredEnvironment) {
     if (!process.env[key]) {
