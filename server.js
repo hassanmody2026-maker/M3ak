@@ -2576,15 +2576,18 @@ app.post(
     for (const item of userTrials.rows) {
       try {
         // قفل لمنع تنفيذ التذكير مرتين بالتزامن
-        const lock = await pool.query(
-          `SELECT pg_try_advisory_lock(hashtext($1)) AS locked`,
-          [`user-trial-reminder:${item.subscription_id}`]
-        );
+        const lockClient = await pool.connect();
 
-        if (!lock.rows[0].locked) {
-          results.users.skipped++;
-          continue;
-        }
+const lock = await lockClient.query(
+  `SELECT pg_try_advisory_lock(hashtext($1)) AS locked`,
+  [`user-trial-reminder:${item.subscription_id}`]
+);
+
+if (!lock.rows[0].locked) {
+  lockClient.release();
+  results.users.skipped++;
+  continue;
+}
 
         try {
           const alreadySent = await pool.query(
