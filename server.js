@@ -4178,16 +4178,38 @@ async function getActiveSubscription(client, userId) {
   return result.rows[0];
 }
 
-async function consumeUsage(
-  userId,
-  type,
-  amount
-) {
+async function reserveUsage(userId, type, amount) {
+  const columns = {
+    words: {
+      column: 'words_used',
+      limit: 'daily_word_limit'
+    },
+    images: {
+      column: 'images_used',
+      limit: 'daily_image_limit'
+    },
+    products: {
+      column: 'product_searches_used',
+      limit: 'daily_product_search_limit'
+    },
+    outOfRange: {
+      column: 'out_of_range_searches_used',
+      limit: 'daily_out_of_range_limit'
+    }
+  };
+
+  const config = columns[type];
+
+  if (!config) {
+    throw new ApiError(400, 'نوع الاستهلاك غير معروف.', 'INVALID_USAGE_TYPE');
+  }
+
+  if (!Number.isSafeInteger(amount) || amount <= 0) {
+    throw new ApiError(400, 'قيمة الاستهلاك غير صحيحة.', 'INVALID_USAGE_AMOUNT');
+  }
+
   return withTransaction(async client => {
-    const subscription = await getActiveSubscription(
-      client,
-      userId
-    );
+    const subscription = await getActiveSubscription(client, userId);
 
     const usageResult = await client.query(
       `
@@ -4201,36 +4223,6 @@ async function consumeUsage(
     );
 
     const usage = usageResult.rows[0];
-
-    const columns = {
-      words: {
-        column: 'words_used',
-        limit: 'daily_word_limit'
-      },
-      images: {
-        column: 'images_used',
-        limit: 'daily_image_limit'
-      },
-      products: {
-        column: 'product_searches_used',
-        limit: 'daily_product_search_limit'
-      },
-      outOfRange: {
-        column: 'out_of_range_searches_used',
-        limit: 'daily_out_of_range_limit'
-      }
-    };
-
-    const config = columns[type];
-
-    if (!config) {
-      throw new ApiError(
-        400,
-        'نوع الاستهلاك غير معروف.',
-        'INVALID_USAGE_TYPE'
-      );
-    }
-
     const current = Number(usage[config.column]);
     const maximum = Number(subscription[config.limit]);
 
@@ -4254,11 +4246,61 @@ async function consumeUsage(
 
     return {
       usage: updated.rows[0],
-      subscription
+      subscription,
+      reservation: {
+        userId,
+        type,
+        amount,
+        usageDate: usage.usage_date
+      }
     };
   });
 }
 
+
+async function refundUsage(reservation) {
+  const columns = {
+    words: 'words_used',
+    images: 'images_used',
+    products: 'product_searches_used',
+    outOfRange: 'out_of_range_searches_used'
+  };
+
+  if (
+    !reservation ||
+    !columns[reservation.type] ||
+    !Number.isSafeInteger(reservation.amount) ||
+    reservation.amount <= 0
+  ) {
+    throw new Error('Invalid usage refund reservation.');
+  }
+
+  const column = columns[reservation.type];
+
+  return withTransaction(async client => {
+    const result = await client.query(
+      `
+      UPDATE usage_daily
+      SET ${column} = ${column} - $1
+      WHERE user_id = $2
+        AND usage_date = $3
+        AND ${column} >= $1
+      RETURNING *
+      `,
+      [
+        reservation.amount,
+        reservation.userId,
+        reservation.usageDate
+      ]
+    );
+
+    if (!result.rowCount) {
+      throw new Error('Usage refund failed.');
+    }
+
+    return result.rows[0];
+  });
+}
 
 app.get(
   '/api/usage/today',
@@ -7241,11 +7283,6 @@ app.use((error, req, res, next) => {
     'INTERNAL_SERVER_ERROR'
   );
 });
-
-
-/* =========================================================
-   SERVER START
-========================================================= */
 
 /* =========================================================
    SERVER START
