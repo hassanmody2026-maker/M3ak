@@ -384,6 +384,61 @@ button{font:inherit;cursor:pointer}
 
   loadDashboard();
 })();
+  <section class="section">
+  <h3>متابعة التجارب المجانية</h3>
+  <p>متابعة تجارب المستخدمين والتجار، ومعرفة النشطة والقريبة من الانتهاء والمنتهية والمحوّلة لاشتراك مدفوع.</p>
+
+  <div class="trial-stats">
+    <div class="trial-box">
+      <span>إجمالي التجارب</span>
+      <strong id="trialTotal">—</strong>
+    </div>
+    <div class="trial-box">
+      <span>تجارب نشطة</span>
+      <strong id="trialActive">—</strong>
+    </div>
+    <div class="trial-box">
+      <span>تنتهي خلال 48 ساعة</span>
+      <strong id="trialEnding">—</strong>
+    </div>
+    <div class="trial-box">
+      <span>منتهية أو تحولت لاشتراك</span>
+      <strong id="trialClosed">—</strong>
+    </div>
+  </div>
+
+  <div class="trial-toolbar">
+    <select id="trialType">
+      <option value="all">كل التجارب</option>
+      <option value="users">تجارب المستخدمين</option>
+      <option value="merchants">تجارب التجار</option>
+    </select>
+
+    <button class="trial-refresh" id="refreshTrials">
+      تحديث البيانات
+    </button>
+  </div>
+
+  <div id="trialMessage" class="trial-empty">
+    جارٍ تحميل بيانات التجارب...
+  </div>
+
+  <div class="trial-table-wrap">
+    <table class="trial-table">
+      <thead>
+        <tr>
+          <th>النوع</th>
+          <th>الاسم / النشاط</th>
+          <th>البريد الإلكتروني</th>
+          <th>الهاتف</th>
+          <th>الحالة</th>
+          <th>الوقت المتبقي</th>
+        </tr>
+      </thead>
+      <tbody id="trialRows"></tbody>
+    </table>
+  </div>
+</section>
 </script>
 
 </body>
