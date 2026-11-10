@@ -1541,6 +1541,217 @@ app.post(
   })
 );
 /* =========================================================
+   ADMIN ORDERS MANAGEMENT
+   إدارة جميع طلبات العملاء
+========================================================= */
+
+// عرض جميع الطلبات للإدارة
+app.get(
+  '/api/admin/orders',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (req, res) => {
+    const conditions = [];
+    const values = [];
+
+    const allowedStatuses = [
+      'pending',
+      'confirmed',
+      'processing',
+      'completed',
+      'cancelled',
+      'rejected'
+    ];
+
+    if (req.query.status) {
+      if (!allowedStatuses.includes(req.query.status)) {
+        return sendError(
+          res,
+          400,
+          'حالة الطلب غير صحيحة.',
+          'INVALID_ORDER_STATUS'
+        );
+      }
+
+      values.push(req.query.status);
+      conditions.push(`o.status = $${values.length}`);
+    }
+
+    if (req.query.merchant_id) {
+      values.push(req.query.merchant_id);
+      conditions.push(`
+        EXISTS (
+          SELECT 1
+          FROM order_items oi
+          JOIN catalog_items ci ON ci.id = oi.item_id
+          WHERE oi.order_id = o.id
+            AND ci.merchant_id = $${values.length}
+        )
+      `);
+    }
+
+    const whereClause = conditions.length
+      ? `WHERE ${conditions.join(' AND ')}`
+      : '';
+
+    const result = await pool.query(
+      `
+      SELECT
+        o.*,
+        u.full_name AS customer_name,
+        u.email AS customer_email,
+        u.phone AS customer_phone,
+
+        (
+          SELECT COUNT(*)
+          FROM order_items oi
+          WHERE oi.order_id = o.id
+        ) AS items_count,
+
+        (
+          SELECT jsonb_agg(
+            DISTINCT jsonb_build_object(
+              'merchant_id', m.id,
+              'business_name', m.business_name
+            )
+          )
+          FROM order_items oi
+          JOIN catalog_items ci ON ci.id = oi.item_id
+          JOIN merchants m ON m.id = ci.merchant_id
+          WHERE oi.order_id = o.id
+        ) AS merchants
+
+      FROM orders o
+      JOIN users u ON u.id = o.user_id
+
+      ${whereClause}
+
+      ORDER BY o.created_at DESC
+      LIMIT 200
+      `,
+      values
+    );
+
+    res.json({
+      success: true,
+      total: result.rowCount,
+      orders: result.rows
+    });
+  })
+);
+
+
+// تفاصيل طلب معين للإدارة
+app.get(
+  '/api/admin/orders/:id',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (req, res) => {
+    const orderResult = await pool.query(
+      `
+      SELECT
+        o.*,
+        u.full_name AS customer_name,
+        u.email AS customer_email,
+        u.phone AS customer_phone
+      FROM orders o
+      JOIN users u ON u.id = o.user_id
+      WHERE o.id = $1
+      LIMIT 1
+      `,
+      [req.params.id]
+    );
+
+    if (!orderResult.rowCount) {
+      return sendError(
+        res,
+        404,
+        'الطلب غير موجود.',
+        'ORDER_NOT_FOUND'
+      );
+    }
+
+    const itemsResult = await pool.query(
+      `
+      SELECT
+        oi.*,
+        ci.section_code,
+        ci.category_name,
+        m.id AS merchant_id,
+        m.business_name
+      FROM order_items oi
+      LEFT JOIN catalog_items ci ON ci.id = oi.item_id
+      LEFT JOIN merchants m ON m.id = ci.merchant_id
+      WHERE oi.order_id = $1
+      ORDER BY oi.created_at ASC
+      `,
+      [req.params.id]
+    );
+
+    res.json({
+      success: true,
+      order: orderResult.rows[0],
+      items: itemsResult.rows
+    });
+  })
+);
+
+
+// تحديث حالة الطلب من الإدارة
+app.patch(
+  '/api/admin/orders/:id/status',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (req, res) => {
+    const allowedStatuses = [
+      'pending',
+      'confirmed',
+      'processing',
+      'completed',
+      'cancelled',
+      'rejected'
+    ];
+
+    const { status } = req.body;
+
+    if (!allowedStatuses.includes(status)) {
+      return sendError(
+        res,
+        400,
+        'حالة الطلب غير صحيحة.',
+        'INVALID_ORDER_STATUS'
+      );
+    }
+
+    const result = await pool.query(
+      `
+      UPDATE orders
+      SET
+        status = $1,
+        updated_at = NOW()
+      WHERE id = $2
+      RETURNING *
+      `,
+      [status, req.params.id]
+    );
+
+    if (!result.rowCount) {
+      return sendError(
+        res,
+        404,
+        'الطلب غير موجود.',
+        'ORDER_NOT_FOUND'
+      );
+    }
+
+    res.json({
+      success: true,
+      message: 'تم تحديث حالة الطلب.',
+      order: result.rows[0]
+    });
+  })
+);
+/* =========================================================
    ADMIN CATALOG MANAGEMENT
    الإدارة وحدها تتحكم في المنتجات والخدمات
 ========================================================= */
