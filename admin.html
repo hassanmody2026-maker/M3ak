@@ -379,7 +379,7 @@ async function loadTrials() {
       error.message || 'حدث خطأ أثناء تحميل التجارب.';
   }
 }
-
+window.loadTrials = loadTrials;
 document.getElementById('trialType').addEventListener('change', loadTrials);
 document.getElementById('refreshTrials').addEventListener('click', loadTrials);
   async function loadDashboard() {
