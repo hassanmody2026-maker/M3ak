@@ -523,6 +523,52 @@ document.getElementById('dashboard').insertAdjacentHTML('beforeend', `
 `);
 document.getElementById('trialType').addEventListener('change', window.loadTrials);
 document.getElementById('refreshTrials').addEventListener('click', window.loadTrials);
+  document.getElementById('dashboard').insertAdjacentHTML('beforeend', `
+  <section class="section">
+    <h3>إدارة المستخدمين</h3>
+    <p>البحث عن الحسابات ومراجعة بيانات المستخدمين واشتراكاتهم.</p>
+
+    <div class="trial-toolbar">
+      <input
+        id="userSearch"
+        type="search"
+        placeholder="ابحث بالاسم أو البريد أو الهاتف"
+        style="flex:1;min-width:220px;background:#32134a;color:white;border:1px solid #ffffff30;border-radius:10px;padding:12px;font:inherit"
+      >
+
+      <select id="userStatus">
+        <option value="">كل الحالات</option>
+        <option value="active">نشط</option>
+        <option value="suspended">موقوف</option>
+        <option value="deleted">محذوف</option>
+      </select>
+
+      <button class="trial-refresh" id="refreshUsers">
+        بحث وتحديث
+      </button>
+    </div>
+
+    <div id="usersMessage" class="trial-empty">
+      قائمة المستخدمين جاهزة للتحميل.
+    </div>
+
+    <div class="trial-table-wrap">
+      <table class="trial-table">
+        <thead>
+          <tr>
+            <th>الاسم</th>
+            <th>البريد الإلكتروني</th>
+            <th>الهاتف</th>
+            <th>الحالة</th>
+            <th>الباقة</th>
+            <th>الاشتراك</th>
+          </tr>
+        </thead>
+        <tbody id="usersRows"></tbody>
+      </table>
+    </div>
+  </section>
+`);
 </script>
 
 </body>
