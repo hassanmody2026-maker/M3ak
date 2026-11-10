@@ -3844,7 +3844,7 @@ app.get(
         u.account_status AS owner_account_status
 
       FROM merchants m
-JOIN users u ON u.id = m.user_id
+LEFT JOIN users u ON u.id = m.user_id
 
       WHERE m.id = $1
       `,
