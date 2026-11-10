@@ -2758,49 +2758,55 @@ app.post(
 
     results.merchants.checked = merchantTrials.rowCount;
 
-    for (const item of merchantTrials.rows) {
+        for (const item of merchantTrials.rows) {
+      let lockClient = null;
+      let locked = false;
+
       try {
-        const lock = await pool.query(
+        lockClient = await pool.connect();
+
+        const lock = await lockClient.query(
           `SELECT pg_try_advisory_lock(hashtext($1)) AS locked`,
           [`merchant-trial-reminder:${item.subscription_id}`]
         );
 
-        if (!lock.rows[0].locked) {
+        locked = lock.rows[0].locked;
+
+        if (!locked) {
           results.merchants.skipped++;
           continue;
         }
 
-        try {
-          const alreadySent = await pool.query(
-            `
-            SELECT id
-            FROM trial_reminder_logs
-            WHERE trial_type = 'merchant'
-              AND subscription_id = $1
-              AND reminder_hours = 48
-              AND channel = 'email'
-              AND status = 'sent'
-            LIMIT 1
-            `,
-            [item.subscription_id]
-          );
+        const alreadySent = await pool.query(
+          `
+          SELECT id
+          FROM trial_reminder_logs
+          WHERE trial_type = 'merchant'
+            AND subscription_id = $1
+            AND reminder_hours = 48
+            AND channel = 'email'
+            AND status = 'sent'
+          LIMIT 1
+          `,
+          [item.subscription_id]
+        );
 
-          if (alreadySent.rowCount) {
-            results.merchants.skipped++;
-            continue;
-          }
+        if (alreadySent.rowCount) {
+          results.merchants.skipped++;
+          continue;
+        }
 
-          const expiryDate = new Date(item.ends_at)
-            .toLocaleString('ar-EG', {
-              dateStyle: 'long',
-              timeStyle: 'short',
-              timeZone: 'Africa/Cairo'
-            });
+        const expiryDate = new Date(item.ends_at)
+          .toLocaleString('ar-EG', {
+            dateStyle: 'long',
+            timeStyle: 'short',
+            timeZone: 'Africa/Cairo'
+          });
 
-          await sendEmail(
-            item.email,
-            'تذكير: الفترة التجريبية لمتجرك في معاك تقترب من الانتهاء',
-            `مرحباً ${item.full_name || ''}،
+        await sendEmail(
+          item.email,
+          'تذكير: الفترة التجريبية لمتجرك في معاك تقترب من الانتهاء',
+          `مرحباً ${item.full_name || ''}،
 
 نذكرك بأن الفترة التجريبية لمتجرك (${item.business_name}) ستنتهي خلال 48 ساعة.
 
@@ -2809,88 +2815,81 @@ app.post(
 يرجى التواصل مع إدارة معاك لتجديد الاشتراك وتجنب توقف ظهور متجرك للعملاء.
 
 مع تحيات فريق معاك.`
+        );
+
+        await withTransaction(async client => {
+          await client.query(
+            `
+            INSERT INTO notifications (
+              user_id,
+              title,
+              message,
+              notification_type,
+              metadata
+            )
+            VALUES (
+              $1,
+              $2,
+              $3,
+              'merchant_subscription',
+              $4::jsonb
+            )
+            `,
+            [
+              item.user_id,
+              'الفترة التجريبية لمتجرك تقترب من الانتهاء',
+              `الفترة التجريبية لمتجرك ${item.business_name} ستنتهي خلال 48 ساعة.`,
+              JSON.stringify({
+                subscription_id: item.subscription_id,
+                merchant_id: item.merchant_id,
+                ends_at: item.ends_at
+              })
+            ]
           );
 
-          await withTransaction(async client => {
-            await client.query(
-              `
-              INSERT INTO notifications (
-                user_id,
-                title,
-                message,
-                notification_type,
-                metadata
-              )
-              VALUES (
-                $1,
-                $2,
-                $3,
-                'merchant_subscription',
-                $4::jsonb
-              )
-              `,
-              [
-                item.user_id,
-                'الفترة التجريبية لمتجرك تقترب من الانتهاء',
-                `الفترة التجريبية لمتجرك ${item.business_name} ستنتهي خلال 48 ساعة.`,
-                JSON.stringify({
-                  subscription_id: item.subscription_id,
-                  merchant_id: item.merchant_id,
-                  ends_at: item.ends_at
-                })
-              ]
-            );
-
-            await client.query(
-              `
-              INSERT INTO trial_reminder_logs (
-                trial_type,
-                subscription_id,
-                user_id,
-                reminder_hours,
-                channel,
-                status,
-                recipient,
-                sent_at
-              )
-              VALUES (
-                'merchant',
-                $1,
-                $2,
-                48,
-                'email',
-                'sent',
-                $3,
-                NOW()
-              )
-              `,
-              [
-                item.subscription_id,
-                item.user_id,
-                item.email
-              ]
-            );
-
-            await client.query(
-              `
-              UPDATE merchant_subscriptions
-              SET reminder_sent_at = NOW(),
-                  updated_at = NOW()
-              WHERE id = $1
-                AND reminder_sent_at IS NULL
-              `,
-              [item.subscription_id]
-            );
-          });
-
-          results.merchants.sent++;
-
-        } finally {
-          await pool.query(
-            `SELECT pg_advisory_unlock(hashtext($1))`,
-            [`merchant-trial-reminder:${item.subscription_id}`]
+          await client.query(
+            `
+            INSERT INTO trial_reminder_logs (
+              trial_type,
+              subscription_id,
+              user_id,
+              reminder_hours,
+              channel,
+              status,
+              recipient,
+              sent_at
+            )
+            VALUES (
+              'merchant',
+              $1,
+              $2,
+              48,
+              'email',
+              'sent',
+              $3,
+              NOW()
+            )
+            `,
+            [
+              item.subscription_id,
+              item.user_id,
+              item.email
+            ]
           );
-        }
+
+          await client.query(
+            `
+            UPDATE merchant_subscriptions
+            SET reminder_sent_at = NOW(),
+                updated_at = NOW()
+            WHERE id = $1
+              AND reminder_sent_at IS NULL
+            `,
+            [item.subscription_id]
+          );
+        });
+
+        results.merchants.sent++;
 
       } catch (error) {
         results.merchants.failed++;
@@ -2931,10 +2930,27 @@ app.post(
             String(error.message).slice(0, 2000)
           ]
         ).catch(logError => {
-          console.error('Failed to save merchant reminder log:', logError.message);
+          console.error(
+            'Failed to save merchant reminder log:',
+            logError.message
+          );
         });
+
+      } finally {
+        if (lockClient) {
+          try {
+            if (locked) {
+              await lockClient.query(
+                `SELECT pg_advisory_unlock(hashtext($1))`,
+                [`merchant-trial-reminder:${item.subscription_id}`]
+              );
+            }
+          } finally {
+            lockClient.release();
+          }
+        }
       }
-    }
+}
 
     res.json({
       success: true,
