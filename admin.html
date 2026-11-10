@@ -303,94 +303,129 @@ button{font:inherit;cursor:pointer}
       ? number.toLocaleString('ar-EG')
       : '0';
   }
-async function loadTrials() {
-  const type = document.getElementById('trialType').value;
-  const trialMessage = document.getElementById('trialMessage');
-  const trialRows = document.getElementById('trialRows');
+async function loadUsers() {
+  const search = document.getElementById('userSearch').value.trim();
+  const status = document.getElementById('userStatus').value;
+  const usersMessage = document.getElementById('usersMessage');
+  const usersRows = document.getElementById('usersRows');
 
-  trialMessage.textContent = 'جارٍ تحميل بيانات التجارب...';
-  trialRows.replaceChildren();
+  usersMessage.textContent = 'جارٍ تحميل المستخدمين...';
+  usersRows.replaceChildren();
 
   try {
+    const params = new URLSearchParams();
+    if (search) params.set('search', search);
+    if (status) params.set('status', status);
+
     const data = await apiRequest(
-      `/admin/trial-monitoring?type=${encodeURIComponent(type)}`
+      `/admin/users?${params.toString()}`
     );
 
     if (!data.success) {
-      throw new Error('تعذر تحميل بيانات التجارب.');
+      throw new Error('تعذر تحميل المستخدمين.');
     }
 
-    const stats = data.stats || {};
-    const trials = Array.isArray(data.trials) ? data.trials : [];
+    const users = Array.isArray(data.users) ? data.users : [];
 
-    document.getElementById('trialTotal').textContent =
-      formatNumber(stats.total);
-
-    document.getElementById('trialActive').textContent =
-      formatNumber(stats.active);
-
-    document.getElementById('trialEnding').textContent =
-      formatNumber(stats.ending_soon);
-
-    document.getElementById('trialClosed').textContent =
-      formatNumber((Number(stats.expired) || 0) +
-                   (Number(stats.converted) || 0));
-
-    trialRows.replaceChildren();
-
-    if (trials.length === 0) {
-      trialMessage.textContent = 'لا توجد تجارب مجانية مسجلة حاليًا.';
+    if (!users.length) {
+      usersMessage.textContent = 'لا توجد حسابات مطابقة للبحث.';
       return;
     }
 
-    trialMessage.textContent = '';
+    usersMessage.textContent =
+      `عدد الحسابات المعروضة: ${formatNumber(data.total ?? users.length)}`;
 
-    trials.forEach(trial => {
+    users.forEach(user => {
       const row = document.createElement('tr');
 
+      const statusText = {
+        active: 'نشط',
+        suspended: 'موقوف',
+        deleted: 'محذوف'
+      };
+
+      const subscriptionText = {
+        active: 'نشط',
+        expired: 'منتهي',
+        cancelled: 'ملغي',
+        pending: 'قيد الانتظار'
+      };
+
       const values = [
-        trial.trial_type === 'merchant' ? 'تاجر' : 'مستخدم',
-        trial.business_name || trial.full_name || '—',
-        trial.email || '—',
-        trial.phone || '—',
-        ({
-          active: 'نشطة',
-          ending_soon: 'تنتهي قريبًا',
-          expired: 'منتهية',
-          converted: 'اشتراك مدفوع'
-        })[trial.trial_state] || 'غير محددة',
-        trial.trial_state === 'expired' ||
-        trial.trial_state === 'converted'
-          ? '—'
-          : formatNumber(
-              Math.ceil((Number(trial.remaining_seconds) || 0) / 3600)
-            ) + ' ساعة'
+        user.full_name || '—',
+        user.email || '—',
+        user.phone || '—',
+        statusText[user.account_status] || user.account_status || '—',
+        user.package_name || 'بدون باقة',
+        subscriptionText[user.subscription_status] ||
+          user.subscription_status || '—'
       ];
 
       values.forEach(value => {
-  const cell = document.createElement('td');
-  cell.textContent = value;
-  row.appendChild(cell);
-});
-    } catch (error) {
-      window.alert(error.message || 'تعذر تحديث حالة الحساب.');
-    }
-  });
+        const cell = document.createElement('td');
+        cell.textContent = value;
+        row.appendChild(cell);
+      });
 
-  actionCell.appendChild(actionButton);
-} else {
-  actionCell.textContent = 'محذوف';
-}
+      const actionCell = document.createElement('td');
 
-row.appendChild(actionCell);
-usersRows.appendChild(row);
-});
+      if (user.account_status !== 'deleted') {
+        const actionButton = document.createElement('button');
 
-} catch (error) {
-    trialMessage.textContent =
-      error.message || 'حدث خطأ أثناء تحميل التجارب.';
+        actionButton.type = 'button';
+        actionButton.textContent =
+          user.account_status === 'suspended'
+            ? 'إعادة التفعيل'
+            : 'إيقاف الحساب';
+
+        actionButton.className = 'trial-refresh';
+
+        actionButton.addEventListener('click', async () => {
+          const nextStatus =
+            user.account_status === 'suspended'
+              ? 'active'
+              : 'suspended';
+
+          const confirmed = window.confirm(
+            nextStatus === 'suspended'
+              ? 'هل تريد إيقاف هذا الحساب؟'
+              : 'هل تريد إعادة تفعيل هذا الحساب؟'
+          );
+
+          if (!confirmed) return;
+
+          try {
+            await apiRequest(
+              `/admin/users/${encodeURIComponent(user.id)}/status`,
+              {
+                method: 'PATCH',
+                body: { account_status: nextStatus }
+              }
+            );
+
+            await loadUsers();
+
+          } catch (error) {
+            window.alert(
+              error.message || 'تعذر تحديث حالة الحساب.'
+            );
+          }
+        });
+
+        actionCell.appendChild(actionButton);
+      } else {
+        actionCell.textContent = 'محذوف';
+      }
+
+      row.appendChild(actionCell);
+      usersRows.appendChild(row);
+    });
+
+  } catch (error) {
+    usersMessage.textContent =
+      error.message || 'حدث خطأ أثناء تحميل المستخدمين.';
   }
-}
+  }
 window.loadTrials = loadTrials;
   async function loadUsers() {
   const search = document.getElementById('userSearch').value.trim();
