@@ -368,11 +368,59 @@ async function loadTrials() {
       ];
 
       values.forEach(value => {
-        const cell = document.createElement('td');
-        cell.textContent = value;
-        row.appendChild(cell);
+  const cell = document.createElement('td');
+  cell.textContent = value;
+  row.appendChild(cell);
+});
+
+const actionCell = document.createElement('td');
+
+if (user.account_status !== 'deleted') {
+  const actionButton = document.createElement('button');
+
+  actionButton.type = 'button';
+  actionButton.textContent =
+    user.account_status === 'suspended'
+      ? 'إعادة التفعيل'
+      : 'إيقاف الحساب';
+
+  actionButton.className = 'trial-refresh';
+
+  actionButton.addEventListener('click', async () => {
+    const nextStatus =
+      user.account_status === 'suspended' ? 'active' : 'suspended';
+
+    if (!window.confirm(
+      nextStatus === 'suspended'
+        ? 'هل تريد إيقاف هذا الحساب؟'
+        : 'هل تريد إعادة تفعيل هذا الحساب؟'
+    )) return;
+
+    try {
+      await apiRequest(
+        `/admin/users/${encodeURIComponent(user.id)}/status`,
+        {
+          method: 'PATCH',
+          body: { account_status: nextStatus }
+        }
+      );
+
+      await loadUsers();
+    } catch (error) {
+      window.alert(error.message || 'تعذر تحديث حالة الحساب.');
+    }
   });
-  } catch (error) {
+
+  actionCell.appendChild(actionButton);
+} else {
+  actionCell.textContent = 'محذوف';
+}
+
+row.appendChild(actionCell);
+usersRows.appendChild(row);
+});
+
+} catch (error) {
     trialMessage.textContent =
       error.message || 'حدث خطأ أثناء تحميل التجارب.';
   }
