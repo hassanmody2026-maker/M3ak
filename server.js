@@ -2499,13 +2499,16 @@ app.delete(
   })
 );
 /* =========================================================
-   MERCHANT SUBSCRIPTION EXPIRY REMINDERS
-   تذكير التجار قبل انتهاء الاشتراك بـ 48 ساعة
+   FREE TRIAL REMINDERS
+   تذكيرات التجارب المجانية للمستخدمين والتجار
+   إرسال قبل الانتهاء بـ 48 ساعة
 ========================================================= */
 
 app.post(
-  '/api/internal/merchant-expiry-reminders',
+  '/api/internal/trial-expiry-reminders',
   asyncRoute(async (req, res) => {
+
+    // حماية المسار بمفتاح CRON_SECRET
     const secret = process.env.CRON_SECRET;
     const provided = req.get('x-cron-secret') || '';
 
@@ -2526,8 +2529,225 @@ app.post(
       );
     }
 
-    const dueResult = await pool.query(
-      `
+    const results = {
+      users: { checked: 0, sent: 0, failed: 0, skipped: 0 },
+      merchants: { checked: 0, sent: 0, failed: 0, skipped: 0 }
+    };
+
+    /*
+      =====================================================
+      1. USER TRIALS
+      تجارب المستخدمين - 4 أيام
+      =====================================================
+    */
+
+    const userTrials = await pool.query(`
+      SELECT
+        s.id AS subscription_id,
+        s.user_id,
+        COALESCE(s.trial_expires_at, s.ends_at) AS ends_at,
+        u.email,
+        u.full_name
+      FROM subscriptions s
+      JOIN packages p ON p.id = s.package_id
+      JOIN users u ON u.id = s.user_id
+      WHERE p.code = 'TRIAL'
+        AND s.status = 'active'
+        AND COALESCE(s.trial_expires_at, s.ends_at) > NOW()
+        AND COALESCE(s.trial_expires_at, s.ends_at)
+            <= NOW() + INTERVAL '48 hours'
+        AND u.email_verified = TRUE
+        AND u.account_status = 'active'
+        AND NOT EXISTS (
+          SELECT 1
+          FROM trial_reminder_logs l
+          WHERE l.trial_type = 'user'
+            AND l.subscription_id = s.id
+            AND l.reminder_hours = 48
+            AND l.channel = 'email'
+            AND l.status = 'sent'
+        )
+      ORDER BY ends_at ASC
+      LIMIT 100
+    `);
+
+    results.users.checked = userTrials.rowCount;
+
+    for (const item of userTrials.rows) {
+      try {
+        // قفل لمنع تنفيذ التذكير مرتين بالتزامن
+        const lock = await pool.query(
+          `SELECT pg_try_advisory_lock(hashtext($1)) AS locked`,
+          [`user-trial-reminder:${item.subscription_id}`]
+        );
+
+        if (!lock.rows[0].locked) {
+          results.users.skipped++;
+          continue;
+        }
+
+        try {
+          const alreadySent = await pool.query(
+            `
+            SELECT id
+            FROM trial_reminder_logs
+            WHERE trial_type = 'user'
+              AND subscription_id = $1
+              AND reminder_hours = 48
+              AND channel = 'email'
+              AND status = 'sent'
+            LIMIT 1
+            `,
+            [item.subscription_id]
+          );
+
+          if (alreadySent.rowCount) {
+            results.users.skipped++;
+            continue;
+          }
+
+          const expiryDate = new Date(item.ends_at)
+            .toLocaleString('ar-EG', {
+              dateStyle: 'long',
+              timeStyle: 'short',
+              timeZone: 'Africa/Cairo'
+            });
+
+          await sendEmail(
+            item.email,
+            'تذكير: تجربتك المجانية في معاك تقترب من الانتهاء',
+            `مرحباً ${item.full_name || ''}،
+
+نذكرك بأن تجربتك المجانية في تطبيق معاك ستنتهي خلال 48 ساعة.
+
+موعد انتهاء التجربة: ${expiryDate}.
+
+يمكنك الاشتراك للاستمرار في الاستفادة من خدمات معاك دون انقطاع.
+
+مع تحيات فريق معاك.`
+          );
+
+          await withTransaction(async client => {
+            await client.query(
+              `
+              INSERT INTO notifications (
+                user_id,
+                title,
+                message,
+                notification_type,
+                metadata
+              )
+              VALUES (
+                $1,
+                $2,
+                $3,
+                'subscription',
+                $4::jsonb
+              )
+              `,
+              [
+                item.user_id,
+                'تجربتك المجانية تقترب من الانتهاء',
+                'تبقى 48 ساعة على انتهاء تجربتك المجانية في معاك.',
+                JSON.stringify({
+                  subscription_id: item.subscription_id,
+                  ends_at: item.ends_at
+                })
+              ]
+            );
+
+            await client.query(
+              `
+              INSERT INTO trial_reminder_logs (
+                trial_type,
+                subscription_id,
+                user_id,
+                reminder_hours,
+                channel,
+                status,
+                recipient,
+                sent_at
+              )
+              VALUES (
+                'user',
+                $1,
+                $2,
+                48,
+                'email',
+                'sent',
+                $3,
+                NOW()
+              )
+              `,
+              [
+                item.subscription_id,
+                item.user_id,
+                item.email
+              ]
+            );
+          });
+
+          results.users.sent++;
+
+        } finally {
+          await pool.query(
+            `SELECT pg_advisory_unlock(hashtext($1))`,
+            [`user-trial-reminder:${item.subscription_id}`]
+          );
+        }
+
+      } catch (error) {
+        results.users.failed++;
+
+        console.error(
+          'User trial reminder failed:',
+          item.subscription_id,
+          error.message
+        );
+
+        await pool.query(
+          `
+          INSERT INTO trial_reminder_logs (
+            trial_type,
+            subscription_id,
+            user_id,
+            reminder_hours,
+            channel,
+            status,
+            recipient,
+            failure_reason
+          )
+          VALUES (
+            'user',
+            $1,
+            $2,
+            48,
+            'email',
+            'failed',
+            $3,
+            $4
+          )
+          `,
+          [
+            item.subscription_id,
+            item.user_id,
+            item.email,
+            String(error.message).slice(0, 2000)
+          ]
+        ).catch(logError => {
+          console.error('Failed to save user reminder log:', logError.message);
+        });
+      }
+    }
+
+    /*
+      =====================================================
+      2. MERCHANT TRIALS
+      تجارب التجار - 30 يومًا
+      =====================================================
+    */
+
+    const merchantTrials = await pool.query(`
       SELECT
         ms.id AS subscription_id,
         ms.merchant_id,
@@ -2539,7 +2759,8 @@ app.post(
       FROM merchant_subscriptions ms
       JOIN merchants m ON m.id = ms.merchant_id
       JOIN users u ON u.id = m.user_id
-      WHERE ms.status IN ('trial', 'active')
+      WHERE ms.billing_cycle = 'free_trial'
+        AND ms.status IN ('trial', 'active')
         AND ms.ends_at > NOW()
         AND ms.ends_at <= NOW() + INTERVAL '48 hours'
         AND ms.reminder_sent_at IS NULL
@@ -2547,93 +2768,192 @@ app.post(
         AND u.account_status = 'active'
       ORDER BY ms.ends_at ASC
       LIMIT 100
-      `
-    );
+    `);
 
-    let sent = 0;
-    let failed = 0;
+    results.merchants.checked = merchantTrials.rowCount;
 
-    for (const item of dueResult.rows) {
+    for (const item of merchantTrials.rows) {
       try {
-        const expiryDate = new Date(item.ends_at)
-          .toLocaleDateString('ar-EG', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            timeZone: 'Africa/Cairo'
-          });
+        const lock = await pool.query(
+          `SELECT pg_try_advisory_lock(hashtext($1)) AS locked`,
+          [`merchant-trial-reminder:${item.subscription_id}`]
+        );
 
-        await sendEmail(
-          item.email,
-          'تذكير: اشتراك متجرك في معاك يقترب من الانتهاء',
-          `مرحباً ${item.full_name || ''}،
+        if (!lock.rows[0].locked) {
+          results.merchants.skipped++;
+          continue;
+        }
 
-نذكرك بأن اشتراك متجرك (${item.business_name}) سينتهي خلال 48 ساعة، بتاريخ ${expiryDate}.
+        try {
+          const alreadySent = await pool.query(
+            `
+            SELECT id
+            FROM trial_reminder_logs
+            WHERE trial_type = 'merchant'
+              AND subscription_id = $1
+              AND reminder_hours = 48
+              AND channel = 'email'
+              AND status = 'sent'
+            LIMIT 1
+            `,
+            [item.subscription_id]
+          );
+
+          if (alreadySent.rowCount) {
+            results.merchants.skipped++;
+            continue;
+          }
+
+          const expiryDate = new Date(item.ends_at)
+            .toLocaleString('ar-EG', {
+              dateStyle: 'long',
+              timeStyle: 'short',
+              timeZone: 'Africa/Cairo'
+            });
+
+          await sendEmail(
+            item.email,
+            'تذكير: الفترة التجريبية لمتجرك في معاك تقترب من الانتهاء',
+            `مرحباً ${item.full_name || ''}،
+
+نذكرك بأن الفترة التجريبية لمتجرك (${item.business_name}) ستنتهي خلال 48 ساعة.
+
+موعد انتهاء التجربة: ${expiryDate}.
 
 يرجى التواصل مع إدارة معاك لتجديد الاشتراك وتجنب توقف ظهور متجرك للعملاء.
 
 مع تحيات فريق معاك.`
-        );
-
-        await withTransaction(async client => {
-          await client.query(
-            `
-            INSERT INTO notifications (
-              user_id,
-              title,
-              message,
-              notification_type,
-              metadata
-            )
-            VALUES (
-              $1,
-              $2,
-              $3,
-              'merchant_subscription',
-              $4::jsonb
-            )
-            `,
-            [
-              item.user_id,
-              'اشتراك متجرك يقترب من الانتهاء',
-              `اشتراك متجرك ${item.business_name} سينتهي خلال 48 ساعة.`,
-              JSON.stringify({
-                subscription_id: item.subscription_id,
-                merchant_id: item.merchant_id,
-                ends_at: item.ends_at
-              })
-            ]
           );
 
-          await client.query(
-            `
-            UPDATE merchant_subscriptions
-            SET reminder_sent_at = NOW(),
-                updated_at = NOW()
-            WHERE id = $1
-              AND reminder_sent_at IS NULL
-            `,
-            [item.subscription_id]
-          );
-        });
+          await withTransaction(async client => {
+            await client.query(
+              `
+              INSERT INTO notifications (
+                user_id,
+                title,
+                message,
+                notification_type,
+                metadata
+              )
+              VALUES (
+                $1,
+                $2,
+                $3,
+                'merchant_subscription',
+                $4::jsonb
+              )
+              `,
+              [
+                item.user_id,
+                'الفترة التجريبية لمتجرك تقترب من الانتهاء',
+                `الفترة التجريبية لمتجرك ${item.business_name} ستنتهي خلال 48 ساعة.`,
+                JSON.stringify({
+                  subscription_id: item.subscription_id,
+                  merchant_id: item.merchant_id,
+                  ends_at: item.ends_at
+                })
+              ]
+            );
 
-        sent++;
+            await client.query(
+              `
+              INSERT INTO trial_reminder_logs (
+                trial_type,
+                subscription_id,
+                user_id,
+                reminder_hours,
+                channel,
+                status,
+                recipient,
+                sent_at
+              )
+              VALUES (
+                'merchant',
+                $1,
+                $2,
+                48,
+                'email',
+                'sent',
+                $3,
+                NOW()
+              )
+              `,
+              [
+                item.subscription_id,
+                item.user_id,
+                item.email
+              ]
+            );
+
+            await client.query(
+              `
+              UPDATE merchant_subscriptions
+              SET reminder_sent_at = NOW(),
+                  updated_at = NOW()
+              WHERE id = $1
+                AND reminder_sent_at IS NULL
+              `,
+              [item.subscription_id]
+            );
+          });
+
+          results.merchants.sent++;
+
+        } finally {
+          await pool.query(
+            `SELECT pg_advisory_unlock(hashtext($1))`,
+            [`merchant-trial-reminder:${item.subscription_id}`]
+          );
+        }
+
       } catch (error) {
-        failed++;
+        results.merchants.failed++;
+
         console.error(
-          'Merchant expiry reminder failed:',
+          'Merchant trial reminder failed:',
           item.subscription_id,
           error.message
         );
+
+        await pool.query(
+          `
+          INSERT INTO trial_reminder_logs (
+            trial_type,
+            subscription_id,
+            user_id,
+            reminder_hours,
+            channel,
+            status,
+            recipient,
+            failure_reason
+          )
+          VALUES (
+            'merchant',
+            $1,
+            $2,
+            48,
+            'email',
+            'failed',
+            $3,
+            $4
+          )
+          `,
+          [
+            item.subscription_id,
+            item.user_id,
+            item.email,
+            String(error.message).slice(0, 2000)
+          ]
+        ).catch(logError => {
+          console.error('Failed to save merchant reminder log:', logError.message);
+        });
       }
     }
 
     res.json({
       success: true,
-      checked: dueResult.rowCount,
-      sent,
-      failed,
-      message: 'انتهت عملية فحص تذكيرات اشتراكات التجار.'
+      message: 'انتهى فحص تذكيرات التجارب المجانية.',
+      results
     });
   })
 );
