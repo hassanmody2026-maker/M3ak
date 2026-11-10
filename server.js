@@ -4336,7 +4336,6 @@ app.get(
 /* =========================================================
    AI ASSISTANT
 ========================================================= */
-
 app.post(
   '/api/assistant/chat',
   authenticate,
@@ -4370,7 +4369,7 @@ app.post(
       .split(/\s+/)
       .filter(Boolean).length;
 
-    const consumption = await consumeUsage(
+    const reservation = await reserveUsage(
       req.user.id,
       'words',
       wordCount
@@ -4396,15 +4395,25 @@ app.post(
       const answer =
         completion.choices?.[0]?.message?.content || '';
 
-      res.json({
+      return res.json({
         success: true,
         answer,
         usage: {
-          wordsUsed: consumption.usage.words_used
+          wordsUsed: reservation.usage.words_used
         }
       });
+
     } catch (error) {
-      console.error('OpenAI error:', error.message);
+      console.error('OpenAI chat error:', error.message);
+
+      try {
+        await refundUsage(reservation.reservation);
+      } catch (refundError) {
+        console.error(
+          'CRITICAL: AI word usage refund failed:',
+          refundError.message
+        );
+      }
 
       throw new ApiError(
         502,
