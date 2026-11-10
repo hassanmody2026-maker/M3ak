@@ -404,13 +404,85 @@ h2 {
 </section>
 </main>
 
-const 
-      const clipboard = event.clipboardData ||
-        window.clipboardData;
 
-      const value = normalizeDigits(
-        clipboard.getData('text')
-      ).slice(0, 6);
+  <script>
+(() => {
+  'use strict';
+
+  const API_BASE = window.M3AK_API_BASE || '/api';
+
+  const params = new URLSearchParams(window.location.search);
+  const mode = params.get('mode') === 'reset' ? 'reset' : 'verify';
+  const email = params.get('to') || params.get('email') || '';
+
+  const boxes = [...document.querySelectorAll('.otp input')];
+  const form = document.getElementById('verifyForm');
+  const submit = document.getElementById('submit');
+  const notice = document.getElementById('notice');
+  const title = document.getElementById('title');
+  const description = document.getElementById('descriptionText');
+  const destination = document.getElementById('destination');
+  const resetFields = document.getElementById('resetFields');
+
+  function showNotice(message) {
+    notice.textContent = message;
+    notice.classList.add('show');
+  }
+
+  function normalizeDigits(value) {
+    return String(value)
+      .replace(/[٠-٩]/g, digit =>
+        String('٠١٢٣٤٥٦٧٨٩'.indexOf(digit))
+      )
+      .replace(/[^\d]/g, '');
+  }
+
+  if (!email) {
+    showNotice('رابط التحقق غير مكتمل. ارجع إلى صفحة التسجيل أو استعادة كلمة المرور.');
+    submit.disabled = true;
+    return;
+  }
+
+  destination.textContent = email;
+
+  if (mode === 'reset') {
+    title.textContent = 'استعادة كلمة المرور';
+    description.textContent = 'أدخل رمز الاستعادة المرسل إلى';
+    resetFields.hidden = false;
+    submit.textContent = 'تغيير كلمة المرور';
+  } else {
+    title.textContent = 'تأكيد حسابك';
+    description.textContent = 'أدخل رمز التحقق المرسل إلى';
+    resetFields.hidden = true;
+    submit.textContent = 'تأكيد الحساب';
+  }
+
+  boxes.forEach((box, index) => {
+    box.addEventListener('input', () => {
+      box.value = normalizeDigits(box.value).slice(0, 1);
+
+      if (box.value && index < boxes.length - 1) {
+        boxes[index + 1].focus();
+      }
+    });
+
+    box.addEventListener('keydown', event => {
+      if (event.key === 'Backspace' && !box.value && index > 0) {
+        boxes[index - 1].focus();
+      }
+
+      if (event.key === 'ArrowLeft' && index > 0) {
+        boxes[index - 1].focus();
+      }
+
+      if (event.key === 'ArrowRight' && index < boxes.length - 1) {
+        boxes[index + 1].focus();
+      }
+    });
+
+    box.addEventListener('paste', event => {
+      const clipboard = event.clipboardData || window.clipboardData;
+      const value = normalizeDigits(clipboard.getData('text')).slice(0, 6);
 
       if (!value) return;
 
@@ -421,76 +493,95 @@ const
       });
 
       boxes[Math.min(value.length, 5)].focus();
-
     });
-
   });
 
-  document.getElementById('verifyForm')
-    .addEventListener('submit', event => {
+  form.addEventListener('submit', async event => {
+    event.preventDefault();
+    notice.classList.remove('show');
 
-      event.preventDefault();
+    const code = boxes.map(box => box.value).join('');
 
-      notice.classList.remove('show');
+    if (code.length !== 6) {
+      showNotice('من فضلك أدخل رمز التحقق كاملًا (6 أرقام).');
+      boxes.find(box => !box.value)?.focus();
+      return;
+    }
 
-      const code = boxes.map(box => box.value).join('');
+    let endpoint;
+    let payload;
 
-      if (code.length !== 6) {
-        showNotice(
-          'من فضلك أدخل رمز التحقق كاملًا (6 أرقام).'
-        );
+    if (mode === 'reset') {
+      const password = document.getElementById('newPassword').value;
+      const confirm = document.getElementById('confirmPassword').value;
 
-        boxes.find(box => !box.value)?.focus();
-
+      if (password.length < 8) {
+        showNotice('كلمة المرور يجب ألا تقل عن 8 أحرف.');
         return;
       }
 
-      if (mode === 'reset') {
-
-        const password =
-          document.getElementById('newPassword').value;
-
-        const confirm =
-          document.getElementById('confirmPassword').value;
-
-        if (password.length < 8) {
-          showNotice(
-            'كلمة المرور يجب ألا تقل عن 8 أحرف.'
-          );
-          return;
-        }
-
-        if (password !== confirm) {
-          showNotice(
-            'كلمتا المرور غير متطابقتين.'
-          );
-          return;
-        }
-
+      if (password !== confirm) {
+        showNotice('كلمتا المرور غير متطابقتين.');
+        return;
       }
 
-      showNotice(
-        'تم إدخال البيانات. تأكيد الرمز وتفعيل العملية يحتاج إلى ربط الخادم.'
-      );
+      endpoint = `${API_BASE}/auth/password-reset/confirm`;
+      payload = { email, code, password };
+    } else {
+      endpoint = `${API_BASE}/auth/verify`;
+      payload = { email, code };
+    }
 
-    });
+    submit.disabled = true;
+    submit.textContent = 'جارٍ التحقق...';
 
-  document.getElementById('resend')
-    .addEventListener('click', event => {
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
 
-      event.preventDefault();
+      const data = await response.json().catch(() => ({}));
 
-      showNotice(
-        'إعادة إرسال الرمز ستعمل بعد ربط خدمة الرسائل والبريد بالخادم.'
-      );
+      if (!response.ok) {
+        throw new Error(data.message || data.error || 'تعذر إتمام العملية. راجع الرمز وحاول مرة أخرى.');
+      }
 
-    });
+      if (mode === 'reset') {
+        showNotice('تم تغيير كلمة المرور بنجاح. يمكنك تسجيل الدخول الآن.');
+        setTimeout(() => {
+          window.location.href = 'login.html';
+        }, 1500);
+      } else {
+        if (data.token) {
+          localStorage.setItem('m3ak_token', data.token);
+        }
 
+        if (data.user) {
+          localStorage.setItem('m3ak_user', JSON.stringify(data.user));
+        }
+
+        showNotice('تم تأكيد حسابك بنجاح.');
+
+        setTimeout(() => {
+          const isAdmin = data.user && data.user.role === 'admin';
+          window.location.href = isAdmin ? 'admin.html' : 'home.html';
+        }, 1000);
+      }
+    } catch (error) {
+      showNotice(error.message || 'حدث خطأ أثناء الاتصال بالخادم.');
+      submit.disabled = false;
+      submit.textContent = mode === 'reset' ? 'تغيير كلمة المرور' : 'تأكيد الحساب';
+    }
+  });
+
+  document.getElementById('resend').addEventListener('click', event => {
+    event.preventDefault();
+    showNotice('إعادة إرسال الرمز غير متاحة حاليًا؛ الخادم لا يحتوي حتى الآن على مسار مخصص لإعادة الإرسال.');
+  });
 })();
-</script>
+  </script>
 
 </body>
   </html>
-
-
-  
