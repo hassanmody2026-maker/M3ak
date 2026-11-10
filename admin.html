@@ -643,6 +643,13 @@ document.getElementById('refreshTrials').addEventListener('click', window.loadTr
     </div>
   </section>
 `);
+  document.getElementById('refreshUsers').addEventListener('click', window.loadUsers);
+
+document.getElementById('userSearch').addEventListener('keydown', event => {
+  if (event.key === 'Enter') window.loadUsers();
+});
+
+document.getElementById('userStatus').addEventListener('change', window.loadUsers);
 </script>
 
 </body>
