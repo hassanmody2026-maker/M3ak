@@ -4300,8 +4300,274 @@ app.post(
     });
   })
 );
+/* =========================================================
+   ADMIN SUPPORT TICKETS MANAGEMENT
+   إدارة شكاوى واستفسارات العملاء
+========================================================= */
+
+// عرض جميع الشكاوى للإدارة
+app.get(
+  '/api/admin/support/tickets',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (req, res) => {
+    const allowedStatuses = [
+      'open',
+      'in_progress',
+      'waiting_user',
+      'resolved',
+      'closed'
+    ];
+
+    const conditions = [];
+    const values = [];
+
+    if (req.query.status) {
+      if (!allowedStatuses.includes(req.query.status)) {
+        return sendError(
+          res,
+          400,
+          'حالة الشكوى غير صحيحة.',
+          'INVALID_TICKET_STATUS'
+        );
+      }
+
+      values.push(req.query.status);
+      conditions.push(`t.status = $${values.length}`);
+    }
+
+    const whereClause = conditions.length
+      ? `WHERE ${conditions.join(' AND ')}`
+      : '';
+
+    const result = await pool.query(
+      `
+      SELECT
+        t.*,
+        u.full_name AS customer_name,
+        u.email AS customer_email,
+        u.phone AS customer_phone
+      FROM support_tickets t
+      JOIN users u ON u.id = t.user_id
+      ${whereClause}
+      ORDER BY
+        CASE t.priority
+          WHEN 'urgent' THEN 1
+          WHEN 'high' THEN 2
+          WHEN 'normal' THEN 3
+          WHEN 'low' THEN 4
+        END,
+        t.created_at DESC
+      LIMIT 200
+      `,
+      values
+    );
+
+    res.json({
+      success: true,
+      total: result.rowCount,
+      tickets: result.rows
+    });
+  })
+);
 
 
+// تفاصيل شكوى معينة للإدارة
+app.get(
+  '/api/admin/support/tickets/:id',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (req, res) => {
+    const result = await pool.query(
+      `
+      SELECT
+        t.*,
+        u.full_name AS customer_name,
+        u.email AS customer_email,
+        u.phone AS customer_phone
+      FROM support_tickets t
+      JOIN users u ON u.id = t.user_id
+      WHERE t.id = $1
+      LIMIT 1
+      `,
+      [req.params.id]
+    );
+
+    if (!result.rowCount) {
+      return sendError(
+        res,
+        404,
+        'الشكوى غير موجودة.',
+        'TICKET_NOT_FOUND'
+      );
+    }
+
+    res.json({
+      success: true,
+      ticket: result.rows[0]
+    });
+  })
+);
+
+
+// رد الإدارة وتحديث حالة الشكوى
+app.patch(
+  '/api/admin/support/tickets/:id',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (req, res) => {
+    const {
+      admin_reply,
+      status,
+      priority
+    } = req.body;
+
+    const allowedStatuses = [
+      'open',
+      'in_progress',
+      'waiting_user',
+      'resolved',
+      'closed'
+    ];
+
+    const allowedPriorities = [
+      'low',
+      'normal',
+      'high',
+      'urgent'
+    ];
+
+    if (
+      status !== undefined &&
+      !allowedStatuses.includes(status)
+    ) {
+      return sendError(
+        res,
+        400,
+        'حالة الشكوى غير صحيحة.',
+        'INVALID_TICKET_STATUS'
+      );
+    }
+
+    if (
+      priority !== undefined &&
+      !allowedPriorities.includes(priority)
+    ) {
+      return sendError(
+        res,
+        400,
+        'أولوية الشكوى غير صحيحة.',
+        'INVALID_TICKET_PRIORITY'
+      );
+    }
+
+    if (
+      admin_reply !== undefined &&
+      (
+        typeof admin_reply !== 'string' ||
+        admin_reply.trim().length > 5000
+      )
+    ) {
+      return sendError(
+        res,
+        400,
+        'نص الرد غير صحيح.',
+        'INVALID_ADMIN_REPLY'
+      );
+    }
+
+    if (
+      status === undefined &&
+      priority === undefined &&
+      admin_reply === undefined
+    ) {
+      return sendError(
+        res,
+        400,
+        'لم يتم إرسال أي تعديل.',
+        'NO_UPDATE_FIELDS'
+      );
+    }
+
+    const result = await pool.query(
+      `
+      UPDATE support_tickets
+      SET
+        admin_reply = CASE
+          WHEN $1::boolean THEN $2
+          ELSE admin_reply
+        END,
+        replied_at = CASE
+          WHEN $1::boolean THEN NOW()
+          ELSE replied_at
+        END,
+        status = COALESCE($3, status),
+        priority = COALESCE($4, priority),
+        updated_at = NOW()
+      WHERE id = $5
+      RETURNING *
+      `,
+      [
+        admin_reply !== undefined,
+        admin_reply?.trim() || null,
+        status ?? null,
+        priority ?? null,
+        req.params.id
+      ]
+    );
+
+    if (!result.rowCount) {
+      return sendError(
+        res,
+        404,
+        'الشكوى غير موجودة.',
+        'TICKET_NOT_FOUND'
+      );
+    }
+
+    const ticket = result.rows[0];
+
+    res.json({
+      success: true,
+      message: 'تم تحديث الشكوى.',
+      ticket
+    });
+  })
+);
+
+
+// العميل يتابع شكاواه وردود الإدارة
+app.get(
+  '/api/support/tickets',
+  authenticate,
+  asyncRoute(async (req, res) => {
+    const result = await pool.query(
+      `
+      SELECT
+        id,
+        subject,
+        message,
+        category,
+        status,
+        priority,
+        admin_reply,
+        replied_at,
+        created_at,
+        updated_at
+      FROM support_tickets
+      WHERE user_id = $1
+      ORDER BY created_at DESC
+      LIMIT 100
+      `,
+      [req.user.id]
+    );
+
+    res.json({
+      success: true,
+      tickets: result.rows
+    });
+  })
+);
 /* =========================================================
    PAYMOB WEBHOOK
 ========================================================= */
