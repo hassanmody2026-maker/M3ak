@@ -420,10 +420,7 @@ if (user.account_status !== 'deleted') {
 row.appendChild(actionCell);
 usersRows.appendChild(row);
       });
-
-      usersRows.appendChild(row);
-    });
-
+              
   } catch (error) {
     usersMessage.textContent =
       error.message || 'حدث خطأ أثناء تحميل المستخدمين.';
