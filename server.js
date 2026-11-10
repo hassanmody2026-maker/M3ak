@@ -3798,8 +3798,7 @@ app.get(
         ms.payment_method
 
       FROM merchants m
-
-      JOIN users u ON u.id = m.user_id
+LEFT JOIN users u ON u.id = m.user_id
 
       LEFT JOIN LATERAL (
         SELECT *
@@ -3845,7 +3844,7 @@ app.get(
         u.account_status AS owner_account_status
 
       FROM merchants m
-      JOIN users u ON u.id = m.user_id
+JOIN users u ON u.id = m.user_id
 
       WHERE m.id = $1
       `,
@@ -4902,8 +4901,8 @@ app.get(
             END AS trial_state
 
           FROM merchant_subscriptions ms
-          JOIN merchants m ON m.id = ms.merchant_id
-          JOIN users u ON u.id = m.user_id
+JOIN merchants m ON m.id = ms.merchant_id
+LEFT JOIN users u ON u.id = m.user_id
           WHERE ms.billing_cycle = 'free_trial'
           ORDER BY ms.created_at DESC
           LIMIT 500
