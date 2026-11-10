@@ -4247,7 +4247,174 @@ app.patch(
     });
   })
 );
+/* =========================================================
+   ADMIN NOTIFICATIONS MANAGEMENT
+========================================================= */
 
+// عرض الإشعارات ومتابعة قراءتها من لوحة الإدارة
+app.get(
+  '/api/admin/notifications',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (req, res) => {
+    const values = [];
+    const conditions = [];
+
+    if (req.query.user_id) {
+      values.push(req.query.user_id);
+      conditions.push(`n.user_id = $${values.length}`);
+    }
+
+    if (req.query.is_read !== undefined) {
+      if (!['true', 'false'].includes(req.query.is_read)) {
+        return sendError(
+          res,
+          400,
+          'قيمة حالة القراءة غير صحيحة.',
+          'INVALID_READ_FILTER'
+        );
+      }
+
+      values.push(req.query.is_read === 'true');
+      conditions.push(`n.is_read = $${values.length}`);
+    }
+
+    if (req.query.notification_type) {
+      values.push(String(req.query.notification_type).slice(0, 50));
+      conditions.push(`n.notification_type = $${values.length}`);
+    }
+
+    const whereClause = conditions.length
+      ? `WHERE ${conditions.join(' AND ')}`
+      : '';
+
+    const result = await pool.query(
+      `
+      SELECT
+        n.*,
+        u.full_name AS recipient_name,
+        u.email AS recipient_email,
+        u.phone AS recipient_phone,
+        u.role AS recipient_role
+      FROM notifications n
+      JOIN users u ON u.id = n.user_id
+      ${whereClause}
+      ORDER BY n.created_at DESC
+      LIMIT 200
+      `,
+      values
+    );
+
+    const stats = await pool.query(
+      `
+      SELECT
+        COUNT(*)::int AS total,
+        COUNT(*) FILTER (
+          WHERE is_read = FALSE
+        )::int AS unread,
+        COUNT(*) FILTER (
+          WHERE is_read = TRUE
+        )::int AS read
+      FROM notifications
+      `
+    );
+
+    res.json({
+      success: true,
+      stats: stats.rows[0],
+      notifications: result.rows
+    });
+  })
+);
+
+
+// إنشاء إشعار لعميل أو تاجر
+app.post(
+  '/api/admin/notifications',
+  authenticate,
+  requireAdmin,
+  asyncRoute(async (req, res) => {
+    const {
+      user_id,
+      title,
+      message,
+      notification_type,
+      metadata
+    } = req.body;
+
+    if (
+      !user_id ||
+      typeof title !== 'string' ||
+      title.trim().length < 2 ||
+      title.trim().length > 200 ||
+      typeof message !== 'string' ||
+      message.trim().length < 2 ||
+      message.trim().length > 5000
+    ) {
+      return sendError(
+        res,
+        400,
+        'راجع بيانات الإشعار والمستلم.',
+        'INVALID_NOTIFICATION_DATA'
+      );
+    }
+
+    const recipient = await pool.query(
+      `
+      SELECT id, role, full_name
+      FROM users
+      WHERE id = $1
+        AND account_status = 'active'
+      LIMIT 1
+      `,
+      [user_id]
+    );
+
+    if (!recipient.rowCount) {
+      return sendError(
+        res,
+        404,
+        'المستخدم غير موجود أو حسابه غير نشط.',
+        'RECIPIENT_NOT_FOUND'
+      );
+    }
+
+    const safeMetadata =
+      metadata &&
+      typeof metadata === 'object' &&
+      !Array.isArray(metadata)
+        ? metadata
+        : {};
+
+    const result = await pool.query(
+      `
+      INSERT INTO notifications (
+        user_id,
+        title,
+        message,
+        notification_type,
+        metadata
+      )
+      VALUES ($1, $2, $3, $4, $5)
+      RETURNING *
+      `,
+      [
+        user_id,
+        title.trim(),
+        message.trim(),
+        String(notification_type || 'general').slice(0, 50),
+        JSON.stringify(safeMetadata)
+      ]
+    );
+
+    res.status(201).json({
+      success: true,
+      message: 'تم إنشاء الإشعار داخل التطبيق.',
+      recipient: recipient.rows[0],
+      notification: result.rows[0]
+    });
+  })
+);
 
 /* =========================================================
    SUPPORT
