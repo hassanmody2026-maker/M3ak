@@ -761,6 +761,12 @@ body {
 <script>
 "use strict";
 
+const API_BASE = window.M3AK_API_BASE || '/api';
+
+const token =
+  sessionStorage.getItem('m3ak_token') ||
+  localStorage.getItem('m3ak_token');
+
 function go(page) {
   window.location.href = page;
 }
@@ -778,6 +784,60 @@ function showMessage(message) {
   toastTimer = setTimeout(() => {
     toast.classList.remove("show");
   }, 3500);
+}
+
+/* AUTHENTICATION */
+
+function clearSession() {
+  localStorage.removeItem('m3ak_token');
+  localStorage.removeItem('m3ak_user');
+  sessionStorage.removeItem('m3ak_token');
+  sessionStorage.removeItem('m3ak_user');
+}
+
+async function loadHomeUser() {
+  if (!token) {
+    window.location.replace('login.html');
+    return;
+  }
+
+  try {
+    const response = await fetch(`${API_BASE}/auth/me`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json'
+      }
+    });
+
+    const data = await response.json().catch(() => ({}));
+
+    if (response.status === 401 || response.status === 403) {
+      clearSession();
+      window.location.replace('login.html');
+      return;
+    }
+
+    if (!response.ok || !data.success || !data.user) {
+      throw new Error(
+        data.message || 'تعذر تحميل بيانات حسابك.'
+      );
+    }
+
+    const name = data.user.fullName || 'صديقنا';
+
+    document.getElementById('userName').textContent =
+      `أهلاً بيك يا ${name}`;
+
+    localStorage.setItem('m3ak_user', JSON.stringify(data.user));
+
+  } catch (error) {
+    showMessage(
+      error.message === 'Failed to fetch'
+        ? 'تعذر الاتصال بالخادم. حاول مرة أخرى.'
+        : error.message
+    );
+  }
 }
 
 /* SEARCH */
@@ -817,19 +877,12 @@ serviceCards.forEach(card => {
   });
 });
 
-/* USER DISPLAY */
+/* LOAD REAL USER DATA */
 
-try {
-  const savedName = localStorage.getItem("m3ak_user_name");
-
-  if (savedName) {
-    document.getElementById("userName").textContent =
-      "أهلاً بيك يا " + savedName;
-  }
-} catch(error) {
-  // الاسم المعروض ليس إثباتًا لهوية المستخدم.
-}
+loadHomeUser();
+  
 </script>
+
 
 </body>
   </html>
