@@ -1101,36 +1101,250 @@ body {
 <div class="notice" id="notice"></div>
 
 <script>
+(() => {
+  'use strict';
 
-function showNotice(message) {
+  const API_BASE = window.M3AK_API_BASE || '/api';
 
-  const box = document.getElementById("notice");
+  const token =
+    sessionStorage.getItem('m3ak_token') ||
+    localStorage.getItem('m3ak_token');
 
-  box.textContent = message;
-  box.style.display = "block";
+  const notice = document.getElementById('notice');
 
-  clearTimeout(window.noticeTimer);
+  function showNotice(message) {
+    notice.textContent = message;
+    notice.style.display = 'block';
 
-  window.noticeTimer = setTimeout(function() {
-    box.style.display = "none";
-  }, 3000);
+    clearTimeout(window.noticeTimer);
 
-}
+    window.noticeTimer = setTimeout(() => {
+      notice.style.display = 'none';
+    }, 3500);
+  }
 
-function logout() {
+  function clearSession() {
+    localStorage.removeItem('m3ak_token');
+    localStorage.removeItem('m3ak_user');
+    sessionStorage.removeItem('m3ak_token');
+    sessionStorage.removeItem('m3ak_user');
+  }
 
-  const confirmed = confirm(
-    "هل تريد تسجيل الخروج من حسابك؟"
-  );
+  async function apiRequest(path, method = 'GET') {
+    const response = await fetch(`${API_BASE}${path}`, {
+      method,
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json'
+      }
+    });
 
-  if (!confirmed) return;
+    const data = await response.json().catch(() => ({}));
 
-  showNotice(
-    "سيتم تفعيل تسجيل الخروج بعد ربط نظام الحسابات."
-  );
+    if (!response.ok) {
+      const error = new Error(
+        data.message || data.error || 'تعذر الاتصال بالخادم.'
+      );
+      error.status = response.status;
+      throw error;
+    }
 
-}
+    return data;
+  }
 
+  function formatDate(value) {
+    if (!value) return 'غير محدد';
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) return 'غير محدد';
+
+    return date.toLocaleDateString('ar-EG', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  }
+
+  function packageName(code) {
+    const names = {
+      trial: 'التجربة المجانية',
+      basic: 'الأساسية',
+      plus: 'بلص PLUS',
+      family: 'فاميلي FAMILY',
+      elite: 'التميز ELITE',
+      premium: 'المميزة'
+    };
+
+    return names[String(code || '').toLowerCase()] ||
+      code || 'غير محددة';
+  }
+
+  function accountStatus(status) {
+    const values = {
+      active: 'نشط',
+      pending: 'قيد المراجعة',
+      suspended: 'موقوف',
+      blocked: 'محظور',
+      inactive: 'غير نشط'
+    };
+
+    return values[String(status || '').toLowerCase()] ||
+      status || 'غير محدد';
+  }
+
+  function subscriptionStatus(status) {
+    const values = {
+      active: 'نشط',
+      pending: 'قيد الانتظار',
+      expired: 'منتهي',
+      cancelled: 'ملغي'
+    };
+
+    return values[String(status || '').toLowerCase()] ||
+      status || 'غير محدد';
+  }
+
+  function renderProfile(user) {
+    document.getElementById('userName').textContent =
+      user.fullName || 'مستخدم معاك';
+
+    const details = document.querySelectorAll('.profile-info .profile-detail');
+
+    if (details[0]) {
+      details[0].textContent =
+        `✉ ${user.email || 'غير مسجل'}`;
+    }
+
+    if (details[1]) {
+      details[1].textContent =
+        `☎ ${user.phone || 'غير مسجل'}`;
+    }
+
+    const status = document.querySelector('.profile-info .status');
+
+    if (status) {
+      status.textContent =
+        `● حالة الحساب: ${accountStatus(user.accountStatus)}`;
+    }
+  }
+
+  function renderSubscription(subscription) {
+    const packages = document.querySelectorAll('.packages .package');
+    const planItems = document.querySelectorAll('.plan-details .plan-item strong');
+
+    packages.forEach(item => {
+      item.classList.remove('current-package');
+      item.removeAttribute('aria-current');
+    });
+
+    if (!subscription) {
+      const heading = document.querySelector('.current-label');
+      if (heading) heading.textContent = 'لا يوجد اشتراك نشط';
+
+      if (planItems[0]) {
+        planItems[0].textContent = 'لا توجد باقة حالية';
+      }
+
+      if (planItems[1]) {
+        planItems[1].textContent = 'غير متاح';
+      }
+
+      return;
+    }
+
+    const code = String(subscription.code || '').toLowerCase();
+
+    const packageClasses = {
+      elite: '.package.elite',
+      family: '.package.family',
+      plus: '.package.plus'
+    };
+
+    if (packageClasses[code]) {
+      const activePackage = document.querySelector(packageClasses[code]);
+
+      if (activePackage) {
+        activePackage.classList.add('current-package');
+        activePackage.setAttribute('aria-current', 'true');
+      }
+    }
+
+    const heading = document.querySelector('.current-label');
+
+    if (heading) {
+      heading.textContent = packageName(subscription.code);
+    }
+
+    if (planItems[0]) {
+      planItems[0].textContent =
+        `${packageName(subscription.code)} — ${subscriptionStatus(subscription.status)}`;
+    }
+
+    if (planItems[1]) {
+      planItems[1].textContent =
+        formatDate(subscription.ends_at || subscription.trial_expires_at);
+    }
+  }
+
+  async function loadProfile() {
+    if (!token) {
+      window.location.replace('login.html');
+      return;
+    }
+
+    try {
+      const [profileData, subscriptionData] = await Promise.all([
+        apiRequest('/profile'),
+        apiRequest('/subscriptions/current')
+      ]);
+
+      if (!profileData.success || !profileData.user) {
+        throw new Error('لم تصل بيانات الحساب من الخادم.');
+      }
+
+      renderProfile(profileData.user);
+
+      renderSubscription(
+        subscriptionData.subscription ||
+        profileData.subscription ||
+        null
+      );
+
+    } catch (error) {
+      if (error.status === 401 || error.status === 403) {
+        clearSession();
+        window.location.replace('login.html');
+        return;
+      }
+
+      showNotice(error.message || 'تعذر تحميل بيانات الحساب.');
+    }
+  }
+
+  window.logout = async function() {
+    const confirmed = confirm('هل تريد تسجيل الخروج من حسابك؟');
+
+    if (!confirmed) return;
+
+    try {
+      if (token) {
+        await apiRequest('/auth/logout', 'POST');
+      }
+    } catch (error) {
+      if (error.status !== 401 && error.status !== 403) {
+        showNotice('تعذر الاتصال بالخادم، سيتم إنهاء الجلسة على هذا الجهاز.');
+      }
+    } finally {
+      clearSession();
+      window.location.replace('login.html');
+    }
+  };
+
+  window.showNotice = showNotice;
+
+  loadProfile();
+})();
 </script>
 
 </body>
