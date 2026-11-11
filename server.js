@@ -17,6 +17,7 @@
 require('dotenv').config();
 
 const express = require('express');
+const path = require('path');
 const cors = require('cors');
 const helmet = require('helmet');
 const bcrypt = require('bcryptjs');
@@ -139,35 +140,22 @@ const openai = process.env.OPENAI_API_KEY
 
 app.disable('x-powered-by');
 
-app.use(helmet());
-
-const allowedOrigins = (process.env.APP_ORIGIN || '')
-  .split(',')
-  .map(value => value.trim())
-  .filter(Boolean);
-
-app.use(cors({
-  origin(origin, callback) {
-    if (!origin) {
-      return callback(null, true);
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "https:"],
+      fontSrc: ["'self'", "data:", "https:"],
+      connectSrc: ["'self'", "https:"],
+      objectSrc: ["'none'"],
+      baseUri: ["'self'"],
+      formAction: ["'self'"],
+      frameAncestors: ["'none'"]
     }
-
-    if (
-      NODE_ENV !== 'production' &&
-      allowedOrigins.length === 0
-    ) {
-      return callback(null, true);
-    }
-
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-
-    return callback(new Error('CORS_ORIGIN_NOT_ALLOWED'));
-  },
-  credentials: true
+  }
 }));
-
 /*
  * Paymob webhook needs the original raw request body.
  * It is mounted before express.json().
@@ -7511,7 +7499,67 @@ app.use((req, res) => {
   );
 });
 
+/* =========================================================
+   FRONTEND PAGES
+========================================================= */
 
+const PUBLIC_PAGES = new Set([
+  'index.html',
+  'signup.html',
+  'login.html',
+  'verify.html',
+  'reset-password.html',
+  'home.html',
+  'assistant.html',
+  'profile.html',
+  'admin.html',
+  'orders.html',
+  'notifications.html',
+  'plans.html',
+  'support.html',
+  'budget.html',
+  'clothes-shoes.html',
+  'home-needs.html',
+  'hotels-restaurants.html',
+  'kids.html',
+  'landscape.html',
+  'mobiles-electronics.html',
+  'nearby.html',
+  'purchase-protection.html',
+  'shopping.html',
+  'salons.html',
+  'terms.html',
+  'privacy.html'
+]);
+
+const PUBLIC_ASSETS = new Set([
+  'M3AK_192.png',
+  'M3AK_512.png'
+]);
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+app.get(/^\/([a-z0-9-]+\.html)$/i, (req, res) => {
+  const page = req.params[0];
+
+  if (!PUBLIC_PAGES.has(page)) {
+    return res.status(404).send('الصفحة غير موجودة');
+  }
+
+  res.sendFile(path.join(__dirname, page));
+});
+
+app.get(/^\/(M3AK_192\.png|M3AK_512\.png)$/i, (req, res) => {
+  const asset = req.params[0];
+
+  if (!PUBLIC_ASSETS.has(asset)) {
+    return res.sendStatus(404);
+  }
+
+  res.sendFile(path.join(__dirname, asset));
+});
 /* =========================================================
    GLOBAL ERROR HANDLER
 ========================================================= */
