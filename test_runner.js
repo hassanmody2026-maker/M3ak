@@ -361,7 +361,7 @@ test('Backend checks JWT secret length', () => {
 test('Backend uses Helmet security middleware', () => {
   assert.match(
     server,
-    /app\.use\(helmet\(\)\)/
+    /app\\.use\\(helmet\\(/
   );
 });
 
