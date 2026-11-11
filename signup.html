@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#2b0c3d">
+  <meta name="description" content="إنشاء حساب جديد في تطبيق معاك M3AK">
+  <title>إنشاء حساب | M3AK</title>
+
+  <style>
+    :root {
+      --purple-dark: #2b0c3d;
+      --purple-deep: #12041a;
+      --purple: #7b1fa2;
+      --pink: #e91e63;
+      --turquoise: #35dce8;
+      --white: #ffffff;
+      --page-bg: #ffffff;
+      --text: #292333;
+      --muted: #77717e;
+      --border: #e8e3eb;
+      --danger: #d93655;
+      --success: #168b68;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--page-bg);
+      color: var(--text);
+      font-family: Tahoma, Arial, sans-serif;
+    }
+
+    button, input {
+      font: inherit;
+    }
+
+    a {
+      color: var(--purple);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    /* Header */
+
+    .header {
+      width: 100%;
+      min-height: 205px;
+      padding: 22px 16px 35px;
+      text-align: center;
+      color: white;
+      background: linear-gradient(
+        135deg,
+        #7b1fa2 0%,
+        #3c1054 55%,
+        #2b0c3d 100%
+      );
+      border-radius: 0 0 30px 30px;
+      box-shadow: 0 5px 18px rgba(43,12,61,.16);
+    }
+
+    .brand-logo {
+      display: block;
+      width: 76px;
+      height: 76px;
+      object-fit: contain;
+      margin: 0 auto 7px;
+    }
+
+    .brand-title {
+      margin: 0;
+      font-size: 29px;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+
+    .brand-subtitle {
+      margin: 8px 0 0;
+      color: #f2e8f8;
+      font-size: 14px;
+    }
+
+    /* Main content */
+
+    .container {
+      width: 100%;
+      max-width: 490px;
+      margin: 0 auto;
+      padding: 27px 19px 35px;
+    }
+
+    .page-title {
+      margin: 0 0 9px;
+      font-size: 24px;
+      color: var(--purple-dark);
+    }
+
+    .page-description {
+      margin: 0 0 24px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.8;
+    }
+
+    .field {
+      margin-bottom: 17px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 13px;
+      font-weight: bold;
+      color: #393142;
+    }
+
+    input {
+      width: 100%;
+      min-height: 49px;
+      padding: 12px 14px;
+      color: var(--text);
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+
+    input::placeholder {
+      color: #aaa4b0;
+    }
+
+    input:focus {
+      border-color: var(--purple);
+      box-shadow: 0 0 0 3px rgba(123,31,162,.09);
+    }
+
+    input[aria-invalid="true"] {
+      border-color: var(--danger);
+    }
+
+    .password-wrap {
+      position: relative;
+    }
+
+    .password-wrap input {
+      padding-left: 67px;
+    }
+
+    .toggle-password {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      border: 0;
+      background: transparent;
+      color: var(--purple);
+      font-size: 12px;
+      cursor: pointer;
+      padding: 8px;
+    }
+
+    .hint {
+      display: block;
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.7;
+    }
+
+    /* Terms */
+
+    .check-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 9px;
+      margin: 17px 0;
+      color: #625b68;
+      font-size: 12px;
+      line-height: 1.9;
+    }
+
+    .check-row input {
+      width: 17px;
+      height: 17px;
+      min-height: auto;
+      margin-top: 3px;
+      accent-color: var(--purple);
+      flex-shrink: 0;
+    }
+
+    .check-row label {
+      margin: 0;
+      font-weight: normal;
+      line-height: 1.9;
+    }
+
+    /* Trial */
+
+    .trial-note {
+      padding: 14px;
+      margin: 19px 0;
+      border: 1px solid #d9f3f5;
+      border-radius: 13px;
+      background: #f1fcfd;
+      color: #34565b;
+      font-size: 13px;
+      line-height: 1.9;
+      text-align: center;
+    }
+
+    .trial-note strong {
+      color: var(--purple);
+    }
+
+    /* Submit */
+
+    .submit-btn {
+      width: 100%;
+      min-height: 52px;
+      border: 0;
+      border-radius: 13px;
+      color: white;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+      background: linear-gradient(
+        110deg,
+        var(--purple),
+        var(--pink)
+      );
+      box-shadow: 0 6px 17px rgba(123,31,162,.19);
+      transition: opacity .2s;
+    }
+
+    .submit-btn:disabled {
+      opacity: .6;
+      cursor: not-allowed;
+    }
+
+    .message {
+      display: none;
+      padding: 12px;
+      margin: 14px 0;
+      border-radius: 10px;
+      font-size: 13px;
+      line-height: 1.8;
+    }
+
+    .message.error {
+      display: block;
+      color: #a51f3c;
+      background: #fff0f2;
+      border: 1px solid #f4cbd3;
+    }
+
+    .message.success {
+      display: block;
+      color: #126c50;
+      background: #edfaf5;
+      border: 1px solid #c8eddf;
+    }
+
+    .login-link {
+      text-align: center;
+      margin: 21px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .login-link a {
+      font-weight: bold;
+    }
+
+    /* Bottom navigation */
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      right: 0;
+      left: 0;
+      z-index: 10;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      min-height: 67px;
+      padding: 8px 5px calc(8px + env(safe-area-inset-bottom));
+      background: linear-gradient(
+        110deg,
+        #3b1050,
+        #2b0c3d
+      );
+      box-shadow: 0 -4px 18px rgba(43,12,61,.13);
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      min-width: 55px;
+      color: #ffffff;
+      font-size: 10px;
+      text-decoration: none;
+      opacity: .9;
+    }
+
+    .nav-item svg {
+      width: 22px;
+      height: 22px;
+      stroke: #ffffff;
+      fill: none;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .nav-item.active {
+      color: var(--turquoise);
+      opacity: 1;
+    }
+
+    .nav-item.active svg {
+      stroke: var(--turquoise);
+    }
+
+    .footer {
+      text-align: center;
+      color: #aaa3ae;
+      font-size: 11px;
+      padding: 8px 0 95px;
+    }
+
+    @media (max-width: 380px) {
+      .header {
+        min-height: 185px;
+      }
+
+      .container {
+        padding-right: 15px;
+        padding-left: 15px;
+      }
+
+      .page-title {
+        font-size: 22px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header class="header">
+    <img
+      class="brand-logo"
+      src="M3AK_192.png"
+      alt="شعار معاك"
+    >
+
+    <h1 class="brand-title">M3AK | معاك</h1>
+
+    <p class="brand-subtitle">
+      كل اللي تحتاجه.. معاك
+    </p>
+  </header>
+
+  <main class="container">
+
+    <h2 class="page-title">إنشاء حساب جديد</h2>
+
+    <p class="page-description">
+      أهلاً بيك في معاك. أنشئ حسابك وابدأ الاستفادة من خدماتنا.
+    </p>
+
+    <form id="signupForm" novalidate>
+
+      <div class="field">
+        <label for="fullName">الاسم بالكامل</label>
+        <input
+          id="fullName"
+          name="fullName"
+          type="text"
+          placeholder="اكتب اسمك بالكامل"
+          autocomplete="name"
+          maxlength="120"
+          required
+        >
+      </div>
+
+      <div class="field">
+        <label for="email">البريد الإلكتروني</label>
+        <input
+          id="email"
+          name="email"
+          type="email"
+          placeholder="example@email.com"
+          autocomplete="email"
+          maxlength="254"
+          dir="ltr"
+          required
+        >
+      </div>
+
+      <div class="field">
+        <label for="phone">رقم الهاتف</label>
+        <input
+          id="phone"
+          name="phone"
+          type="tel"
+          placeholder="+20 10XXXXXXXX"
+          autocomplete="tel"
+          maxlength="20"
+          dir="ltr"
+          required
+        >
+        <small class="hint">
+          اكتب مفتاح الدولة ثم رقم هاتفك.
+        </small>
+      </div>
+
+      <div class="field">
+        <label for="password">كلمة المرور</label>
+
+        <div class="password-wrap">
+          <input
+            id="password"
+            name="password"
+            type="password"
+            placeholder="أنشئ كلمة مرور قوية"
+            autocomplete="new-password"
+            minlength="8"
+            maxlength="128"
+            required
+          >
+
+          <button
+            class="toggle-password"
+            type="button"
+            data-target="password"
+          >
+            إظهار
+          </button>
+        </div>
+
+        <small class="hint">
+          8 أحرف على الأقل، ويفضل استخدام أحرف وأرقام ورموز.
+        </small>
+      </div>
+
+      <div class="field">
+        <label for="confirmPassword">تأكيد كلمة المرور</label>
+
+        <div class="password-wrap">
+          <input
+            id="confirmPassword"
+            name="confirmPassword"
+            type="password"
+            placeholder="أعد كتابة كلمة المرور"
+            autocomplete="new-password"
+            minlength="8"
+            maxlength="128"
+            required
+          >
+
+          <button
+            class="toggle-password"
+            type="button"
+            data-target="confirmPassword"
+          >
+            إظهار
+          </button>
+        </div>
+      </div>
+
+      <div class="check-row">
+        <input id="termsAccepted" type="checkbox" required>
+
+        <label for="termsAccepted">
+          أوافق على
+          <a href="terms.html">الشروط والأحكام</a>
+          و
+          <a href="privacy.html">سياسة الخصوصية</a>.
+        </label>
+      </div>
+
+      <div class="trial-note">
+        🎁 ابدأ تجربتك المجانية لمدة 4 أيام
+        <br>
+        <strong>وفقًا لحدود الاستخدام وسياسة التجربة المعتمدة.</strong>
+      </div>
+
+      <div
+        id="formMessage"
+        class="message"
+        role="alert"
+        aria-live="polite"
+      ></div>
+
+      <button id="submitBtn" class="submit-btn" type="submit">
+        إنشاء الحساب
+      </button>
+
+    </form>
+
+    <p class="login-link">
+      لديك حساب بالفعل؟
+      <a href="login.html">تسجيل الدخول</a>
+    </p>
+
+    <footer class="footer">
+      © M3AK - جميع الحقوق محفوظة
+    </footer>
+
+  </main>
+
+  <nav class="bottom-nav" aria-label="القائمة الرئيسية">
+
+    <a href="index.html" class="nav-item">
+      <svg viewBox="0 0 24 24">
+        <path d="M3 10.5L12 3l9 7.5"></path>
+        <path d="M5 9.5V21h14V9.5"></path>
+        <path d="M9 21v-7h6v7"></path>
+      </svg>
+      <span>الرئيسية</span>
+    </a>
+
+    <a href="assistant.html" class="nav-item">
+      <svg viewBox="0 0 24 24">
+        <path d="M12 3a8 8 0 0 0-8 8v3a3 3 0 0 0 3 3h1v-6H7a5 5 0 0 1 10 0h-1v6h1a3 3 0 0 0 3-3v-3a8 8 0 0 0-8-8z"></path>
+        <path d="M9 20h6"></path>
+      </svg>
+      <span>المساعد</span>
+    </a>
+
+    <a href="services.html" class="nav-item">
+      <svg viewBox="0 0 24 24">
+        <rect x="3" y="3" width="7" height="7" rx="1"></rect>
+        <rect x="14" y="3" width="7" height="7" rx="1"></rect>
+        <rect x="3" y="14" width="7" height="7" rx="1"></rect>
+        <rect x="14" y="14" width="7" height="7" rx="1"></rect>
+      </svg>
+      <span>الخدمات</span>
+    </a>
+
+    <a href="profile.html" class="nav-item">
+      <svg viewBox="0 0 24 24">
+        <circle cx="12" cy="8" r="4"></circle>
+        <path d="M4 21a8 8 0 0 1 16 0"></path>
+      </svg>
+      <span>حسابي</span>
+    </a>
+
+  </nav>
+
+  <script>
+    'use strict';
+
+    const API_BASE = '/api';
+
+    const form = document.getElementById('signupForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const messageBox = document.getElementById('formMessage');
+
+    const fullNameInput = document.getElementById('fullName');
+    const emailInput = document.getElementById('email');
+    const phoneInput = document.getElementById('phone');
+    const passwordInput = document.getElementById('password');
+    const confirmPasswordInput = document.getElementById('confirmPassword');
+    const termsInput = document.getElementById('termsAccepted');
+
+    function showMessage(message, type) {
+      messageBox.textContent = message;
+      messageBox.className = 'message ' + type;
+    }
+
+    function clearMessage() {
+      messageBox.textContent = '';
+      messageBox.className = 'message';
+    }
+
+    function validateForm() {
+      const fullName = fullNameInput.value.trim();
+      const email = emailInput.value.trim().toLowerCase();
+      const phone = phoneInput.value.trim();
+      const password = passwordInput.value;
+      const confirmPassword = confirmPasswordInput.value;
+
+      if (fullName.length < 3) {
+        return 'من فضلك أدخل اسمك بالكامل بشكل صحيح.';
+      }
+
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return 'من فضلك أدخل بريدًا إلكترونيًا صحيحًا.';
+      }
+
+      if (!/^\+?[0-9\s()-]{8,20}$/.test(phone)) {
+        return 'من فضلك أدخل رقم هاتف صحيحًا مع مفتاح الدولة.';
+      }
+
+      if (password.length < 8) {
+        return 'كلمة المرور يجب ألا تقل عن 8 أحرف.';
+      }
+
+      if (password !== confirmPassword) {
+        return 'كلمتا المرور غير متطابقتين.';
+      }
+
+      if (!termsInput.checked) {
+        return 'يجب الموافقة على الشروط وسياسة الخصوصية للمتابعة.';
+      }
+
+      return null;
+    }
+
+    document.querySelectorAll('.toggle-password').forEach(button => {
+      button.addEventListener('click', () => {
+        const input = document.getElementById(button.dataset.target);
+
+        if (!input) return;
+
+        const willShow = input.type === 'password';
+
+        input.type = willShow ? 'text' : 'password';
+        button.textContent = willShow ? 'إخفاء' : 'إظهار';
+      });
+    });
+
+    form.addEventListener('submit', async event => {
+      event.preventDefault();
+      clearMessage();
+
+      const validationError = validateForm();
+
+      if (validationError) {
+        showMessage(validationError, 'error');
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'جارٍ إنشاء الحساب...';
+
+      const payload = {
+        fullName: fullNameInput.value.trim(),
+        email: emailInput.value.trim().toLowerCase(),
+        phone: phoneInput.value.trim(),
+        password: passwordInput.value
+      };
+
+      try {
+        const response = await fetch(`${API_BASE}/auth/register`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const result = await response.json().catch(() => null);
+
+        if (!response.ok) {
+          throw new Error(
+            result && typeof result.message === 'string'
+              ? result.message
+              : 'تعذر إنشاء الحساب. يرجى المحاولة مرة أخرى.'
+          );
+        }
+
+        if (!result || result.success !== true) {
+          throw new Error(
+            result && result.message
+              ? result.message
+              : 'استجابة غير متوقعة من الخادم.'
+          );
+        }
+
+        showMessage(
+          result.message || 'تم إرسال طلب إنشاء الحساب بنجاح.',
+          'success'
+        );
+
+        if (result.nextStep === 'verify-email') {
+          setTimeout(() => {
+            window.location.href =
+              'verify-email.html?email=' +
+              encodeURIComponent(payload.email);
+          }, 1200);
+        }
+
+      } catch (error) {
+        showMessage(
+          error.message || 'حدث خطأ أثناء الاتصال بالخادم.',
+          'error'
+        );
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'إنشاء الحساب';
+      }
+    });
+
+  </script>
+
+</body>
+  </html>
