@@ -2,49 +2,35 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#2b0c3d">
-
 <title>M3AK | معاك</title>
 
 <style>
-* {
-  box-sizing: border-box;
+*{box-sizing:border-box}
+html,body{
+  margin:0;
+  width:100%;
+  height:100%;
+  background:#2b0c3d;
 }
-
-html, body {
-  margin: 0;
-  width: 100%;
-  height: 100%;
-  background: #2b0c3d;
+body{
+  min-height:100vh;
+  min-height:100svh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
 }
-
-body {
-  min-height: 100vh;
-  min-height: 100svh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-
-#welcome {
-  display: block;
-  width: 100%;
-  height: 100%;
-  height: 100svh;
-  object-fit: contain;
-  object-position: center;
-  background: #2b0c3d;
-  cursor: pointer;
-}
-
-#fallback {
-  display: none;
-  color: #fff;
-  font: 700 18px Arial, sans-serif;
-  text-align: center;
-  padding: 24px;
+#welcome{
+  display:block;
+  width:100%;
+  height:100%;
+  height:100svh;
+  object-fit:contain;
+  object-position:center;
+  background:#2b0c3d;
+  cursor:pointer;
 }
 </style>
 </head>
@@ -53,31 +39,13 @@ body {
 
 <img
   id="welcome"
-  src="https://raw.githubusercontent.com/hassanmody2026-maker/M3ak/main/welcome-final.png"
+  src="https://raw.githubusercontent.com/hassanmody2026-maker/M3ak/main/welcome-final.png?v=2"
   alt="M3AK - كل اللي تحتاجه معاك"
 >
 
-<div id="fallback">
-  تعذر تحميل صورة الترحيب.
-  <br>
-  <a
-    href="./index%20(2).html"
-    style="color:#fff"
-  >
-    فتح صفحة الترحيب الاحتياطية
-  </a>
-</div>
-
 <script>
-const welcome = document.getElementById("welcome");
-
-welcome.addEventListener("error", function () {
-  welcome.style.display = "none";
-  document.getElementById("fallback").style.display = "block";
-});
-
-welcome.addEventListener("click", function () {
-  window.location.href = "./signup.html";
+document.getElementById("welcome").addEventListener("click",function(){
+  window.location.href="./signup.html";
 });
 </script>
 
