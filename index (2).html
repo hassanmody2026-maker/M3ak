@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#2b0c3d">
+
+<title>M3AK | معاك</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap');
+
+:root {
+  --purple: #2b0c3d;
+  --deep: #12041a;
+  --violet: #7b1fa2;
+  --pink: #e91e63;
+  --turquoise: #20c9c3;
+  --white: #ffffff;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Cairo', sans-serif;
+  background: linear-gradient(150deg, #2b0c3d, #12041a);
+  color: white;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.screen {
+  min-height: 100vh;
+  max-width: 520px;
+  margin: auto;
+  padding: 25px 22px 35px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.glow {
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  filter: blur(100px);
+  opacity: .23;
+  pointer-events: none;
+}
+
+.glow.one {
+  background: var(--pink);
+  top: 100px;
+  right: -160px;
+}
+
+.glow.two {
+  background: var(--turquoise);
+  bottom: 100px;
+  left: -170px;
+}
+
+.header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  z-index: 2;
+  animation: appear .9s ease;
+}
+
+.logo {
+  width: 65px;
+  height: 65px;
+  object-fit: contain;
+}
+
+.brand {
+  text-align: right;
+}
+
+.brand h1 {
+  font-size: 30px;
+  font-weight: 900;
+  letter-spacing: 1px;
+}
+
+.brand p {
+  color: #e8c7f1;
+  font-size: 12px;
+}
+
+.hero {
+  width: 100%;
+  margin-top: 18px;
+  position: relative;
+  animation: rise 1s ease;
+}
+
+.hero-title {
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.hero-title h2 {
+  font-size: 24px;
+  font-weight: 900;
+  line-height: 1.6;
+}
+
+.hero-title span {
+  color: #ff72ac;
+}
+
+.family-art {
+  width: 100%;
+  max-height: 370px;
+  display: block;
+  margin: auto;
+  filter: drop-shadow(0 15px 25px #0005);
+}
+
+.features {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 8px;
+  animation: rise 1.2s ease;
+}
+
+.feature {
+  text-align: center;
+  padding: 12px 5px;
+  background: #ffffff12;
+  border: 1px solid #ffffff20;
+  border-radius: 17px;
+  backdrop-filter: blur(12px);
+}
+
+.feature .icon {
+  font-size: 24px;
+  margin-bottom: 4px;
+}
+
+.feature p {
+  font-size: 12px;
+  font-weight: 700;
+  color: white;
+}
+
+.description {
+  text-align: center;
+  margin-top: 19px;
+  line-height: 1.9;
+  color: #e8d9ee;
+  font-size: 13px;
+  max-width: 340px;
+}
+
+.action {
+  width: 100%;
+  margin-top: 22px;
+}
+
+.start-button {
+  width: 100%;
+  min-height: 58px;
+  border: none;
+  border-radius: 18px;
+  background: linear-gradient(100deg, #e91e63, #9224b5);
+  color: white;
+  font-family: inherit;
+  font-size: 19px;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 9px 30px #e91e6350;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  transition: .25s;
+}
+
+.start-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 13px 35px #e91e6370;
+}
+
+.arrow {
+  font-size: 25px;
+  line-height: 1;
+}
+
+.footer {
+  margin-top: 18px;
+  font-size: 11px;
+  color: #c9afd4;
+}
+
+@keyframes appear {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(25px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 360px) {
+  .hero-title h2 { font-size: 21px; }
+  .family-art { max-height: 300px; }
+  .logo { width: 55px; height: 55px; }
+}
+</style>
+</head>
+
+<body>
+
+<main class="screen">
+
+<div class="glow one"></div>
+<div class="glow two"></div>
+
+<header class="header">
+  <img src="M3AK_512.png" class="logo" alt="M3AK Logo">
+  <div class="brand">
+    <h1>M3AK | معاك</h1>
+    <p>كل اللي تحتاجه.. معاك</p>
+  </div>
+</header>
+
+<section class="hero">
+
+  <div class="hero-title">
+    <h2>عيلتك كلها <span>معاك</span></h2>
+  </div>
+
+  <!-- مشهد الأسرة والبرج السكني -->
+
+  <svg class="family-art"
+       viewBox="0 0 400 390"
+       xmlns="http://www.w3.org/2000/svg">
+
+    <defs>
+      <linearGradient id="tower" x1="0" y1="0" x2="1" y2="1">
+        <stop stop-color="#a56bc6"/>
+        <stop offset="1" stop-color="#54226f"/>
+      </linearGradient>
+
+      <linearGradient id="clothes1" x1="0" y1="0" x2="1" y2="1">
+        <stop stop-color="#e91e63"/>
+        <stop offset="1" stop-color="#9c185d"/>
+      </linearGradient>
+
+      <linearGradient id="clothes2" x1="0" y1="0" x2="1" y2="1">
+        <stop stop-color="#20c9c3"/>
+        <stop offset="1" stop-color="#137b92"/>
+      </linearGradient>
+
+      <linearGradient id="ground" x1="0" y1="0" x2="0" y2="1">
+        <stop stop-color="#a34fc2"/>
+        <stop offset="1" stop-color="#50205f"/>
+      </linearGradient>
+    </defs>
+
+    <!-- البرج السكني -->
+    <path d="M105 235 V65 Q105 45 125 45 H275 Q295 45 295 65 V235Z"
+          fill="url(#tower)" stroke="#d9a8f0" stroke-width="2"/>
+
+    <path d="M150 45 V24 H250 V45" fill="#7b1fa2"/>
+
+    <!-- نوافذ البرج -->
+    <g fill="#f8d9ff" opacity=".85">
+      <rect x="125" y="72" width="34" height="32" rx="5"/>
+      <rect x="184" y="72" width="34" height="32" rx="5"/>
+      <rect x="240" y="72" width="34" height="32" rx="5"/>
+
+      <rect x="125" y="125" width="34" height="32" rx="5"/>
+      <rect x="184" y="125" width="34" height="32" rx="5"/>
+      <rect x="240" y="125" width="34" height="32" rx="5"/>
+
+      <rect x="125" y="178" width="34" height="32" rx="5"/>
+      <rect x="240" y="178" width="34" height="32" rx="5"/>
+    </g>
+
+    <!-- أرضية المشهد -->
+    <ellipse cx="200" cy="345" rx="170" ry="25"
+             fill="url(#ground)" opacity=".7"/>
+
+    <!-- الأب -->
+    <g>
+      <path d="M225 210 Q250 190 274 210 L285 310 H211Z"
+            fill="url(#clothes2)"/>
+      <circle cx="248" cy="174" r="27" fill="#dba47e"/>
+      <path d="M222 171 Q225 136 252 143 Q278 145 274 172
+               Q254 153 222 171" fill="#30202a"/>
+      <path d="M221 225 L199 277 M273 225 L293 278"
+            stroke="#dba47e" stroke-width="13" stroke-linecap="round"/>
+      <path d="M226 305 L222 341 M269 305 L274 341"
+            stroke="#29213d" stroke-width="14" stroke-linecap="round"/>
+    </g>
+
+    <!-- الأم -->
+    <g>
+      <path d="M133 210 Q160 188 185 210 L196 310 H120Z"
+            fill="url(#clothes1)"/>
+      <circle cx="158" cy="174" r="26" fill="#e7b18c"/>
+      <path d="M132 175 Q125 138 157 139 Q187 138 184 178
+               Q176 153 157 153 Q139 153 132 175"
+            fill="#29202c"/>
+      <path d="M135 220 L112 275 M182 220 L204 270"
+            stroke="#e7b18c" stroke-width="12" stroke-linecap="round"/>
+      <path d="M139 305 L134 341 M178 305 L183 341"
+            stroke="#29213d" stroke-width="13" stroke-linecap="round"/>
+    </g>
+
+    <!-- البنت -->
+    <g>
+      <path d="M167 254 Q183 235 200 254 L205 321 H163Z"
+            fill="#f2b8e9"/>
+      <circle cx="185" cy="228" r="18" fill="#e6aa83"/>
+      <path d="M166 227 Q160 199 184 201 Q207 201 205 231
+               Q194 209 166 227" fill="#382431"/>
+      <path d="M172 318 L170 345 M196 318 L199 345"
+            stroke="#dba47e" stroke-width="9" stroke-linecap="round"/>
+    </g>
+
+    <!-- الولد -->
+    <g>
+      <path d="M205 255 Q224 238 240 255 L245 321 H202Z"
+            fill="#35bfc2"/>
+      <circle cx="224" cy="228" r="18" fill="#dca17b"/>
+      <path d="M207 226 Q210 202 229 208 Q242 210 242 228
+               Q226 214 207 226" fill="#30202a"/>
+      <path d="M211 318 L209 345 M234 318 L237 345"
+            stroke="#dba47e" stroke-width="9" stroke-linecap="round"/>
+    </g>
+
+    <!-- رموز الخدمات -->
+    <g font-size="24" text-anchor="middle">
+      <circle cx="65" cy="125" r="27" fill="#ffffff20"
+              stroke="#ffffff55"/>
+      <text x="65" y="134">🏠</text>
+
+      <circle cx="335" cy="115" r="27" fill="#ffffff20"
+              stroke="#ffffff55"/>
+      <text x="335" y="124">🤖</text>
+
+      <circle cx="55" cy="240" r="27" fill="#ffffff20"
+              stroke="#ffffff55"/>
+      <text x="55" y="249">🛒</text>
+
+      <circle cx="345" cy="235" r="27" fill="#ffffff20"
+              stroke="#ffffff55"/>
+      <text x="345" y="244">🚗</text>
+    </g>
+
+  </svg>
+</section>
+
+<section class="features">
+
+  <div class="feature">
+    <div class="icon">🛡️</div>
+    <p>آمن وموثوق</p>
+  </div>
+
+  <div class="feature">
+    <div class="icon">⚡</div>
+    <p>سريع وسهل</p>
+  </div>
+
+  <div class="feature">
+    <div class="icon">⭐</div>
+    <p>مناسب للجميع</p>
+  </div>
+
+</section>
+
+<p class="description">
+  خدمات واحتياجات أسرتك في مكان واحد،
+  بمساعدة الذكاء الاصطناعي.
+</p>
+
+<div class="action">
+  <button class="start-button" onclick="startApp()">
+    <span>البدء الآن</span>
+    <span class="arrow">←</span>
+  </button>
+</div>
+
+<footer class="footer">
+  M3AK © 2026 — مصلحتك أولًا
+</footer>
+
+</main>
+
+<script>
+function startApp() {
+  window.location.href = "signup.html";
+}
+</script>
+
+</body>
+</html>
