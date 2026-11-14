@@ -2,757 +2,936 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="theme-color" content="#ffffff">
-<title>M3AK - الأقسام الرئيسية</title>
+<title>M3AK | الأقسام</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
 <style>
-:root {
-  --purple:#71418c;
-  --purple-light:#eee5f4;
-  --pink:#d968a8;
-  --pink-light:#fbedf5;
-  --teal:#36aaa5;
-  --teal-light:#e8f6f4;
-  --bg:#faf9fc;
-  --text:#342a3b;
-  --muted:#9991a0;
-  --white:#fff;
+:root{
+  --purple:#542078;
+  --purple2:#783c96;
+  --pink:#e91e63;
+  --teal:#00aeb5;
+  --ink:#302638;
+  --muted:#958b9c;
+  --line:#eee8f1;
+  --bg:#fff;
 }
 
-* {
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-}
+*{box-sizing:border-box;margin:0;padding:0}
 
-body {
+body{
   font-family:'Cairo',sans-serif;
-  background:var(--bg);
-  color:var(--text);
+  color:var(--ink);
+  background:#f7f5f9;
 }
 
-.app {
+button{font-family:inherit;border:0;cursor:pointer}
+
+.app{
   max-width:520px;
   min-height:100vh;
   margin:auto;
-  padding-bottom:100px;
+  background:#fff;
   position:relative;
   overflow:hidden;
-  background:
-    radial-gradient(circle at 5% 35%,rgba(217,104,168,.035),transparent 25%),
-    radial-gradient(circle at 95% 65%,rgba(54,170,165,.045),transparent 25%),
-    #faf9fc;
+  padding-bottom:100px;
 }
 
-/* WATERMARK */
+/* العلامة المائية */
 
-.watermark {
-  position:fixed;
-  top:48%;
-  left:50%;
-  transform:translate(-50%,-50%);
-  font-size:100px;
-  font-weight:900;
-  letter-spacing:5px;
-  color:rgba(113,65,140,.025);
+.watermark{
+  position:absolute;
+  top:360px;
+  left:-45px;
+  width:300px;
+  height:300px;
+  opacity:.035;
   pointer-events:none;
   z-index:0;
-  white-space:nowrap;
 }
 
-/* HEADER */
+/* الهيدر */
 
-.header {
+.header{
   position:relative;
-  padding:15px 17px 13px;
-  background:linear-gradient(110deg,#fff,#faf5fc);
-  border-bottom:1px solid #f0e9f3;
-  z-index:1;
+  z-index:2;
+  padding:17px 18px 13px;
+  background:linear-gradient(125deg,#fff 65%,#fbf5fc);
+  border-bottom:1px solid #f3edf5;
 }
 
-.header-top {
+.header-row{
   display:flex;
-  justify-content:space-between;
   align-items:center;
+  justify-content:space-between;
 }
 
-.brand {
+.brand{
   display:flex;
   align-items:center;
   gap:10px;
 }
 
-.brand img {
-  width:59px;
-  height:59px;
+/* مسار الشعار الأصلي */
+
+.logo{
+  width:54px;
+  height:50px;
   object-fit:contain;
 }
 
-.brand-text h1 {
-  color:var(--purple);
+.brand-name{
   font-size:23px;
   font-weight:900;
-  line-height:1.3;
+  color:var(--purple);
+  line-height:1.15;
+  letter-spacing:.4px;
 }
 
-.brand-text p {
-  color:var(--muted);
+.brand-tagline{
   font-size:10px;
+  color:#887b90;
+  margin-top:3px;
 }
 
-.notification {
+.header-actions{
+  display:flex;
+  gap:9px;
+}
+
+.header-btn{
   width:39px;
   height:39px;
+  display:grid;
+  place-items:center;
   border-radius:13px;
-  background:#f3ebf6;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:19px;
+  background:#f7f1f9;
   color:var(--purple);
 }
 
-.welcome {
-  margin-top:12px;
+.header-btn svg{
+  width:20px;
+  height:20px;
+}
+
+.welcome{
+  margin-top:15px;
   display:flex;
-  justify-content:space-between;
   align-items:center;
+  justify-content:space-between;
 }
 
-.welcome h2 {
-  font-size:15px;
-  font-weight:800;
+.welcome h1{
+  font-size:19px;
+  font-weight:900;
+  color:#34253c;
 }
 
-.welcome p {
-  font-size:10px;
+.welcome p{
+  font-size:11px;
   color:var(--muted);
+  margin-top:2px;
 }
 
-/* ACCOUNT */
+.welcome-mark{
+  width:36px;
+  height:4px;
+  border-radius:5px;
+  background:linear-gradient(90deg,var(--teal),var(--pink),var(--purple));
+}
 
-.account-card {
-  margin:12px 14px 0;
-  padding:11px 13px;
+/* بطاقة الحساب */
+
+.account{
+  margin:14px 16px 0;
+  padding:12px;
+  border:1px solid var(--line);
+  border-radius:18px;
+  background:linear-gradient(110deg,#fff,#fcf8fd);
   display:flex;
   align-items:center;
   gap:11px;
-  background:white;
-  border:1px solid #eee8f2;
-  border-radius:16px;
-  box-shadow:0 3px 12px rgba(60,30,75,.035);
+  box-shadow:0 5px 18px rgba(68,35,82,.045);
   position:relative;
   z-index:1;
 }
 
-.avatar {
-  width:43px;
-  height:43px;
-  border-radius:13px;
-  background:var(--purple-light);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:21px;
+.avatar{
+  width:44px;
+  height:44px;
+  border-radius:15px;
+  background:linear-gradient(145deg,#eee2f5,#f9eaf2);
+  display:grid;
+  place-items:center;
+  color:var(--purple);
+  flex-shrink:0;
 }
 
-.account-info {
-  flex:1;
-}
+.avatar svg{width:25px;height:25px}
 
-.account-info small {
+.account-info{flex:1;min-width:0}
+
+.account-label{
+  font-size:10px;
   color:var(--muted);
-  font-size:10px;
 }
 
-.account-info h3 {
-  font-size:12px;
+.account-name{
+  font-size:13px;
   font-weight:800;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
 }
 
-.plan {
-  padding:5px 10px;
-  border-radius:9px;
-  background:var(--teal-light);
-  color:#258b86;
+.plan{
+  padding:6px 11px;
+  border-radius:10px;
+  background:#f4eaf8;
+  color:var(--purple);
   font-size:10px;
-  font-weight:800;
+  font-weight:900;
+  white-space:nowrap;
 }
 
-/* SECTION TITLE */
+/* عناوين الأقسام */
 
-.section-title {
-  margin:19px 16px 11px;
+.section-heading{
+  margin:21px 17px 12px;
   display:flex;
-  justify-content:space-between;
   align-items:center;
+  justify-content:space-between;
   position:relative;
   z-index:1;
 }
 
-.section-title h3 {
+.section-heading h2{
   font-size:15px;
   font-weight:900;
 }
 
-.section-title span {
-  width:29px;
-  height:3px;
-  display:block;
-  background:linear-gradient(90deg,var(--teal),var(--pink));
-  border-radius:5px;
-  margin-top:4px;
+.section-heading small{
+  color:#a49aa9;
+  font-size:10px;
 }
 
-/* AI ASSISTANT */
+.heading-line{
+  width:27px;
+  height:3px;
+  border-radius:5px;
+  margin-top:4px;
+  background:linear-gradient(90deg,var(--pink),var(--purple));
+}
 
-.ai-card {
-  margin:0 14px;
-  min-height:91px;
-  border-radius:18px;
-  padding:11px 13px;
-  background:linear-gradient(110deg,#f3eaf7,#e9f5f4);
-  border:1px solid #eee3f1;
+/* المساعد الذكي */
+
+.ai-card{
+  margin:0 15px;
+  min-height:105px;
+  border-radius:20px;
+  padding:13px;
   display:flex;
   align-items:center;
-  gap:12px;
-  box-shadow:0 4px 14px rgba(70,40,90,.05);
-  cursor:pointer;
+  gap:13px;
+  background:
+    radial-gradient(circle at 5% 10%,rgba(0,174,181,.14),transparent 40%),
+    linear-gradient(115deg,#f8f0fb,#f0faf9);
+  border:1px solid #eee4f1;
+  box-shadow:0 7px 20px rgba(74,39,89,.07);
   position:relative;
   overflow:hidden;
   z-index:1;
+  cursor:pointer;
+  transition:.25s;
 }
 
-.robot {
-  width:65px;
-  height:65px;
+.ai-card:active{transform:scale(.985)}
+
+.ai-art{
+  width:72px;
+  height:72px;
+  border-radius:21px;
   flex-shrink:0;
-  border-radius:19px;
-  background:linear-gradient(145deg,#5bcac1,#279a9d);
-  box-shadow:0 4px 13px rgba(54,170,165,.22);
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  display:grid;
+  place-items:center;
+  background:linear-gradient(145deg,#20c0bd,#168e9b);
+  box-shadow:0 7px 16px rgba(0,174,181,.2);
 }
 
-.robot svg {
-  width:57px;
-  height:57px;
-}
+.ai-art svg{width:66px;height:66px}
 
-.ai-info {
-  flex:1;
-}
+.ai-copy{flex:1}
 
-.ai-info h3 {
-  font-size:15px;
+.ai-copy h3{
   color:var(--purple);
+  font-size:16px;
   font-weight:900;
 }
 
-.ai-info p {
+.ai-copy p{
+  color:#817688;
   font-size:10px;
-  color:#777080;
   line-height:1.8;
+  margin-top:2px;
 }
 
-.ai-badge {
-  display:inline-block;
-  margin-top:3px;
-  padding:2px 9px;
-  border-radius:20px;
+.ai-chip{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
   background:#fff;
-  color:var(--teal);
+  color:#269c9c;
+  border-radius:20px;
+  padding:3px 9px;
   font-size:9px;
   font-weight:800;
+  margin-top:5px;
 }
 
-.ai-arrow {
+.ai-arrow{
   color:var(--purple);
-  font-size:20px;
+  font-size:21px;
+  font-weight:700;
 }
 
-/* CATEGORIES */
+/* شبكة الأقسام */
 
-.categories {
+.grid{
   display:grid;
   grid-template-columns:repeat(3,minmax(0,1fr));
-  gap:9px;
-  padding:0 12px;
+  gap:10px;
+  padding:0 14px;
   position:relative;
   z-index:1;
 }
 
-.category {
-  background:white;
-  min-height:105px;
-  border:1px solid #eeeaf1;
-  border-radius:15px;
-  padding:9px 5px;
+.tile{
+  min-height:116px;
+  background:#fff;
+  border:1px solid #eee9f1;
+  border-radius:18px;
+  padding:12px 6px 10px;
   display:flex;
   flex-direction:column;
-  justify-content:center;
   align-items:center;
+  justify-content:center;
   text-align:center;
-  box-shadow:0 3px 10px rgba(50,25,60,.035);
+  box-shadow:0 4px 13px rgba(53,30,64,.035);
+  transition:transform .2s,box-shadow .2s;
+  cursor:pointer;
+  position:relative;
+  overflow:hidden;
+}
+
+.tile:active{
+  transform:scale(.96);
+  box-shadow:0 2px 7px rgba(53,30,64,.07);
+}
+
+.tile-icon{
+  width:48px;
+  height:48px;
+  border-radius:16px;
+  display:grid;
+  place-items:center;
+  margin-bottom:8px;
+}
+
+.tile-icon svg{
+  width:27px;
+  height:27px;
+  stroke:currentColor;
+  fill:none;
+  stroke-width:1.8;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+
+.tile h3{
+  font-size:10px;
+  font-weight:800;
+  line-height:1.7;
+  color:#423749;
+}
+
+.tile:nth-child(6n+1) .tile-icon{background:#e9f7f4;color:#279b87}
+.tile:nth-child(6n+2) .tile-icon{background:#f4eafa;color:#8750a1}
+.tile:nth-child(6n+3) .tile-icon{background:#eaf3fb;color:#5487b7}
+.tile:nth-child(6n+4) .tile-icon{background:#fcecf3;color:#cf6695}
+.tile:nth-child(6n+5) .tile-icon{background:#fff3e7;color:#c48b4d}
+.tile:nth-child(6n) .tile-icon{background:#e9f6f6;color:#28989d}
+
+/* خدمات الحساب */
+
+.service-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:9px;
+  padding:0 15px;
+  position:relative;
+  z-index:1;
+}
+
+.service{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-height:65px;
+  border:1px solid var(--line);
+  border-radius:15px;
+  padding:9px;
+  background:#fff;
   cursor:pointer;
   transition:.2s;
 }
 
-.category:active {
-  transform:scale(.96);
-}
+.service:active{transform:scale(.98)}
 
-.icon {
-  width:38px;
-  height:38px;
-  border-radius:12px;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  margin-bottom:6px;
-  font-size:21px;
-}
-
-.category h4 {
-  font-size:10px;
-  line-height:1.7;
-  font-weight:800;
-}
-
-.c1 .icon {background:#e7f5f1;color:#339a86}
-.c2 .icon {background:#f2eaf7;color:#9257a8}
-.c3 .icon {background:#eaf1fa;color:#5684b8}
-.c4 .icon {background:#fbedf3;color:#cb7095}
-.c5 .icon {background:#fff3e8;color:#c28b51}
-.c6 .icon {background:#eaf5ef;color:#438e70}
-.c7 .icon {background:#f5eaf5;color:#a35d9d}
-.c8 .icon {background:#e8f5f5;color:#358f99}
-.c9 .icon {background:#f9edf0;color:#b96881}
-.c10 .icon {background:#edf0fa;color:#697bad}
-
-/* EXTRA SERVICES */
-
-.service-list {
-  margin:0 13px;
-  display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:9px;
-  position:relative;
-  z-index:1;
-}
-
-.service {
-  min-height:58px;
-  display:flex;
-  align-items:center;
-  gap:9px;
-  background:#fff;
-  border:1px solid #eeeaf1;
+.service-icon{
+  width:39px;
+  height:39px;
   border-radius:13px;
-  padding:9px;
-  cursor:pointer;
-}
-
-.service-icon {
-  width:35px;
-  height:35px;
-  border-radius:11px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:#f3eaf6;
-  font-size:18px;
+  display:grid;
+  place-items:center;
+  background:#f4eafa;
+  color:var(--purple);
   flex-shrink:0;
 }
 
-.service h4 {
+.service-icon svg{
+  width:22px;
+  height:22px;
+  stroke:currentColor;
+  fill:none;
+  stroke-width:1.8;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+
+.service h3{
   font-size:10px;
   font-weight:800;
 }
 
-.admin {
-  display:none;
+.service p{
+  font-size:9px;
+  color:#a39aa7;
+  margin-top:2px;
 }
 
-/* BOTTOM NAV */
+/* الشريط السفلي */
 
-.bottom-nav {
+.bottom-nav{
   position:fixed;
   bottom:0;
   left:50%;
   transform:translateX(-50%);
   width:100%;
   max-width:520px;
-  min-height:69px;
-  background:#fff;
-  border-top:1px solid #eeeaf1;
-  box-shadow:0 -3px 15px rgba(50,30,65,.045);
+  min-height:72px;
+  padding:8px 5px calc(8px + env(safe-area-inset-bottom));
   display:flex;
   align-items:center;
   justify-content:space-around;
+  background:rgba(255,255,255,.97);
+  border-top:1px solid #eee8f1;
+  box-shadow:0 -5px 20px rgba(50,30,60,.055);
   z-index:20;
-  padding:7px 4px env(safe-area-inset-bottom);
+  backdrop-filter:blur(12px);
 }
 
-.nav-item {
+.nav-item{
   flex:1;
   display:flex;
   flex-direction:column;
   align-items:center;
   justify-content:center;
   gap:3px;
-  color:#9991a0;
+  color:#978d9d;
   font-size:9px;
+  font-weight:700;
   cursor:pointer;
 }
 
-.nav-item .nav-icon {
-  font-size:21px;
-  line-height:1.3;
+.nav-item svg{
+  width:22px;
+  height:22px;
+  stroke:currentColor;
+  fill:none;
+  stroke-width:1.8;
+  stroke-linecap:round;
+  stroke-linejoin:round;
 }
 
-.nav-item.active {
-  color:var(--purple);
-  font-weight:900;
-}
+.nav-item.active{color:var(--purple)}
 
-.nav-item.active .nav-icon {
-  color:var(--pink);
-}
+.nav-item.active svg{color:var(--pink)}
 
-.footer {
+.footer{
+  padding:20px 10px 15px;
   text-align:center;
-  padding:19px 10px;
+  color:#a49aa8;
   font-size:10px;
-  color:var(--muted);
   position:relative;
   z-index:1;
 }
 
-@media(max-width:360px) {
-  .categories {
-    gap:7px;
-    padding:0 9px;
-  }
-
-  .category {
-    min-height:98px;
-  }
-
-  .category h4 {
-    font-size:9px;
-  }
-
-  .icon {
-    width:35px;
-    height:35px;
-  }
+@media(max-width:360px){
+  .grid{gap:7px;padding:0 10px}
+  .tile{min-height:108px}
+  .tile h3{font-size:9px}
+  .tile-icon{width:44px;height:44px}
 }
 </style>
 </head>
 
 <body>
-
 <div class="app">
 
-<div class="watermark">M3AK</div>
+<!-- علامة مائية مستوحاة من هوية M3AK -->
+<svg class="watermark" viewBox="0 0 300 300" aria-hidden="true">
+  <path d="M150 260S25 185 25 100C25 40 100 15 150 75C200 15 275 40 275 100C275 185 150 260 150 260Z"
+        fill="none" stroke="#542078" stroke-width="13"/>
+  <path d="M90 145h120M150 85v120" stroke="#e91e63" stroke-width="10" stroke-linecap="round"/>
+</svg>
 
 <header class="header">
-
-  <div class="header-top">
+  <div class="header-row">
 
     <div class="brand">
-      <img src="assets/m3ak-logo.png" alt="M3AK">
-      <div class="brand-text">
-        <h1>M3AK</h1>
-        <p>كل اللي تحتاجه.. معاك</p>
+      <img class="logo" src="assets/m3ak-logo.png" alt="M3AK">
+      <div>
+        <div class="brand-name">M3AK</div>
+        <div class="brand-tagline">كل اللي تحتاجه.. معاك</div>
       </div>
     </div>
 
-    <div class="notification">♧</div>
+    <div class="header-actions">
+      <button class="header-btn" aria-label="الإشعارات">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/>
+          <path d="M10 21h4"/>
+        </svg>
+      </button>
+    </div>
 
   </div>
 
   <div class="welcome">
     <div>
-      <h2 id="welcomeName">أهلاً بيك في معاك ❤️</h2>
-      <p>سلسلة معاك من أول اليوم لآخره</p>
+      <h1 id="welcomeTitle">أهلاً بيك في معاك ❤️</h1>
+      <p>كل احتياجاتك وخدماتك في مكان واحد</p>
     </div>
+    <div class="welcome-mark"></div>
   </div>
-
 </header>
 
-<section class="account-card">
-
-  <div class="avatar">👤</div>
-
-  <div class="account-info">
-    <small>صاحب الحساب</small>
-    <h3 id="accountName">الملف الشخصي</h3>
-  </div>
-
-  <div class="plan" id="accountPlan">باقة حسابك</div>
-
-</section>
-
-<div class="section-title">
-  <div>
-    <h3>مساعدك الشخصي</h3>
-    <span></span>
-  </div>
-</div>
-
-<div class="ai-card" onclick="go('assistant')">
-
-  <div class="robot">
-    <svg viewBox="0 0 64 64">
-
-      <path d="M12 31V27C12 15 21 8 32 8S52 15 52 27V31"
-       fill="none" stroke="white" stroke-width="3"/>
-
-      <rect x="7" y="27" width="10" height="18" rx="5"
-       fill="#eaffff" stroke="#168c91" stroke-width="2"/>
-
-      <rect x="47" y="27" width="10" height="18" rx="5"
-       fill="#eaffff" stroke="#168c91" stroke-width="2"/>
-
-      <rect x="16" y="19" width="32" height="31" rx="11"
-       fill="#fff" stroke="#168c91" stroke-width="2"/>
-
-      <circle cx="25" cy="32" r="3" fill="#269a9b"/>
-      <circle cx="39" cy="32" r="3" fill="#269a9b"/>
-
-      <path d="M26 41Q32 46 38 41"
-       stroke="#269a9b" stroke-width="2.5"
-       fill="none" stroke-linecap="round"/>
-
-      <path d="M51 44Q53 53 43 55"
-       stroke="white" stroke-width="2.5"
-       fill="none"/>
-
-      <circle cx="41" cy="55" r="3" fill="#ed9acb"/>
-
-      <path d="M32 19V12"
-       stroke="white" stroke-width="2"/>
-
-      <circle cx="32" cy="9" r="3" fill="#ed9acb"/>
-
+<!-- بيانات الحساب -->
+<section class="account">
+  <div class="avatar">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+      <circle cx="12" cy="8" r="4"/>
+      <path d="M4 21c.5-4.3 3.2-6.5 8-6.5s7.5 2.2 8 6.5"/>
     </svg>
   </div>
 
-  <div class="ai-info">
-    <h3>المساعد الذكي</h3>
-    <p>مساعدك في البحث والإجابة وتلبية احتياجاتك.</p>
-    <span class="ai-badge">ذكاء اصطناعي معاك</span>
+  <div class="account-info">
+    <div class="account-label">صاحب الحساب</div>
+    <div class="account-name" id="accountName">حسابي الشخصي</div>
   </div>
 
-  <div class="ai-arrow">←</div>
+  <div class="plan" id="accountPlan">باقة M3AK</div>
+</section>
 
-</div>
-
-<div class="section-title">
+<!-- المساعد الذكي -->
+<div class="section-heading">
   <div>
-    <h3>الأقسام الرئيسية</h3>
-    <span></span>
+    <h2>مساعدك الذكي</h2>
+    <div class="heading-line"></div>
   </div>
+  <small>معاك في كل خطوة</small>
 </div>
 
-<main class="categories">
+<section class="ai-card" onclick="navigate('assistant')">
 
-  <div class="category c1" onclick="go('home')">
-    <div class="icon">🏠</div>
-    <h4>احتياجات المنزل</h4>
+  <div class="ai-art">
+    <svg viewBox="0 0 80 80">
+      <!-- سماعة الرأس -->
+      <path d="M15 38V32C15 17 26 9 40 9S65 17 65 32V38"
+            fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+      <rect x="9" y="34" width="12" height="21" rx="6" fill="#fff"/>
+      <rect x="59" y="34" width="12" height="21" rx="6" fill="#fff"/>
+
+      <!-- وجه الروبوت -->
+      <rect x="19" y="25" width="42" height="38" rx="13"
+            fill="#fff" stroke="#177f8b" stroke-width="2"/>
+
+      <circle cx="31" cy="41" r="3.5" fill="#168e9b"/>
+      <circle cx="49" cy="41" r="3.5" fill="#168e9b"/>
+      <path d="M31 51Q40 58 49 51" fill="none"
+            stroke="#168e9b" stroke-width="2.5" stroke-linecap="round"/>
+
+      <!-- ميكروفون -->
+      <path d="M65 53Q69 65 55 68" fill="none"
+            stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="53" cy="68" r="3.5" fill="#f3a5d0"/>
+
+      <!-- إشارة الذكاء -->
+      <path d="M40 5V1M36 3H44" stroke="#ffd5eb"
+            stroke-width="2.5" stroke-linecap="round"/>
+    </svg>
   </div>
 
-  <div class="category c2" onclick="go('shopping')">
-    <div class="icon">🛍️</div>
-    <h4>التسوق ومقارنة الأسعار</h4>
+  <div class="ai-copy">
+    <h3>المساعد الذكي</h3>
+    <p>اسأل، ابحث، قارن، وخلي معاك يساعدك توصل للي محتاجه.</p>
+    <span class="ai-chip">✦ مساعدك متاح دائمًا</span>
   </div>
 
-  <div class="category c3" onclick="go('nearby')">
-    <div class="icon">📍</div>
-    <h4>خدمات قريبة منك</h4>
+  <div class="ai-arrow">‹</div>
+</section>
+
+<!-- الأقسام الرئيسية -->
+<div class="section-heading">
+  <div>
+    <h2>اكتشف أقسام معاك</h2>
+    <div class="heading-line"></div>
+  </div>
+  <small>خدمات متنوعة لحياتك اليومية</small>
+</div>
+
+<main class="grid">
+
+  <!-- المنزل -->
+  <div class="tile" onclick="navigate('home')">
+    <div class="tile-icon">
+      <svg viewBox="0 0 24 24">
+        <path d="M3 10.5L12 3l9 7.5"/>
+        <path d="M5.5 9.5V21h13V9.5"/>
+        <path d="M9 21v-7h6v7"/>
+      </svg>
+    </div>
+    <h3>احتياجات المنزل</h3>
   </div>
 
-  <div class="category c4" onclick="go('family')">
-    <div class="icon">👨‍👩‍👧</div>
-    <h4>احتياجات الأطفال والأسرة</h4>
+  <!-- التسوق -->
+  <div class="tile" onclick="navigate('shopping')">
+    <div class="tile-icon">
+      <svg viewBox="0 0 24 24">
+        <path d="M4 8h16l-1.5 12h-13L4 8Z"/>
+        <path d="M9 9V6a3 3 0 0 1 6 0v3"/>
+        <path d="M9 14h6"/>
+      </svg>
+    </div>
+    <h3>التسوق ومقارنة الأسعار</h3>
   </div>
 
-  <div class="category c5" onclick="go('mother-awareness')">
-    <div class="icon">👩‍👧</div>
-    <h4>توعية الأم تجاه أبنائها</h4>
+  <!-- قريب منك -->
+  <div class="tile" onclick="navigate('nearby')">
+    <div class="tile-icon">
+      <svg viewBox="0 0 24 24">
+        <path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"/>
+        <circle cx="12" cy="10" r="2.5"/>
+      </svg>
+    </div>
+    <h3>خدمات قريبة منك</h3>
   </div>
 
-  <div class="category c6" onclick="go('protection')">
-    <div class="icon">🛡️</div>
-    <h4>حماية المشتريات</h4>
+  <!-- الأسرة -->
+  <div class="tile" onclick="navigate('family')">
+    <div class="tile-icon">
+      <svg viewBox="0 0 24 24">
+        <circle cx="8" cy="8" r="3"/>
+        <circle cx="17" cy="9" r="2.5"/>
+        <path d="M2.5 20c.3-4 2-6 5.5-6s5.2 2 5.5 6"/>
+        <path d="M14 15c3.8-1.5 6.5.7 7 5"/>
+      </svg>
+    </div>
+    <h3>احتياجات الأطفال والأسرة</h3>
   </div>
 
-  <div class="category c7" onclick="go('salons')">
-    <div class="icon">💇</div>
-    <h4>صالونات التصفيف والتجميل</h4>
+  <!-- توعية الأم -->
+  <div class="tile" onclick="navigate('mother-awareness')">
+    <div class="tile-icon">
+      <svg viewBox="0 0 24 24">
+        <circle cx="12" cy="7" r="4"/>
+        <path d="M4 21c.5-5 3-7.5 8-7.5s7.5 2.5 8 7.5"/>
+        <path d="M9 7h.1M15 7h.1"/>
+      </svg>
+    </div>
+    <h3>توعية الأم تجاه أبنائها</h3>
   </div>
 
-  <div class="category c8" onclick="go('restaurants')">
-    <div class="icon">☕</div>
-    <h4>مطاعم وكافيهات</h4>
+  <!-- حماية المشتريات -->
+  <div class="tile" onclick="navigate('protection')">
+    <div class="tile-icon">
+      <svg viewBox="0 0 24 24">
+        <path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/>
+        <path d="m8.5 12 2.3 2.3 4.8-5"/>
+      </svg>
+    </div>
+    <h3>حماية المشتريات</h3>
   </div>
 
-  <div class="category c9" onclick="go('cars')">
-    <div class="icon">🚘</div>
-    <h4>السيارات وخدماتها</h4>
+  <!-- الصالونات -->
+  <div class="tile" onclick="navigate('salons')">
+    <div class="tile-icon">
+      <svg viewBox="0 0 24 24">
+        <path d="M7 3c-2 2-2 5 0 7l10 11"/>
+        <path d="M17 3c2 2 2 5 0 7L7 21"/>
+        <path d="M5 5l4-3M19 5l-4-3"/>
+      </svg>
+    </div>
+    <h3>صالونات التصفيف والتجميل</h3>
   </div>
 
-  <div class="category c10" onclick="go('real-estate')">
-    <div class="icon">🏢</div>
-    <h4>العقارات</h4>
+  <!-- المطاعم -->
+  <div class="tile" onclick="navigate('restaurants')">
+    <div class="tile-icon">
+      <svg viewBox="0 0 24 24">
+        <path d="M4 3v7a3 3 0 0 0 6 0V3"/>
+        <path d="M7 3v18M17 3v18"/>
+        <path d="M17 3c3 2 3 7 0 9"/>
+      </svg>
+    </div>
+    <h3>مطاعم وكافيهات</h3>
+  </div>
+
+  <!-- السيارات -->
+  <div class="tile" onclick="navigate('cars')">
+    <div class="tile-icon">
+      <svg viewBox="0 0 24 24">
+        <path d="m4 11 2-5h12l2 5"/>
+        <path d="M3 11h18v8H3z"/>
+        <path d="M6 19v2M18 19v2"/>
+        <circle cx="7" cy="15" r="1"/>
+        <circle cx="17" cy="15" r="1"/>
+      </svg>
+    </div>
+    <h3>السيارات وخدماتها</h3>
+  </div>
+
+  <!-- العقارات -->
+  <div class="tile" onclick="navigate('real-estate')">
+    <div class="tile-icon">
+      <svg viewBox="0 0 24 24">
+        <path d="M4 21V5l8-3 8 3v16"/>
+        <path d="M2 21h20"/>
+        <path d="M8 8h2M14 8h2M8 12h2M14 12h2"/>
+        <path d="M10 21v-5h4v5"/>
+      </svg>
+    </div>
+    <h3>العقارات</h3>
   </div>
 
 </main>
 
-<div class="section-title">
+<!-- خدمات الحساب -->
+<div class="section-heading">
   <div>
-    <h3>خدمات حسابك</h3>
-    <span></span>
+    <h2>خدمات حسابك</h2>
+    <div class="heading-line"></div>
   </div>
 </div>
 
-<section class="service-list">
+<section class="service-grid">
 
-  <div class="service" onclick="go('suggestions')">
-    <div class="service-icon">💡</div>
-    <h4>مقترحاتك تهمنا</h4>
+  <div class="service" onclick="navigate('suggestions')">
+    <div class="service-icon">
+      <svg viewBox="0 0 24 24">
+        <path d="M9 18h6M10 22h4"/>
+        <path d="M8 14a7 7 0 1 1 8 0c-1 .7-1 2-1 2h-6s0-1.3-1-2Z"/>
+      </svg>
+    </div>
+    <div>
+      <h3>مقترحاتك تهمنا</h3>
+      <p>شاركنا رأيك</p>
+    </div>
   </div>
 
-  <div class="service" onclick="go('subscriptions')">
-    <div class="service-icon">💎</div>
-    <h4>الاشتراكات والباقات</h4>
+  <div class="service" onclick="navigate('subscriptions')">
+    <div class="service-icon">
+      <svg viewBox="0 0 24 24">
+        <path d="M3 7h18v13H3z"/>
+        <path d="M3 11h18M7 16h4"/>
+        <path d="M7 7V4h13v3"/>
+      </svg>
+    </div>
+    <div>
+      <h3>الاشتراكات والباقات</h3>
+      <p>إدارة باقتك</p>
+    </div>
   </div>
 
-  <div class="service" onclick="go('support')">
-    <div class="service-icon">🎧</div>
-    <h4>الدعم الفني</h4>
+  <div class="service" onclick="navigate('support')">
+    <div class="service-icon">
+      <svg viewBox="0 0 24 24">
+        <path d="M4 13v-2a8 8 0 0 1 16 0v2"/>
+        <rect x="3" y="12" width="4" height="7" rx="2"/>
+        <rect x="17" y="12" width="4" height="7" rx="2"/>
+        <path d="M17 19c0 2-2 3-5 3"/>
+      </svg>
+    </div>
+    <div>
+      <h3>الدعم الفني</h3>
+      <p>نحن هنا لمساعدتك</p>
+    </div>
   </div>
 
-  <div class="service" onclick="go('profile')">
-    <div class="service-icon">👤</div>
-    <h4>الملف الشخصي</h4>
+  <div class="service" onclick="navigate('profile')">
+    <div class="service-icon">
+      <svg viewBox="0 0 24 24">
+        <circle cx="12" cy="8" r="4"/>
+        <path d="M4 21c.5-4.5 3-7 8-7s7.5 2.5 8 7"/>
+      </svg>
+    </div>
+    <div>
+      <h3>الملف الشخصي</h3>
+      <p>بيانات حسابك</p>
+    </div>
   </div>
 
-  <div class="service admin" id="adminService"
-       onclick="go('admin')">
-    <div class="service-icon">⚙️</div>
-    <h4>لوحة التحكم</h4>
+  <div class="service" id="adminService" hidden onclick="navigate('admin')">
+    <div class="service-icon">
+      <svg viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19 13.5a7 7 0 0 0 0-3l2-1.5-2-3.5-2.5 1a8 8 0 0 0-2.5-1.5L13.5 2h-4L9 5a8 8 0 0 0-2.5 1.5L4 5.5 2 9l2 1.5a7 7 0 0 0 0 3L2 15l2 3.5 2.5-1A8 8 0 0 0 9 19l.5 3h4l.5-3a8 8 0 0 0 2.5-1.5l2.5 1 2-3.5Z"/>
+      </svg>
+    </div>
+    <div>
+      <h3>لوحة التحكم</h3>
+      <p>إدارة التطبيق</p>
+    </div>
   </div>
 
 </section>
 
-<footer class="footer">
-  M3AK — مصلحتك أولاً ❤️
-</footer>
+<div class="footer">M3AK · مصلحتك أولًا ❤️</div>
 
+<!-- شريط التنقل -->
 <nav class="bottom-nav">
 
-  <div class="nav-item active" onclick="go('sections')">
-    <span class="nav-icon">⌂</span>
+  <div class="nav-item active" onclick="navigate('sections')">
+    <svg viewBox="0 0 24 24">
+      <path d="m3 11 9-8 9 8"/>
+      <path d="M5 10v11h14V10"/>
+      <path d="M9 21v-7h6v7"/>
+    </svg>
     <span>الرئيسية</span>
   </div>
 
-  <div class="nav-item" onclick="go('nearby')">
-    <span class="nav-icon">⌖</span>
+  <div class="nav-item" onclick="navigate('nearby')">
+    <svg viewBox="0 0 24 24">
+      <path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"/>
+      <circle cx="12" cy="10" r="2.5"/>
+    </svg>
     <span>قريب منك</span>
   </div>
 
-  <div class="nav-item" onclick="go('orders')">
-    <span class="nav-icon">▤</span>
+  <div class="nav-item" onclick="navigate('orders')">
+    <svg viewBox="0 0 24 24">
+      <path d="M6 3h12v18H6z"/>
+      <path d="M9 8h6M9 12h6M9 16h4"/>
+    </svg>
     <span>طلباتي</span>
   </div>
 
-  <div class="nav-item" onclick="go('profile')">
-    <span class="nav-icon">♙</span>
+  <div class="nav-item" onclick="navigate('profile')">
+    <svg viewBox="0 0 24 24">
+      <circle cx="12" cy="8" r="4"/>
+      <path d="M4 21c.5-4.5 3-7 8-7s7.5 2.5 8 7"/>
+    </svg>
     <span>حسابي</span>
   </div>
 
-  <div class="nav-item" onclick="go('assistant')">
-    <span class="nav-icon">✧</span>
+  <div class="nav-item" onclick="navigate('assistant')">
+    <svg viewBox="0 0 24 24">
+      <rect x="4" y="6" width="16" height="14" rx="5"/>
+      <path d="M12 3v3M8 12h.1M16 12h.1M9 16h6"/>
+      <path d="M2 10v5M22 10v5"/>
+    </svg>
     <span>المساعد</span>
   </div>
 
 </nav>
-
 </div>
 
 <script>
+/*
+  اربط هذه الصفحة بجلسة المستخدم الحقيقية من Backend.
+  لا تعتمد على localStorage لتحديد صلاحية الباقة أو المسؤول.
+*/
 
-function loadAccount() {
+const API_BASE = window.API_BASE || '/api';
 
-  try {
+async function loadAccount(){
+  try{
+    const response = await fetch(`${API_BASE}/me`, {
+      method:'GET',
+      credentials:'include',
+      headers:{'Accept':'application/json'}
+    });
 
-    const user = JSON.parse(
-      localStorage.getItem('m3ak_user') || '{}'
-    );
+    if(!response.ok) return;
 
-    const name = user.fullName || user.name || '';
+    const data = await response.json();
+    const user = data.user || data;
 
-    if(name) {
+    const name = user.fullName || user.name;
+    const plan = user.packageName || user.planName || user.plan;
+
+    if(name){
       document.getElementById('accountName').textContent = name;
-      document.getElementById('welcomeName').textContent =
-        'أهلاً بيك يا ' + name + ' ❤️';
+      document.getElementById('welcomeTitle').textContent =
+        `أهلاً بيك يا ${name} ❤️`;
     }
 
-    const plan = user.packageName || user.plan || '';
-
-    if(plan) {
+    if(plan){
       document.getElementById('accountPlan').textContent = plan;
     }
 
-    // صلاحية لوحة التحكم يجب أن تأتي من جلسة موثوقة
-    // والتحقق النهائي يكون في Backend وليس من localStorage.
+    // لا تظهر لوحة التحكم إلا إذا أكد السيرفر صلاحية المسؤول.
+    if(user.role === 'admin'){
+      document.getElementById('adminService').hidden = false;
+    }
 
-  } catch(error) {
-    console.error('Account loading error',error);
+  }catch(error){
+    console.warn('تعذر تحميل بيانات الحساب:',error);
   }
-
 }
 
-function go(section) {
+const routes = {
+  sections:'sections.html',
+  assistant:'assistant.html',
+  home:'home.html',
+  shopping:'shopping.html',
+  nearby:'nearby.html',
+  family:'family.html',
+  'mother-awareness':'mother-awareness.html',
+  protection:'protection.html',
+  salons:'salons.html',
+  restaurants:'restaurants.html',
+  cars:'cars.html',
+  'real-estate':'real-estate.html',
+  suggestions:'suggestions.html',
+  subscriptions:'subscriptions.html',
+  support:'support.html',
+  profile:'profile.html',
+  admin:'admin.html',
+  orders:'orders.html'
+};
 
-  const routes = {
-    sections:'sections.html',
-    assistant:'assistant.html',
-    home:'home.html',
-    shopping:'shopping.html',
-    nearby:'nearby.html',
-    family:'family.html',
-    'mother-awareness':'mother-awareness.html',
-    protection:'protection.html',
-    salons:'salons.html',
-    restaurants:'restaurants.html',
-    cars:'cars.html',
-    'real-estate':'real-estate.html',
-    suggestions:'suggestions.html',
-    subscriptions:'subscriptions.html',
-    support:'support.html',
-    profile:'profile.html',
-    admin:'admin.html',
-    orders:'orders.html'
-  };
-
-  if(routes[section]) {
-    window.location.href = routes[section];
-  }
-
+function navigate(page){
+  const target = routes[page];
+  if(target) window.location.href = target;
 }
 
 loadAccount();
-
 </script>
 
 </body>
- </html>
+  </html>
