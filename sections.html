@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#241333">
+<title>M3AK | الأقسام الرئيسية</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap');
+
+:root {
+  --purple: #54246f;
+  --deep: #241333;
+  --pink: #c94b91;
+  --turquoise: #19aaa7;
+  --light: #f7f6fa;
+  --text: #292333;
+  --muted: #898493;
+  --white: #ffffff;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Cairo', sans-serif;
+  background: var(--light);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+.app {
+  max-width: 520px;
+  margin: auto;
+  min-height: 100vh;
+  padding-bottom: 35px;
+  background:
+    radial-gradient(circle at 95% 8%, rgba(25,170,167,.07), transparent 25%),
+    radial-gradient(circle at 5% 35%, rgba(84,36,111,.05), transparent 25%),
+    #faf9fc;
+}
+
+/* HEADER */
+
+.header {
+  background: linear-gradient(125deg,#241333,#432052);
+  padding: 24px 20px 30px;
+  border-radius: 0 0 30px 30px;
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.header::after {
+  content: "";
+  position: absolute;
+  width: 190px;
+  height: 190px;
+  border: 1px solid rgba(255,255,255,.09);
+  border-radius: 50%;
+  left: -65px;
+  top: -85px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  z-index: 2;
+}
+
+/* ضع هنا ملف اللوجو الأصلي المعتمد */
+
+.brand img {
+  width: 57px;
+  height: 57px;
+  object-fit: contain;
+}
+
+.brand-name {
+  font-size: 25px;
+  font-weight: 900;
+  letter-spacing: 1px;
+}
+
+.brand-subtitle {
+  font-size: 11px;
+  opacity: .85;
+  margin-top: -4px;
+}
+
+.welcome {
+  margin-top: 25px;
+  position: relative;
+  z-index: 2;
+}
+
+.welcome h1 {
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.welcome p {
+  font-size: 13px;
+  color: #e0d5e8;
+  margin-top: 5px;
+}
+
+/* SECTION TITLE */
+
+.section-heading {
+  padding: 25px 20px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.section-heading h2 {
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.section-heading span {
+  width: 36px;
+  height: 3px;
+  background: var(--turquoise);
+  border-radius: 10px;
+  display: block;
+  margin-top: 5px;
+}
+
+/* AI ASSISTANT */
+
+.ai-card {
+  margin: 0 16px;
+  border-radius: 22px;
+  padding: 19px;
+  background: linear-gradient(115deg,#321b47,#63347c);
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 9px 25px rgba(65,31,82,.17);
+  cursor: pointer;
+}
+
+.ai-card::before {
+  content: "";
+  position: absolute;
+  width: 140px;
+  height: 140px;
+  border: 1px solid rgba(255,255,255,.13);
+  border-radius: 50%;
+  left: -45px;
+  top: -55px;
+}
+
+.ai-icon {
+  width: 65px;
+  height: 65px;
+  flex-shrink: 0;
+  border-radius: 20px;
+  background: linear-gradient(145deg,#21b8b3,#137f8e);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 34px;
+  box-shadow: 0 5px 18px rgba(20,180,174,.25);
+}
+
+.ai-content {
+  flex: 1;
+  position: relative;
+  z-index: 1;
+}
+
+.ai-content h3 {
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.ai-content p {
+  font-size: 11px;
+  color: #e7ddeb;
+  margin-top: 4px;
+}
+
+.ai-arrow {
+  font-size: 22px;
+  color: #71ded6;
+}
+
+/* CATEGORIES */
+
+.categories {
+  padding: 0 16px;
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 13px;
+}
+
+.category {
+  background: white;
+  min-height: 135px;
+  border-radius: 19px;
+  padding: 17px 12px;
+  border: 1px solid #efebf2;
+  box-shadow: 0 5px 17px rgba(49,27,60,.045);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: .25s ease;
+}
+
+.category:active {
+  transform: scale(.97);
+}
+
+.category::after {
+  content: "";
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--soft);
+  left: -35px;
+  bottom: -40px;
+  opacity: .65;
+}
+
+.icon {
+  width: 49px;
+  height: 49px;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 25px;
+  background: var(--soft);
+  margin-bottom: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+.category h3 {
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.7;
+  position: relative;
+  z-index: 1;
+}
+
+.category p {
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 3px;
+  position: relative;
+  z-index: 1;
+}
+
+/* COLORS */
+
+.c1 { --soft:#e4f5f3; }
+.c2 { --soft:#f5eaf7; }
+.c3 { --soft:#e9f1fa; }
+.c4 { --soft:#fceef3; }
+.c5 { --soft:#fff3e7; }
+.c6 { --soft:#e9f5f0; }
+.c7 { --soft:#f5edf8; }
+.c8 { --soft:#e8f5f5; }
+.c9 { --soft:#f9edf1; }
+
+/* FOOTER */
+
+.footer {
+  margin: 25px 18px 0;
+  padding: 17px;
+  border-top: 1px solid #eee8f1;
+  text-align: center;
+  color: #938a9a;
+  font-size: 11px;
+}
+
+.footer strong {
+  color: var(--purple);
+}
+
+/* SMALL SCREENS */
+
+@media (max-width:350px) {
+  .categories {
+    gap: 9px;
+    padding: 0 11px;
+  }
+
+  .category {
+    padding: 13px 10px;
+  }
+
+  .category h3 {
+    font-size: 12px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <header class="header">
+
+    <div class="brand">
+
+      <img src="assets/m3ak-logo.png" alt="M3AK Logo">
+
+      <div>
+        <div class="brand-name">M3AK</div>
+        <div class="brand-subtitle">كل اللي تحتاجه.. معاك</div>
+      </div>
+
+    </div>
+
+    <div class="welcome">
+      <h1>أهلاً بيك في معاك ❤️</h1>
+      <p>اختار القسم اللي محتاجه وإحنا معاك.</p>
+    </div>
+
+  </header>
+
+
+  <div class="section-heading">
+    <div>
+      <h2>اكتشف خدمات معاك</h2>
+      <span></span>
+    </div>
+  </div>
+
+
+  <!-- AI ASSISTANT -->
+
+  <div class="ai-card" onclick="openSection('assistant')">
+
+    <div class="ai-icon">✦</div>
+
+    <div class="ai-content">
+      <h3>المساعد الذكي</h3>
+      <p>اسأل، ابحث، واستفد من خدمات معاك.</p>
+    </div>
+
+    <div class="ai-arrow">←</div>
+
+  </div>
+
+
+  <!-- APPROVED CATEGORIES -->
+
+  <div class="section-heading">
+    <div>
+      <h2>الأقسام الرئيسية</h2>
+      <span></span>
+    </div>
+  </div>
+
+
+  <main class="categories">
+
+    <div class="category c1"
+         onclick="openSection('home')">
+      <div class="icon">🏠</div>
+      <h3>احتياجات المنزل</h3>
+      <p>كل ما يخص احتياجات بيتك</p>
+    </div>
+
+
+    <div class="category c2"
+         onclick="openSection('shopping')">
+      <div class="icon">🛍️</div>
+      <h3>التسوق ومقارنة الأسعار</h3>
+      <p>قارن واختار الأنسب</p>
+    </div>
+
+
+    <div class="category c3"
+         onclick="openSection('nearby')">
+      <div class="icon">📍</div>
+      <h3>خدمات قريبة منك</h3>
+      <p>اكتشف الخدمات المحيطة بك</p>
+    </div>
+
+
+    <div class="category c4"
+         onclick="openSection('family')">
+      <div class="icon">👨‍👩‍👧</div>
+      <h3>احتياجات الأطفال والأسرة</h3>
+      <p>خدمات تهم كل أفراد الأسرة</p>
+    </div>
+
+
+    <div class="category c5"
+         onclick="openSection('mother-awareness')">
+      <div class="icon">👩‍👧</div>
+      <h3>توعية الأم تجاه أبنائها</h3>
+      <p>وعي وتربية وتواصل أفضل</p>
+    </div>
+
+
+    <div class="category c6"
+         onclick="openSection('protection')">
+      <div class="icon">🛡️</div>
+      <h3>حماية المشتريات</h3>
+      <p>معلومات تساعدك على الشراء الآمن</p>
+    </div>
+
+
+    <div class="category c7"
+         onclick="openSection('salons')">
+      <div class="icon">💇</div>
+      <h3>صالونات التصفيف والتجميل</h3>
+      <p>خدمات رجالي وحريمي</p>
+    </div>
+
+
+    <div class="category c8"
+         onclick="openSection('restaurants')">
+      <div class="icon">☕</div>
+      <h3>مطاعم وكافيهات</h3>
+      <p>اكتشف المطاعم والكافيهات</p>
+    </div>
+
+
+    <div class="category c9"
+         onclick="openSection('cars')">
+      <div class="icon">🚘</div>
+      <h3>السيارات وخدماتها</h3>
+      <p>خدمات واحتياجات السيارات</p>
+    </div>
+
+  </main>
+
+
+  <footer class="footer">
+    <strong>M3AK</strong>
+    <br>
+    مصلحتك أولاً.. وسلسلة معاك من أول اليوم لآخره
+  </footer>
+
+</div>
+
+
+<script>
+
+function openSection(section) {
+
+  // ربط الأقسام بشاشاتها الفعلية عند تنفيذها
+
+  const routes = {
+    assistant: 'assistant.html',
+    home: 'home.html',
+    shopping: 'shopping.html',
+    nearby: 'nearby.html',
+    family: 'family.html',
+    'mother-awareness': 'mother-awareness.html',
+    protection: 'protection.html',
+    salons: 'salons.html',
+    restaurants: 'restaurants.html',
+    cars: 'cars.html'
+  };
+
+  if (routes[section]) {
+    window.location.href = routes[section];
+  }
+
+}
+
+</script>
+
+</body>
+</html>
