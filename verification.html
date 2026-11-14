@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#ffffff">
+<title>M3AK - التحقق من الحساب</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap');
+
+:root {
+  --purple: #7010d8;
+  --dark: #390078;
+  --pink: #ed168e;
+  --cyan: #00c5d5;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Cairo', sans-serif;
+  background: #fff;
+  color: var(--dark);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.screen {
+  width: 100%;
+  max-width: 480px;
+  min-height: 100vh;
+  margin: auto;
+  position: relative;
+  overflow: hidden;
+  background: #fff;
+  padding: 20px 22px 170px;
+}
+
+/* الزخارف العلوية */
+
+.top-left {
+  position: absolute;
+  top: -65px;
+  left: -85px;
+  width: 230px;
+  height: 210px;
+  background: linear-gradient(135deg,#f7a1ff,#ed168e);
+  border-radius: 35% 0 65% 0;
+  transform: rotate(-15deg);
+  opacity: .8;
+}
+
+.top-right {
+  position: absolute;
+  top: 120px;
+  right: -130px;
+  width: 230px;
+  height: 160px;
+  border-radius: 50%;
+  border-top: 35px solid #7950e8;
+  border-bottom: 35px solid #00c5d5;
+  transform: rotate(-35deg);
+  opacity: .8;
+}
+
+/* الشعار */
+
+.logo-area {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  margin-top: 5px;
+}
+
+.logo {
+  width: 112px;
+  height: 112px;
+  margin: auto;
+}
+
+.brand {
+  font-size: 39px;
+  font-weight: 900;
+  color: #4a087e;
+  line-height: 1.2;
+  direction: ltr;
+}
+
+.tagline {
+  font-size: 17px;
+  font-weight: 700;
+}
+
+/* العلامة المائية */
+
+.watermark {
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  top: 350px;
+  right: -35px;
+  opacity: .075;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* الرسم الرئيسي */
+
+.illustration {
+  height: 350px;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 5px;
+}
+
+.illustration svg {
+  width: 100%;
+  max-width: 350px;
+}
+
+/* النصوص */
+
+.content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+}
+
+h1 {
+  font-size: 29px;
+  font-weight: 900;
+  margin-bottom: 12px;
+  color: #410078;
+}
+
+.description {
+  font-size: 18px;
+  line-height: 1.9;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.email {
+  direction: ltr;
+  font-size: 19px;
+  font-weight: 800;
+  color: #450080;
+  margin-bottom: 25px;
+  word-break: break-all;
+}
+
+/* زر البريد */
+
+.email-icon {
+  display: inline-flex;
+  width: 34px;
+  height: 34px;
+  background: linear-gradient(135deg,#8010ed,#ed168e);
+  border-radius: 50%;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  margin-left: 8px;
+}
+
+/* حالة التحقق */
+
+.status-box {
+  background: #f5eaff;
+  border: 1px solid #e7d2ff;
+  border-radius: 25px;
+  padding: 12px;
+  margin: 18px 0;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.timer {
+  color: var(--pink);
+  font-size: 20px;
+  font-weight: 900;
+  margin-left: 5px;
+}
+
+/* زر التحقق */
+
+.verify-btn {
+  width: 100%;
+  height: 66px;
+  border: none;
+  border-radius: 28px;
+  background: linear-gradient(100deg,#8100f5,#ed168e);
+  color: white;
+  font-family: inherit;
+  font-size: 24px;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 5px 15px #b65aff40;
+  margin-top: 10px;
+}
+
+.verify-btn:disabled {
+  opacity: .65;
+  cursor: not-allowed;
+}
+
+/* إعادة الإرسال */
+
+.resend {
+  margin-top: 20px;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.resend button {
+  border: none;
+  background: transparent;
+  color: var(--cyan);
+  font-family: inherit;
+  font-weight: 900;
+  font-size: 17px;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.message {
+  margin-top: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  min-height: 25px;
+}
+
+/* خلفية المعالم المصرية */
+
+.skyline {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 190px;
+  z-index: 0;
+  opacity: .35;
+}
+
+.bottom-waves {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 75px;
+  z-index: 1;
+  background:
+    linear-gradient(170deg,transparent 25%,#ed168e 26%,#ed168e 43%,transparent 44%),
+    linear-gradient(190deg,transparent 38%,#00c5d5 39%,#00c5d5 55%,transparent 56%),
+    linear-gradient(160deg,transparent 45%,#5710d8 46%);
+}
+
+@media(max-width:380px) {
+  .illustration {height:300px}
+  h1 {font-size:25px}
+  .description {font-size:16px}
+  .screen {padding-left:16px;padding-right:16px}
+}
+</style>
+</head>
+
+<body>
+
+<div class="screen">
+
+<div class="top-left"></div>
+<div class="top-right"></div>
+
+<!-- العلامة المائية -->
+<svg class="watermark" viewBox="0 0 300 300">
+ <path d="M35 130 L150 35 L265 130 V260 H35 Z"
+ fill="none" stroke="#8c22d9" stroke-width="18"
+ stroke-linejoin="round"/>
+ <path d="M150 100 C115 55 65 105 150 170 C235 105 185 55 150 100"
+ fill="#8c22d9"/>
+ <path d="M35 190 Q0 140 65 165 L110 215"
+ fill="none" stroke="#8c22d9" stroke-width="20"
+ stroke-linecap="round"/>
+ <path d="M265 190 Q300 140 235 165 L190 215"
+ fill="none" stroke="#8c22d9" stroke-width="20"
+ stroke-linecap="round"/>
+</svg>
+
+<!-- الشعار -->
+<header class="logo-area">
+
+<svg class="logo" viewBox="0 0 120 120">
+<defs>
+ <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
+  <stop stop-color="#7800e8"/>
+  <stop offset="1" stop-color="#ed168e"/>
+ </linearGradient>
+ <linearGradient id="hg" x1="0" y1="0" x2="1" y2="1">
+  <stop stop-color="#ed168e"/>
+  <stop offset="1" stop-color="#8500e8"/>
+ </linearGradient>
+</defs>
+<path d="M15 54 L60 12 L105 54 V82"
+ fill="none" stroke="url(#lg)" stroke-width="12"
+ stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M60 43 C42 20 20 47 60 78 C100 47 78 20 60 43"
+ fill="url(#hg)"/>
+<path d="M18 65 Q-2 52 15 88 Q28 108 49 105"
+ fill="none" stroke="#a000dc" stroke-width="12"
+ stroke-linecap="round"/>
+<path d="M102 65 Q122 52 105 88 Q92 108 71 105"
+ fill="none" stroke="#00bed5" stroke-width="12"
+ stroke-linecap="round"/>
+</svg>
+
+<div class="brand">M3AK</div>
+<div class="tagline">كل اللي تحتاجه.. معاك</div>
+
+</header>
+
+<!-- الرسم الرئيسي -->
+<div class="illustration">
+
+<svg viewBox="0 0 350 350">
+
+<defs>
+ <linearGradient id="phone" x1="0" y1="0" x2="1" y2="1">
+  <stop stop-color="#a900ff"/>
+  <stop offset="1" stop-color="#350078"/>
+ </linearGradient>
+ <linearGradient id="shield" x1="0" y1="0" x2="1" y2="1">
+  <stop stop-color="#a400ff"/>
+  <stop offset="1" stop-color="#5100c9"/>
+ </linearGradient>
+ <filter id="shadow">
+  <feGaussianBlur stdDeviation="8"/>
+ </filter>
+</defs>
+
+<ellipse cx="175" cy="300" rx="115" ry="15"
+ fill="#9c36ff" opacity=".25" filter="url(#shadow)"/>
+
+<!-- الهاتف -->
+<g transform="rotate(-7 145 170)">
+ <rect x="75" y="35" width="145" height="250"
+ rx="29" fill="#350078"/>
+ <rect x="82" y="41" width="131" height="235"
+ rx="24" fill="#d9c4ff" stroke="#a16aff" stroke-width="4"/>
+ <rect x="90" y="49" width="115" height="218"
+ rx="19" fill="#fff"/>
+ <rect x="125" y="48" width="50" height="12"
+ rx="6" fill="#390078"/>
+
+ <!-- الدرع -->
+ <path d="M148 100 L195 119 V159
+ Q190 199 148 220 Q106 199 101 159 V119 Z"
+ fill="url(#shield)"/>
+ <path d="M125 156 L143 174 L176 138"
+ fill="none" stroke="#fff" stroke-width="10"
+ stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+
+<!-- الظرف -->
+<rect x="220" y="95" width="95" height="80"
+ rx="17" fill="#a600ef"/>
+<rect x="226" y="101" width="83" height="68"
+ rx="12" fill="#fff"/>
+<path d="M230 112 L267 141 L305 112"
+ fill="none" stroke="#a600ef" stroke-width="7"
+ stroke-linecap="round"/>
+<path d="M230 158 L253 135 M305 158 L282 135"
+ fill="none" stroke="#a600ef" stroke-width="6"
+ stroke-linecap="round"/>
+
+<!-- الهالة -->
+<ellipse cx="170" cy="280" rx="125" ry="25"
+ fill="none" stroke="#c59aff" stroke-width="4"
+ opacity=".8"/>
+
+</svg>
+</div>
+
+<!-- محتوى التحقق -->
+<main class="content">
+
+<h1>التحقق من الحساب</h1>
+
+<p class="description">
+أرسلنا رابط التحقق إلى بريدك الإلكتروني
+</p>
+
+<div class="email">
+<span class="email-icon">✉</span>
+<span id="emailDisplay">جاري تحميل البريد...</span>
+</div>
+
+<div class="status-box" id="statusBox">
+<span>●</span>
+في انتظار تأكيد البريد الإلكتروني
+</div>
+
+<button class="verify-btn" id="verifyBtn">
+تحققت من بريدي ✓
+</button>
+
+<div class="resend">
+لم يصلك البريد؟
+<button id="resendBtn">إعادة إرسال الرابط</button>
+</div>
+
+<div class="message" id="message"></div>
+
+</main>
+
+<!-- معالم مصر -->
+<svg class="skyline" viewBox="0 0 400 190"
+ preserveAspectRatio="none">
+
+<g fill="#8d50d5">
+ <path d="M0 160 V120 L20 105 L40 120 V160 Z"/>
+ <path d="M55 160 V110 Q90 65 125 110 V160 Z"/>
+ <path d="M75 110 V80 L90 60 L105 80 V110 Z"/>
+ <path d="M145 160 V100 L160 80 L175 100 V160 Z"/>
+ <path d="M190 160 V120 L210 95 L230 120 V160 Z"/>
+ <path d="M260 160 L290 70 L320 160 Z"/>
+ <path d="M300 160 L335 85 L370 160 Z"/>
+ <path d="M375 160 V110 L390 95 L400 110 V160 Z"/>
+</g>
+
+<g stroke="#fff" stroke-width="3" opacity=".5">
+ <path d="M20 160 V120 M90 160 V110 M160 160 V100 M210 160 V120"/>
+</g>
+</svg>
+
+<div class="bottom-waves"></div>
+
+</div>
+
+<script type="module">
+
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+
+import {
+ getAuth,
+ onAuthStateChanged,
+ reload,
+ sendEmailVerification
+} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+
+/*
+مهم:
+ضع نفس Firebase Config المستخدم في signup.html
+ولا تستخدم بيانات مشروع مختلفة.
+*/
+
+const firebaseConfig = {
+ apiKey: "YOUR_API_KEY",
+ authDomain: "YOUR_PROJECT.firebaseapp.com",
+ projectId: "YOUR_PROJECT_ID",
+ storageBucket: "YOUR_PROJECT.firebasestorage.app",
+ messagingSenderId: "YOUR_SENDER_ID",
+ appId: "YOUR_APP_ID"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+const emailDisplay = document.getElementById("emailDisplay");
+const verifyBtn = document.getElementById("verifyBtn");
+const resendBtn = document.getElementById("resendBtn");
+const message = document.getElementById("message");
+const statusBox = document.getElementById("statusBox");
+
+let currentUser = null;
+let countdown = 60;
+let timer = null;
+
+function showMessage(text, success=false) {
+ message.textContent = text;
+ message.style.color = success ? "#159b65" : "#e00078";
+}
+
+function maskEmail(email) {
+ const parts = email.split("@");
+ if(parts.length !== 2) return email;
+ const name = parts[0];
+ return name.substring(0,2) + "****@" + parts[1];
+}
+
+onAuthStateChanged(auth, user => {
+
+ currentUser = user;
+
+ if(!user) {
+  emailDisplay.textContent = "لم يتم العثور على جلسة التسجيل";
+  verifyBtn.disabled = true;
+  showMessage("يرجى العودة وتسجيل الدخول مرة أخرى.");
+  return;
+ }
+
+ emailDisplay.textContent = maskEmail(user.email);
+
+ if(user.emailVerified) {
+  verified();
+ }
+});
+
+async function verified() {
+
+ statusBox.textContent = "✓ تم تأكيد البريد الإلكتروني بنجاح";
+ statusBox.style.color = "#159b65";
+ statusBox.style.background = "#e9fff3";
+
+ verifyBtn.textContent = "تم التحقق بنجاح ✓";
+ verifyBtn.disabled = true;
+
+ showMessage("أهلاً بك في M3AK ❤️", true);
+
+ sessionStorage.removeItem("m3ak_pending_signup");
+
+ setTimeout(() => {
+  window.location.href = "login.html?verified=1";
+ }, 1800);
+}
+
+verifyBtn.addEventListener("click", async () => {
+
+ if(!currentUser) return;
+
+ verifyBtn.disabled = true;
+ verifyBtn.textContent = "جاري التحقق...";
+
+ try {
+
+  await reload(currentUser);
+
+  if(currentUser.emailVerified) {
+   await verified();
+  } else {
+   showMessage("لم يتم تأكيد البريد بعد. افتح رسالة Firebase واضغط رابط التحقق.");
+   verifyBtn.disabled = false;
+   verifyBtn.textContent = "تحققت من بريدي ✓";
+  }
+
+ } catch(error) {
+
+  showMessage("تعذر التحقق. حاول مرة أخرى.");
+  verifyBtn.disabled = false;
+  verifyBtn.textContent = "تحققت من بريدي ✓";
+
+ }
+});
+
+function startCountdown() {
+
+ countdown = 60;
+ resendBtn.disabled = true;
+
+ clearInterval(timer);
+
+ timer = setInterval(() => {
+
+  countdown--;
+
+  resendBtn.textContent = countdown > 0
+   ? `إعادة الإرسال (${countdown})`
+   : "إعادة إرسال الرابط";
+
+  if(countdown <= 0) {
+   clearInterval(timer);
+   resendBtn.disabled = false;
+  }
+
+ }, 1000);
+}
+
+resendBtn.addEventListener("click", async () => {
+
+ if(!currentUser) return;
+
+ try {
+
+  await sendEmailVerification(currentUser, {
+   url: window.location.origin + "/verification.html",
+   handleCodeInApp: true
+  });
+
+  showMessage("تم إرسال رابط تحقق جديد إلى بريدك.", true);
+  startCountdown();
+
+ } catch(error) {
+
+  showMessage("تعذر إرسال الرسالة. حاول مرة أخرى.");
+
+ }
+
+});
+
+</script>
+
+</body>
+</html>
