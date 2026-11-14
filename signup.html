@@ -3,678 +3,843 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#2b0c3d">
-<title>M3AK - إنشاء حساب جديد</title>
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<meta name="theme-color" content="#ffffff">
+<title>إنشاء الحساب | M3AK</title>
 
 <style>
 :root {
-    --purple: #7b1fa2;
-    --deep: #2b0c3d;
-    --dark: #12041a;
-    --pink: #e91e63;
-    --turquoise: #22c7c7;
+  --purple: #542078;
+  --deep-purple: #321044;
+  --pink: #e91e63;
+  --teal: #00aeb5;
+  --text: #30243a;
+  --muted: #81778a;
+  --border: #e8e0ed;
+  --white: #ffffff;
 }
 
 * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
+  box-sizing: border-box;
 }
 
 body {
-    font-family: 'Cairo', sans-serif;
-    background: #f8f5fa;
-    min-height: 100vh;
-    color: #30213a;
+  margin: 0;
+  min-height: 100vh;
+  background: #ffffff;
+  color: var(--text);
+  font-family: Tahoma, Arial, sans-serif;
+  direction: rtl;
 }
 
 button, input {
-    font-family: inherit;
+  font-family: inherit;
 }
 
 .page {
-    min-height: 100vh;
-    position: relative;
-    overflow: hidden;
-    background:
-        radial-gradient(circle at 10% 85%, rgba(123,31,162,.045), transparent 30%),
-        #f8f5fa;
+  width: 100%;
+  max-width: 520px;
+  min-height: 100vh;
+  margin: auto;
+  padding: 18px 20px 35px;
+  position: relative;
+  overflow: hidden;
+  background: #ffffff;
 }
 
-/* العلامة المائية */
+/* خلفية بيضاء مع علامة مائية خفيفة */
 .watermark {
-    position: fixed;
-    width: 310px;
-    height: 310px;
-    left: -115px;
-    bottom: 5px;
-    opacity: .055;
-    pointer-events: none;
-    z-index: 0;
+  position: fixed;
+  inset: 0;
+  max-width: 520px;
+  margin: auto;
+  pointer-events: none;
+  opacity: .035;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 0;
 }
 
 .watermark svg {
-    width: 100%;
-    height: 100%;
+  width: 340px;
+  height: 340px;
 }
 
-/* رأس الشاشة */
-.header {
-    height: 255px;
-    position: relative;
-    overflow: hidden;
-    text-align: center;
-    color: white;
-    padding-top: 29px;
-    background: linear-gradient(135deg, #2b0c3d, #4b1262 58%, #791b79);
-    border-radius: 0 0 38px 38px;
+/* الشريط العلوي */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  position: relative;
+  z-index: 2;
+  margin-bottom: 28px;
 }
 
-.header::before {
-    content: "";
-    position: absolute;
-    width: 230px;
-    height: 230px;
-    border: 1px solid rgba(255,255,255,.09);
-    border-radius: 50%;
-    top: -120px;
-    right: -65px;
-}
-
-.header::after {
-    content: "";
-    position: absolute;
-    width: 190px;
-    height: 190px;
-    border: 1px solid rgba(255,255,255,.08);
-    border-radius: 50%;
-    bottom: -125px;
-    left: -55px;
-}
-
-/* سهم الرجوع - أقصى الشمال */
 .back-button {
-    position: absolute;
-    top: 23px;
-    left: 20px;
-    right: auto;
-    width: 43px;
-    height: 43px;
-    border: 1px solid rgba(255,255,255,.3);
-    border-radius: 14px;
-    color: white;
-    background: rgba(255,255,255,.12);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 25px;
-    cursor: pointer;
-    z-index: 5;
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: #fff;
+  color: var(--purple);
+  font-size: 25px;
+  cursor: pointer;
+  box-shadow: 0 3px 12px rgba(60, 20, 80, .06);
+}
+
+.page-title {
+  margin: 9px 0 0;
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--deep-purple);
+  text-align: left;
+  flex: 1;
+  padding-left: 10px;
 }
 
 .brand {
-    position: relative;
-    z-index: 2;
+  text-align: center;
+  min-width: 85px;
 }
 
-.logo {
-    width: 78px;
-    height: 78px;
-    margin: 0 auto 7px;
-    border-radius: 25px;
-    background: linear-gradient(145deg, #fff, #f4dffb);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 8px 28px rgba(0,0,0,.2);
-}
-
-.logo svg {
-    width: 55px;
-    height: 55px;
+.brand-logo {
+  width: 47px;
+  height: 42px;
+  margin: auto;
 }
 
 .brand-name {
-    font-size: 29px;
-    font-weight: 900;
-    letter-spacing: 2px;
+  font-size: 23px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  background: linear-gradient(110deg, var(--purple), var(--pink), var(--teal));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  line-height: 1.1;
 }
 
-.brand-tagline {
-    font-size: 13px;
-    color: rgba(255,255,255,.88);
+.brand-caption {
+  font-size: 8px;
+  color: var(--muted);
+  margin-top: 3px;
 }
 
-/* بطاقة إنشاء الحساب */
-.content {
-    width: 100%;
-    max-width: 490px;
-    padding: 0 19px 25px;
-    margin: -48px auto 0;
-    position: relative;
-    z-index: 2;
+/* مقدمة الشاشة */
+.intro {
+  text-align: center;
+  position: relative;
+  z-index: 1;
+  margin-bottom: 25px;
 }
 
-.form-card {
-    position: relative;
-    overflow: hidden;
-    background: rgba(255,255,255,.98);
-    border-radius: 27px;
-    padding: 25px 21px 24px;
-    box-shadow: 0 12px 38px rgba(43,12,61,.10);
-    border: 1px solid rgba(123,31,162,.07);
+.user-icon {
+  width: 68px;
+  height: 68px;
+  border-radius: 23px;
+  margin: 0 auto 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  background: linear-gradient(140deg, var(--purple), var(--pink));
+  box-shadow: 0 9px 22px rgba(126, 31, 151, .18);
+  position: relative;
 }
 
-/* علامة مائية داخل البطاقة */
-.form-card::before {
-    content: "";
-    position: absolute;
-    width: 235px;
-    height: 235px;
-    top: 190px;
-    right: -90px;
-    opacity: .045;
-    pointer-events: none;
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cpath d='M25 88 L100 25 L175 88 V175 H25 Z' fill='none' stroke='%237b1fa2' stroke-width='9' stroke-linejoin='round'/%3E%3Cpath d='M100 145 C75 125 58 110 72 91 C84 75 100 91 100 101 C100 91 116 75 128 91 C142 110 125 125 100 145Z' fill='%23e91e63'/%3E%3C/svg%3E") center/contain no-repeat;
+.user-icon svg {
+  width: 35px;
+  height: 35px;
 }
 
-.form-content {
-    position: relative;
-    z-index: 1;
+.user-icon::after {
+  content: "+";
+  position: absolute;
+  width: 23px;
+  height: 23px;
+  border-radius: 50%;
+  background: var(--teal);
+  color: white;
+  border: 3px solid white;
+  left: -7px;
+  bottom: -5px;
+  font-size: 19px;
+  font-weight: bold;
+  line-height: 20px;
 }
 
-.title-icon {
-    width: 55px;
-    height: 55px;
-    border-radius: 18px;
-    margin: 0 auto 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 27px;
-    background: linear-gradient(135deg, var(--purple), var(--pink));
-    box-shadow: 0 7px 18px rgba(123,31,162,.22);
+.intro h1 {
+  color: var(--deep-purple);
+  font-size: 25px;
+  margin: 0 0 8px;
+  font-weight: 900;
 }
 
-h1 {
-    text-align: center;
-    color: var(--deep);
-    font-size: 23px;
-    font-weight: 900;
+.intro p {
+  color: var(--muted);
+  font-size: 13px;
+  margin: 0;
+  line-height: 1.8;
 }
 
-.subtitle {
-    text-align: center;
-    color: #8b8291;
-    font-size: 12px;
-    margin: 3px 0 21px;
+/* النموذج */
+.form-area {
+  position: relative;
+  z-index: 1;
 }
 
-/* حقول الإدخال */
 .field {
-    margin-bottom: 13px;
+  margin-bottom: 13px;
 }
 
-.field label {
-    display: block;
-    font-size: 12px;
-    font-weight: 700;
-    color: #493750;
-    margin-bottom: 6px;
+.field-box {
+  min-height: 55px;
+  border: 1px solid var(--border);
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  padding: 0 14px;
+  transition: .2s ease;
+  box-shadow: 0 3px 12px rgba(50, 16, 68, .035);
 }
 
-.input-wrap {
-    position: relative;
-}
-
-.input-wrap input {
-    width: 100%;
-    height: 49px;
-    border: 1px solid #e9e1ed;
-    background: #fcfafd;
-    border-radius: 13px;
-    padding: 0 43px;
-    outline: none;
-    color: #30213a;
-    font-size: 13px;
-    direction: rtl;
-    transition: .2s;
-}
-
-.input-wrap input:focus {
-    border-color: var(--purple);
-    background: white;
-    box-shadow: 0 0 0 3px rgba(123,31,162,.08);
-}
-
-.input-wrap input::placeholder {
-    color: #aaa1af;
+.field-box:focus-within {
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px rgba(0, 174, 181, .09);
 }
 
 .field-icon {
-    position: absolute;
-    right: 14px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #9b7aa9;
-    font-size: 17px;
-    pointer-events: none;
+  width: 23px;
+  height: 23px;
+  color: var(--purple);
+  flex-shrink: 0;
+  margin-left: 12px;
 }
 
-.toggle-password {
-    position: absolute;
-    left: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    border: none;
-    background: transparent;
-    color: #9b7aa9;
-    font-size: 17px;
-    cursor: pointer;
+.field input {
+  border: none;
+  outline: none;
+  background: transparent;
+  width: 100%;
+  min-width: 0;
+  color: var(--text);
+  font-size: 14px;
+  padding: 15px 0;
 }
 
-.phone-wrap {
-    display: flex;
-    gap: 8px;
+.field input::placeholder {
+  color: #a49aaa;
 }
 
-.phone-wrap .input-wrap {
-    flex: 1;
-    min-width: 0;
+.password-toggle {
+  border: none;
+  background: transparent;
+  color: #8c7b98;
+  font-size: 19px;
+  cursor: pointer;
+  padding: 5px;
+}
+
+/* الهاتف */
+.phone-box {
+  display: flex;
+  align-items: center;
+  direction: ltr;
+}
+
+.phone-box input {
+  direction: rtl;
+  text-align: right;
 }
 
 .country-code {
-    height: 49px;
-    min-width: 83px;
-    padding: 0 9px;
-    border: 1px solid #e9e1ed;
-    background: #fcfafd;
-    border-radius: 13px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 5px;
-    direction: ltr;
-    font-size: 13px;
-    font-weight: 700;
-    color: #493750;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding-right: 10px;
+  margin-right: 10px;
+  border-right: 1px solid var(--border);
+  color: var(--purple);
+  font-size: 13px;
+  white-space: nowrap;
+  font-weight: bold;
+}
+
+.egypt-flag {
+  font-size: 19px;
 }
 
 /* الموافقات */
-.terms {
-    margin-top: 15px;
-    display: grid;
-    gap: 10px;
+.agreements {
+  margin: 18px 3px 20px;
 }
 
-.check-row {
-    display: flex;
-    align-items: flex-start;
-    gap: 9px;
-    color: #655b6b;
-    font-size: 11px;
-    line-height: 1.9;
+.agreement {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 12px 0;
+  font-size: 12px;
+  color: #62576b;
+  line-height: 1.7;
 }
 
-.check-row input {
-    width: 17px;
-    height: 17px;
-    accent-color: var(--purple);
-    flex-shrink: 0;
-    margin-top: 4px;
+.agreement input {
+  appearance: none;
+  width: 19px;
+  height: 19px;
+  min-width: 19px;
+  border: 1.5px solid #c9bdd2;
+  border-radius: 5px;
+  cursor: pointer;
+  position: relative;
+  margin: 0;
 }
 
-.check-row a {
-    color: var(--purple);
-    font-weight: 800;
-    text-decoration: none;
+.agreement input:checked {
+  background: var(--teal);
+  border-color: var(--teal);
 }
 
-/* التجربة المجانية */
-.trial-box {
-    margin-top: 18px;
-    padding: 12px 13px;
-    border-radius: 15px;
-    background: linear-gradient(100deg, rgba(123,31,162,.09), rgba(233,30,99,.07));
-    border: 1px solid rgba(123,31,162,.12);
-    display: flex;
-    align-items: center;
-    gap: 11px;
+.agreement input:checked::after {
+  content: "✓";
+  color: white;
+  position: absolute;
+  top: -1px;
+  right: 3px;
+  font-weight: bold;
+  font-size: 14px;
 }
 
-.trial-icon {
-    width: 39px;
-    height: 39px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 20px;
-    flex-shrink: 0;
-    background: linear-gradient(135deg, var(--purple), var(--pink));
-}
-
-.trial-text strong {
-    display: block;
-    font-size: 13px;
-    color: var(--deep);
-    font-weight: 900;
-}
-
-.trial-text span {
-    display: block;
-    color: #817387;
-    font-size: 10px;
+.agreement a {
+  color: var(--teal);
+  font-weight: bold;
+  text-decoration: none;
 }
 
 /* زر إنشاء الحساب */
 .submit-button {
-    width: 100%;
-    height: 52px;
-    margin-top: 19px;
-    border: none;
-    border-radius: 15px;
-    color: white;
-    font-size: 15px;
-    font-weight: 900;
-    cursor: pointer;
-    background: linear-gradient(110deg, #6d1591, #a51a9a 55%, #e91e63);
-    box-shadow: 0 8px 20px rgba(123,31,162,.23);
+  width: 100%;
+  min-height: 56px;
+  border: none;
+  border-radius: 17px;
+  color: white;
+  font-size: 16px;
+  font-weight: 900;
+  cursor: pointer;
+  background: linear-gradient(105deg, var(--pink), var(--purple), var(--teal));
+  box-shadow: 0 8px 20px rgba(126, 31, 151, .19);
+  transition: transform .2s ease, opacity .2s ease;
 }
 
 .submit-button:active {
-    transform: scale(.98);
+  transform: scale(.98);
 }
 
-.login-link {
-    text-align: center;
-    color: #887d90;
-    font-size: 12px;
-    margin-top: 17px;
-}
-
-.login-link a {
-    color: var(--purple);
-    font-weight: 900;
-    text-decoration: none;
+.submit-button:disabled {
+  opacity: .65;
+  cursor: wait;
 }
 
 .message {
-    display: none;
-    padding: 10px;
-    margin-top: 12px;
-    border-radius: 10px;
-    font-size: 12px;
-    text-align: center;
+  display: none;
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  line-height: 1.7;
 }
 
 .message.error {
-    display: block;
-    color: #b42345;
-    background: #fff0f3;
+  display: block;
+  color: #a32145;
+  background: #fff0f4;
+  border: 1px solid #ffd4e0;
 }
 
 .message.success {
-    display: block;
-    color: #087d67;
-    background: #eafaf5;
+  display: block;
+  color: #087b69;
+  background: #eafaf6;
+  border: 1px solid #c8eee5;
 }
 
+/* رابط تسجيل الدخول */
+.login-link {
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted);
+  margin: 19px 0;
+}
+
+.login-link a {
+  color: var(--teal);
+  text-decoration: none;
+  font-weight: 900;
+}
+
+/* التجربة المجانية */
+.trial-box {
+  border: 1px solid #eadcf3;
+  background: linear-gradient(110deg, #faf4ff, #f0fcfc);
+  border-radius: 16px;
+  padding: 14px 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 17px;
+}
+
+.trial-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 13px;
+  background: linear-gradient(140deg, var(--purple), var(--pink));
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 21px;
+  flex-shrink: 0;
+}
+
+.trial-text strong {
+  display: block;
+  font-size: 14px;
+  color: var(--deep-purple);
+  margin-bottom: 4px;
+}
+
+.trial-text strong span {
+  color: var(--pink);
+}
+
+.trial-text small {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+/* العبارة السفلية */
 .footer {
-    text-align: center;
-    color: #a49aaa;
-    font-size: 10px;
-    padding: 17px 0 5px;
+  text-align: center;
+  color: #988da0;
+  font-size: 11px;
+  margin-top: 22px;
+  padding-bottom: 8px;
 }
 
+.footer span {
+  color: var(--pink);
+}
+
+/* الشاشات الصغيرة */
 @media (max-width: 360px) {
-    .header {
-        height: 235px;
-    }
+  .page {
+    padding: 14px 14px 28px;
+  }
 
-    .content {
-        padding-left: 13px;
-        padding-right: 13px;
-    }
+  .intro h1 {
+    font-size: 22px;
+  }
 
-    .form-card {
-        padding: 22px 15px;
-    }
+  .field-box {
+    min-height: 52px;
+  }
 
-    h1 {
-        font-size: 21px;
-    }
+  .page-title {
+    font-size: 15px;
+  }
 }
 </style>
 </head>
 
 <body>
+
 <div class="page">
 
-    <!-- العلامة المائية -->
-    <div class="watermark" aria-hidden="true">
-        <svg viewBox="0 0 200 200" fill="none">
-            <path d="M25 88 L100 25 L175 88 V175 H25 Z"
-                  stroke="#7b1fa2" stroke-width="9" stroke-linejoin="round"/>
-            <path d="M100 145 C75 125 58 110 72 91 C84 75 100 91 100 101 C100 91 116 75 128 91 C142 110 125 125 100 145Z"
-                  fill="#e91e63"/>
-        </svg>
+  <div class="watermark" aria-hidden="true">
+    <svg viewBox="0 0 300 300" fill="none">
+      <path d="M45 145 L150 55 L255 145 V250 H45 Z"
+            stroke="#542078" stroke-width="13" stroke-linejoin="round"/>
+      <path d="M105 250 V180 Q150 125 195 180 V250"
+            stroke="#e91e63" stroke-width="12"/>
+      <path d="M150 130 C115 95 85 130 150 185 C215 130 185 95 150 130Z"
+            fill="#00aeb5"/>
+    </svg>
+  </div>
+
+  <header class="topbar">
+
+    <button class="back-button" type="button"
+      aria-label="رجوع" onclick="goBack()">‹</button>
+
+    <h2 class="page-title">إنشاء الحساب</h2>
+
+    <div class="brand">
+      <svg class="brand-logo" viewBox="0 0 100 85" fill="none">
+        <path d="M12 42 L50 9 L88 42"
+          stroke="#7b1fa2" stroke-width="9"
+          stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M23 39 V76 H77 V39"
+          stroke="#e91e63" stroke-width="8"
+          stroke-linejoin="round"/>
+        <path d="M50 37 C35 25 25 41 50 59 C75 41 65 25 50 37Z"
+          fill="#00aeb5"/>
+        <path d="M13 65 Q29 81 45 70"
+          stroke="#7b1fa2" stroke-width="6"
+          stroke-linecap="round"/>
+        <path d="M87 65 Q71 81 55 70"
+          stroke="#e91e63" stroke-width="6"
+          stroke-linecap="round"/>
+      </svg>
+      <div class="brand-name">M3AK</div>
+      <div class="brand-caption">كل اللي تحتاجه.. معاك</div>
     </div>
 
-    <header class="header">
+  </header>
 
-        <button class="back-button" type="button"
-                onclick="history.back()" aria-label="رجوع">
-            &#8592;
-        </button>
+  <section class="intro">
 
-        <div class="brand">
-            <div class="logo">
-                <svg viewBox="0 0 100 100" fill="none">
-                    <path d="M12 43 L50 12 L88 43 V83 H12 Z"
-                          stroke="#7b1fa2" stroke-width="7" stroke-linejoin="round"/>
-                    <path d="M50 72 C35 60 27 52 34 42 C40 34 50 43 50 48 C50 43 60 34 66 42 C73 52 65 60 50 72Z"
-                          fill="#e91e63"/>
-                    <path d="M28 82 Q50 68 72 82"
-                          stroke="#22bfc2" stroke-width="5" stroke-linecap="round"/>
-                </svg>
-            </div>
+    <div class="user-icon">
+      <svg viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="1.8">
+        <circle cx="12" cy="8" r="4"/>
+        <path d="M4 21 C4 16 7 14 12 14 C17 14 20 16 20 21"/>
+      </svg>
+    </div>
 
-            <div class="brand-name">M3AK</div>
-            <div class="brand-tagline">كل اللي تحتاجه.. معاك</div>
+    <h1>أنشئ حسابك الآن</h1>
+    <p>واستمتع بكل خدمات معاك</p>
+
+  </section>
+
+  <main class="form-area">
+
+    <form id="signupForm" novalidate>
+
+      <div class="field">
+        <div class="field-box">
+          <svg class="field-icon" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="1.8">
+            <circle cx="12" cy="8" r="4"/>
+            <path d="M4 21 C4 16 7 14 12 14 C17 14 20 16 20 21"/>
+          </svg>
+          <input id="fullName" type="text"
+            placeholder="الاسم بالكامل"
+            autocomplete="name" required>
         </div>
-    </header>
+      </div>
 
-    <main class="content">
-        <section class="form-card">
-            <div class="form-content">
-
-                <div class="title-icon">♙</div>
-
-                <h1>إنشاء حساب جديد</h1>
-                <p class="subtitle">
-                    انضم إلى عائلة M3AK وابدأ تجربتك معنا
-                </p>
-
-                <form id="signupForm" novalidate>
-
-                    <div class="field">
-                        <label for="fullName">الاسم بالكامل</label>
-                        <div class="input-wrap">
-                            <span class="field-icon">♙</span>
-                            <input id="fullName" type="text"
-                                   placeholder="اكتب اسمك بالكامل"
-                                   autocomplete="name" required>
-                        </div>
-                    </div>
-
-                    <div class="field">
-                        <label for="email">البريد الإلكتروني</label>
-                        <div class="input-wrap">
-                            <span class="field-icon">✉</span>
-                            <input id="email" type="email"
-                                   placeholder="example@email.com"
-                                   autocomplete="email" required>
-                        </div>
-                    </div>
-
-                    <div class="field">
-                        <label for="phone">رقم الهاتف</label>
-                        <div class="phone-wrap">
-                            <div class="country-code">🇪🇬 +20</div>
-                            <div class="input-wrap">
-                                <span class="field-icon">☎</span>
-                                <input id="phone" type="tel"
-                                       placeholder="رقم الهاتف"
-                                       inputmode="tel"
-                                       autocomplete="tel-national" required>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="field">
-                        <label for="password">كلمة المرور</label>
-                        <div class="input-wrap">
-                            <span class="field-icon">♙</span>
-                            <input id="password" type="password"
-                                   placeholder="أنشئ كلمة مرور قوية"
-                                   autocomplete="new-password" required>
-                            <button class="toggle-password" type="button"
-                                    data-target="password">◉</button>
-                        </div>
-                    </div>
-
-                    <div class="field">
-                        <label for="confirmPassword">تأكيد كلمة المرور</label>
-                        <div class="input-wrap">
-                            <span class="field-icon">♙</span>
-                            <input id="confirmPassword" type="password"
-                                   placeholder="أعد كتابة كلمة المرور"
-                                   autocomplete="new-password" required>
-                            <button class="toggle-password" type="button"
-                                    data-target="confirmPassword">◉</button>
-                        </div>
-                    </div>
-
-                    <div class="terms">
-                        <label class="check-row">
-                            <input type="checkbox" id="agreeTerms">
-                            <span>
-                                أوافق على
-                                <a href="terms.html">الشروط والأحكام</a>.
-                            </span>
-                        </label>
-
-                        <label class="check-row">
-                            <input type="checkbox" id="agreePrivacy">
-                            <span>
-                                قرأت وأوافق على
-                                <a href="privacy.html">سياسة الخصوصية</a>.
-                            </span>
-                        </label>
-                    </div>
-
-                    <div class="trial-box">
-                        <div class="trial-icon">✦</div>
-                        <div class="trial-text">
-                            <strong>ابدأ تجربتك المجانية لمدة 7 أيام</strong>
-                            <span>اكتشف خدمات M3AK واستمتع بتجربتك معنا.</span>
-                        </div>
-                    </div>
-
-                    <button class="submit-button" type="submit">
-                        إنشاء الحساب
-                    </button>
-
-                    <div id="formMessage" class="message" role="alert"></div>
-
-                    <div class="login-link">
-                        لديك حساب بالفعل؟
-                        <a href="login.html">تسجيل الدخول</a>
-                    </div>
-
-                </form>
-            </div>
-        </section>
-
-        <div class="footer">
-            M3AK © جميع الحقوق محفوظة
+      <div class="field">
+        <div class="field-box">
+          <svg class="field-icon" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="1.8">
+            <rect x="3" y="5" width="18" height="14" rx="3"/>
+            <path d="M4 7 L12 13 L20 7"/>
+          </svg>
+          <input id="email" type="email"
+            placeholder="البريد الإلكتروني"
+            autocomplete="email" required>
         </div>
-    </main>
+      </div>
+
+      <div class="field">
+        <div class="field-box phone-box">
+
+          <input id="phone" type="tel"
+            placeholder="رقم الهاتف"
+            autocomplete="tel-national"
+            inputmode="tel" required>
+
+          <div class="country-code">
+            <span class="egypt-flag">🇪🇬</span>
+            <span>+20</span>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field-box">
+          <svg class="field-icon" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="1.8">
+            <rect x="4" y="10" width="16" height="11" rx="2"/>
+            <path d="M8 10 V7 A4 4 0 0 1 16 7 V10"/>
+          </svg>
+          <input id="password" type="password"
+            placeholder="كلمة المرور"
+            autocomplete="new-password" required>
+          <button class="password-toggle" type="button"
+            onclick="togglePassword('password', this)"
+            aria-label="إظهار كلمة المرور">◉</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field-box">
+          <svg class="field-icon" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="1.8">
+            <rect x="4" y="10" width="16" height="11" rx="2"/>
+            <path d="M8 10 V7 A4 4 0 0 1 16 7 V10"/>
+          </svg>
+          <input id="confirmPassword" type="password"
+            placeholder="تأكيد كلمة المرور"
+            autocomplete="new-password" required>
+          <button class="password-toggle" type="button"
+            onclick="togglePassword('confirmPassword', this)"
+            aria-label="إظهار تأكيد كلمة المرور">◉</button>
+        </div>
+      </div>
+
+      <div class="agreements">
+
+        <label class="agreement">
+          <input id="agreeTerms" type="checkbox" required>
+          <span>
+            أوافق على
+            <a href="terms.html">الشروط والأحكام</a>
+          </span>
+        </label>
+
+        <label class="agreement">
+          <input id="agreePrivacy" type="checkbox" required>
+          <span>
+            أوافق على
+            <a href="privacy.html">سياسة الخصوصية</a>
+          </span>
+        </label>
+
+      </div>
+
+      <button class="submit-button" id="submitButton" type="submit">
+        إنشاء الحساب
+      </button>
+
+      <div id="formMessage" class="message" role="alert"></div>
+
+    </form>
+
+    <div class="login-link">
+      لديك حساب بالفعل؟
+      <a href="login.html">تسجيل الدخول</a>
+    </div>
+
+    <div class="trial-box">
+
+      <div class="trial-icon">✓</div>
+
+      <div class="trial-text">
+        <strong>تجربة مجانية لمدة <span>7 أيام</span></strong>
+        <small>لجميع خدمات M3AK</small>
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer class="footer">
+    معاك <span>♥</span> في كل خطوة
+  </footer>
+
 </div>
 
-<script>
-// إظهار وإخفاء كلمة المرور
-document.querySelectorAll('.toggle-password').forEach(button => {
-    button.addEventListener('click', () => {
-        const input = document.getElementById(button.dataset.target);
-        input.type = input.type === 'password' ? 'text' : 'password';
-    });
+<script type="module">
+import { initializeApp } from
+  "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  sendEmailVerification
+} from
+  "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+
+/*
+  ضع بيانات Firebase الحقيقية الخاصة بمشروع M3AK هنا.
+  لا تضع مفاتيح الخادم السرية داخل هذا الملف.
+*/
+const firebaseConfig = {
+  apiKey: "YOUR_FIREBASE_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+  appId: "YOUR_FIREBASE_APP_ID"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+const form = document.getElementById("signupForm");
+const submitButton = document.getElementById("submitButton");
+const messageBox = document.getElementById("formMessage");
+
+function showMessage(message, type = "error") {
+  messageBox.textContent = message;
+  messageBox.className = "message " + type;
+}
+
+function normalizeEmail(value) {
+  return value.trim().toLowerCase();
+}
+
+function normalizePhone(value) {
+  let digits = value.replace(/\D/g, "");
+
+  if (digits.startsWith("20")) {
+    digits = digits.substring(2);
+  }
+
+  if (digits.startsWith("0")) {
+    digits = digits.substring(1);
+  }
+
+  return "+20" + digits;
+}
+
+form.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  messageBox.className = "message";
+  messageBox.textContent = "";
+
+  const name = document.getElementById("fullName").value.trim();
+  const email = normalizeEmail(
+    document.getElementById("email").value
+  );
+  const phoneInput = document.getElementById("phone").value.trim();
+  const phone = normalizePhone(phoneInput);
+  const password = document.getElementById("password").value;
+  const confirmPassword =
+    document.getElementById("confirmPassword").value;
+
+  const agreedTerms =
+    document.getElementById("agreeTerms").checked;
+
+  const agreedPrivacy =
+    document.getElementById("agreePrivacy").checked;
+
+  if (!name || !email || !phoneInput || !password || !confirmPassword) {
+    showMessage("من فضلك أكمل جميع البيانات المطلوبة.");
+    return;
+  }
+
+  if (name.length < 3) {
+    showMessage("الاسم بالكامل يجب ألا يقل عن 3 أحرف.");
+    return;
+  }
+
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    showMessage("من فضلك أدخل بريدًا إلكترونيًا صحيحًا.");
+    return;
+  }
+
+  if (!/^(\+20)[0-9]{10}$/.test(phone)) {
+    showMessage("أدخل رقم هاتف مصري صحيحًا مكونًا من 10 أرقام بعد كود الدولة.");
+    return;
+  }
+
+  if (password.length < 8) {
+    showMessage("كلمة المرور يجب ألا تقل عن 8 أحرف.");
+    return;
+  }
+
+  if (password !== confirmPassword) {
+    showMessage("كلمتا المرور غير متطابقتين.");
+    return;
+  }
+
+  if (!agreedTerms || !agreedPrivacy) {
+    showMessage("يجب الموافقة على الشروط والأحكام وسياسة الخصوصية.");
+    return;
+  }
+
+  if (
+    firebaseConfig.apiKey === "YOUR_FIREBASE_API_KEY" ||
+    firebaseConfig.projectId === "YOUR_PROJECT_ID"
+  ) {
+    showMessage("إعدادات Firebase غير مكتملة. يجب ربط بيانات المشروع الحقيقية أولاً.");
+    return;
+  }
+
+  submitButton.disabled = true;
+  submitButton.textContent = "جارٍ إنشاء الحساب...";
+
+  try {
+    const credential = await createUserWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
+
+    await sendEmailVerification(credential.user);
+
+    const pendingSignup = {
+      name,
+      email,
+      phone,
+      agreedTerms: true,
+      agreedPrivacy: true,
+      createdAt: new Date().toISOString()
+    };
+
+    sessionStorage.setItem(
+      "m3ak_pending_signup",
+      JSON.stringify(pendingSignup)
+    );
+
+    showMessage(
+      "تم إنشاء الحساب. أرسلنا رسالة تأكيد إلى بريدك الإلكتروني. انتقل إلى صفحة التحقق لإكمال التسجيل.",
+      "success"
+    );
+
+    setTimeout(() => {
+      window.location.href = "verification.html";
+    }, 1200);
+
+  } catch (error) {
+    let errorMessage = "تعذر إنشاء الحساب. حاول مرة أخرى.";
+
+    if (error.code === "auth/email-already-in-use") {
+      errorMessage = "هذا البريد الإلكتروني مسجل بالفعل. يمكنك تسجيل الدخول.";
+    } else if (error.code === "auth/invalid-email") {
+      errorMessage = "البريد الإلكتروني غير صحيح.";
+    } else if (error.code === "auth/weak-password") {
+      errorMessage = "كلمة المرور ضعيفة. استخدم كلمة مرور أقوى.";
+    } else if (error.code === "auth/network-request-failed") {
+      errorMessage = "تعذر الاتصال بالإنترنت. تحقق من اتصالك وحاول مجددًا.";
+    } else if (error.code === "auth/operation-not-allowed") {
+      errorMessage = "تسجيل البريد وكلمة المرور غير مفعل في إعدادات Firebase.";
+    }
+
+    showMessage(errorMessage);
+
+  } finally {
+    submitButton.disabled = false;
+    submitButton.textContent = "إنشاء الحساب";
+  }
 });
 
-// التحقق من البيانات
-document.getElementById('signupForm').addEventListener('submit', function(event) {
-    event.preventDefault();
+window.togglePassword = function(id, button) {
+  const input = document.getElementById(id);
 
-    const name = document.getElementById('fullName').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const phone = document.getElementById('phone').value.trim();
-    const password = document.getElementById('password').value;
-    const confirmPassword = document.getElementById('confirmPassword').value;
-    const agreeTerms = document.getElementById('agreeTerms').checked;
-    const agreePrivacy = document.getElementById('agreePrivacy').checked;
-    const message = document.getElementById('formMessage');
+  if (input.type === "password") {
+    input.type = "text";
+    button.textContent = "◎";
+  } else {
+    input.type = "password";
+    button.textContent = "◉";
+  }
+};
 
-    function showError(text) {
-        message.textContent = text;
-        message.className = 'message error';
-    }
-
-    message.className = 'message';
-    message.textContent = '';
-
-    if (!name || !email || !phone || !password || !confirmPassword) {
-        showError('من فضلك أكمل جميع البيانات المطلوبة.');
-        return;
-    }
-
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        showError('من فضلك أدخل بريدًا إلكترونيًا صحيحًا.');
-        return;
-    }
-
-    const cleanPhone = phone.replace(/\D/g, '');
-
-    if (cleanPhone.length < 10 || cleanPhone.length > 11) {
-        showError('من فضلك أدخل رقم هاتف صحيحًا.');
-        return;
-    }
-
-    if (password.length < 8) {
-        showError('كلمة المرور يجب ألا تقل عن 8 أحرف.');
-        return;
-    }
-
-    if (password !== confirmPassword) {
-        showError('كلمتا المرور غير متطابقتين.');
-        return;
-    }
-
-    if (!agreeTerms || !agreePrivacy) {
-        showError('يجب الموافقة على الشروط والأحكام وسياسة الخصوصية.');
-        return;
-    }
-
-    message.textContent =
-        'تم التحقق من البيانات. التسجيل الفعلي يحتاج إلى ربط الخادم.';
-    message.className = 'message success';
-});
+window.goBack = function() {
+  if (window.history.length > 1) {
+    window.history.back();
+  } else {
+    window.location.href = "index.html";
+  }
+};
 </script>
 
 </body>
